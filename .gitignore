@@ -1,0 +1,29 @@
+# Plaintext secrets - NEVER commit
+secrets/plain/*
+!secrets/plain/.gitkeep
+
+# Common secret patterns
+*.env
+.env.*
+*.pem
+*.key
+credentials.*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+*.swp
+*~
+.idea/
+.vscode/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Node (if used)
+node_modules/
