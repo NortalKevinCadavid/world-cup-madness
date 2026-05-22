@@ -63,3 +63,23 @@ The `INDEX.md` file contains a repository map. To update it:
 ```bash
 ./scripts/index/generate.sh
 ```
+
+## Slice 001 (Eligibility & Login)
+
+Active slice: see [`specs/001-eligibility-login/plan.md`](specs/001-eligibility-login/plan.md).
+
+Slice 001 introduces the foundational app skeleton this repo did not have before:
+the Next.js App Router project at `apps/web/`, the Supabase backend at
+`supabase/` (migrations, seed fixtures, pgTAP tests, Edge Functions placeholder,
+`config.toml` wiring the auth hooks and external IdP), the DEV-ONLY OIDC stub
+under `infra/oidc-stub/` plus its `docker-compose.override.yml` sidecar wiring,
+and the CI regression gate at `.github/workflows/ci.yml`. Production auth is
+Microsoft Entra ID; the OIDC stub is used only by Playwright in dev and CI.
+
+Before working in this slice, also read the **Implementation deviations** log
+near the top of [`specs/001-eligibility-login/tasks.md`](specs/001-eligibility-login/tasks.md)
+— in particular **D-001** (Supabase CLI v2.98.2 does not support
+`[auth.hook.before_user_signed_in]`, so the slice uses
+`[auth.hook.custom_access_token]` instead; the PG function name
+`public.handle_auth_user_signed_in` is unchanged). Later tasks (T040, T041,
+`contracts/auth-hook.sql.md`) are written against the new key.

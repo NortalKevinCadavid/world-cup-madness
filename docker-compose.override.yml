@@ -1,0 +1,83 @@
+# --------------------------------------------------------------------------
+# DEV-ONLY: OIDC stub sidecar for World Cup Madness slice 001 (T006).
+# --------------------------------------------------------------------------
+# This compose override is auto-merged by Docker Compose when `supabase start`
+# brings up the local stack. It adds a single sidecar: `oidc-stub`, a fake
+# OAuth 2.0 / OIDC provider whose JWT signing key we control via files in
+# `./infra/oidc-stub/keys/`.
+#
+# Production uses Microsoft Entra ID (see `supabase/config.toml` —
+# [auth.external.azure]). This sidecar is NEVER used in production.
+#
+# Sidecar choice: ghcr.io/navikt/mock-oauth2-server
+#   - Configurable issuer via env vars (SERVER_PORT, JSON_CONFIG).
+#   - Supports custom signed JWTs via its HTTP "default/token" endpoint
+#     and dynamic per-test token shaping (the
+#     `apps/web/tests/playwright/fixtures/oidc.ts` helper drives this).
+#   - Image tag pinned to `3.0.3` (no `:latest`) per the regression-gate rule.
+# --------------------------------------------------------------------------
+
+services:
+  oidc-stub:
+    # Pinned tag — DO NOT change to :latest. Bump intentionally with a PR
+    # that re-runs the slice-001 Playwright suite (T016+).
+    image: ghcr.io/navikt/mock-oauth2-server:3.0.3
+    container_name: wcm-oidc-stub
+    restart: unless-stopped
+    ports:
+      # Host port exposed for Playwright fixtures and curl probes.
+      # The Supabase Auth container reaches this via `host.docker.internal:8090`
+      # (see supabase/config.toml [auth.external.azure].url).
+      - "8090:8090"
+    environment:
+      SERVER_PORT: "8090"
+      # Inline JSON config — keeps all configuration declarative inside
+      # this single file (no extra files in infra/oidc-stub/ besides the
+      # keypair and README). Per-test claim shaping is layered on at runtime
+      # by the Playwright fixture via the mock-oauth2-server "config" HTTP
+      # endpoint (POST /default/token).
+      #
+      # interactiveLogin=false makes the /authorize endpoint non-interactive
+      # (returns an auto-generated authorization code), which is what the
+      # Supabase Auth callback expects in CI.
+      JSON_CONFIG: >-
+        {
+          "interactiveLogin": false,
+          "httpServer": "NettyWrapper",
+          "tokenCallbacks": [
+            {
+              "issuerId": "default",
+              "tokenExpiry": 3600,
+              "requestMappings": [
+                {
+                  "requestParam": "scope",
+                  "match": "openid",
+                  "claims": {
+                    "sub": "default-test-subject",
+                    "email": "placeholder@nortal.com",
+                    "email_verified": true,
+                    "name": "Placeholder User"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+    volumes:
+      # Mount the dev-only RSA keypair read-only. mock-oauth2-server picks
+      # it up via the JWKS_KEY_FILE / signing-keys discovery convention.
+      - ./infra/oidc-stub/keys:/app/keys:ro
+    # Health check so `supabase start` waits until the sidecar serves the
+    # discovery document before proceeding.
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - "wget -qO- http://localhost:8090/default/.well-known/openid-configuration >/dev/null || exit 1"
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+    networks:
+      # Attach to the default Supabase network so the Auth container can resolve
+      # the sidecar by service name (`oidc-stub`) AND via host.docker.internal.
+      default: {}

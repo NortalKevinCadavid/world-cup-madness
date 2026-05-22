@@ -1,7 +1,7 @@
 # Stack Decision (Draft ADR)
 
-**Status:** Proposed — not yet formally approved.
-**Resolves:** [OD-007](open-decisions.md#od-007--implementation-approach) (Implementation approach) — *remains formally open until ratified by the architecture board.*
+**Status:** Backend/data layer (Supabase) **Accepted** as of 2026-05-15 via constitution v1.1.0; frontend & hosting layers (Next.js + Tailwind + Vercel) remain **Proposed** pending separate ratification.
+**Resolves:** [OD-007](open-decisions.md#od-007--implementation-approach) (Implementation approach) — *partially closed: backend/data layer (Supabase) ratified by constitution v1.1.0 § Implementation Platform; frontend & hosting layers remain open pending architecture-board ratification.*
 **Last updated:** 2026-05-15
 
 ## Proposed stack
@@ -17,6 +17,10 @@
 | Authorization | **Row-Level Security (RLS)** policies in Postgres |
 | External data | **football-data.org** (or equivalent) consumed via Supabase Edge Function on a schedule (FR-017) |
 | Secrets at runtime | **Vercel environment variables** + **Supabase project secrets** (template's age-encryption infra retained for any local secrets/scripts) |
+
+### Status notes (2026-05-15 update)
+
+The backend/data row of the table above (**Supabase** — Postgres, Auth, RLS, Realtime, Edge Functions) was formally ratified by constitution v1.1.0 in its **Implementation Platform** section (see `.specify/memory/constitution.md` § *Implementation Platform*), which declares World Cup Madness a Supabase project and closes [OD-007](open-decisions.md#od-007--implementation-approach) for the backend/data layer. The remaining rows (frontend framework, styling, frontend host, identity UI, etc.) stay in **Proposed** state under Principle I (Technology Neutrality) until they are separately ratified; this ADR will be revisited at that point.
 
 ## Rationale
 

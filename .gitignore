@@ -25,5 +25,32 @@ __pycache__/
 .venv/
 venv/
 
-# Node (if used)
+# Node / pnpm workspace
 node_modules/
+*.tsbuildinfo
+.turbo/
+
+# Next.js
+apps/web/.next/
+apps/web/out/
+apps/web/next-env.d.ts
+
+# Playwright
+apps/web/test-results/
+apps/web/playwright-report/
+apps/web/playwright/.cache/
+apps/web/tests/playwright/.tmp/
+
+# Local env files (already partially covered by *.env above; explicit listing for clarity)
+.env.local
+.env.*.local
+
+# Slice 001 / T006 — DEV-ONLY artifacts that must be committed.
+# These overrides re-include files matched by the broad *.pem / .env.* rules
+# above. The OIDC stub keypair is intentionally checked in (see
+# infra/oidc-stub/README.md — production uses Microsoft Entra ID, not these
+# keys). The .env.example is a template, not a real secret.
+!apps/web/.env.example
+!infra/oidc-stub/keys/rsa-private.pem
+!infra/oidc-stub/keys/rsa-public.pem
+

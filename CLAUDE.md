@@ -42,3 +42,9 @@ Start there before making any product or design decisions.
 2. ALWAYS encrypt secrets before sharing
 3. Run `./scripts/bootstrap.sh` on first clone
 4. Update INDEX.md after structural changes: `./scripts/index/generate.sh`
+
+<!-- SPECKIT START -->
+For additional context about technologies to be used, project structure,
+shell commands, and other important information, read the current plan:
+`specs/001-eligibility-login/plan.md`
+<!-- SPECKIT END -->

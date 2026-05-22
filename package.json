@@ -1,0 +1,19 @@
+{
+  "name": "world-cup-madness",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Internal Nortal prediction pool for the FIFA World Cup 2026 — repo root (workspace).",
+  "packageManager": "pnpm@8.15.9",
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=8"
+  },
+  "scripts": {
+    "dev": "pnpm -r run dev",
+    "build": "pnpm -r run build",
+    "test": "pnpm -r run test",
+    "typecheck": "pnpm -r run typecheck",
+    "lint": "pnpm -r run lint",
+    "e2e": "pnpm -r run e2e"
+  }
+}

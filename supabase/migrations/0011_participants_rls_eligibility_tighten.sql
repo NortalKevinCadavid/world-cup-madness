@@ -1,0 +1,70 @@
+-- 0011_participants_rls_eligibility_tighten.sql
+-- Slice 001-eligibility-login | Task T034
+--
+-- Spec anchors:
+--   spec.md Clarifications 2026-05-15 (mid-session deny safety net);
+--   data-model.md § RLS posture summary;
+--   tasks.md T034.
+--
+-- ===========================================================================
+-- NO-OP MIGRATION — slot reserved for sequential ordering only.
+-- ===========================================================================
+--
+-- T034's spec text asks to "REPLACE T012's `participants_self_read` policy
+-- with the tighter form that requires `is_eligible_nortal_participant(auth.uid())`."
+--
+-- However, T012 (`supabase/migrations/0007_participants_rls.sql`) ALREADY
+-- shipped the policy with the eligibility predicate front-loaded into the
+-- USING clause:
+--
+--     CREATE POLICY participants_self_or_admin_read
+--       ON public.participants
+--       FOR SELECT
+--       TO authenticated
+--       USING (
+--         (auth_user_id = auth.uid()
+--           AND public.is_eligible_nortal_participant(auth.uid()))
+--         OR public.is_admin(auth.uid())
+--       );
+--
+-- That is exactly the tightening T034 was created to perform — combined with
+-- the admin-read carve-out documented in data-model.md § RLS posture summary.
+-- The two pgTAP tests gated on this behavior reference T012's policy by name
+-- (`participants_self_or_admin_read`) and both anticipate GREEN against the
+-- current migration set:
+--
+--   * supabase/tests/pgtap/participants_rls_mid_session_deny.sql
+--     "GREEN. Migration 0007 (shipped under T012) ALREADY embeds the predicate
+--      in the USING clause … T034 is effectively a no-op for the predicate
+--      path."
+--
+--   * supabase/tests/pgtap/slice-001-api-me-rls.sql
+--     "GREEN. Migrations 0001-0009 are all present … T012/T023 shipped
+--      together, so the policy can already evaluate the predicate."
+--
+-- Re-doing the work here would force a DROP + CREATE on a live policy that is
+-- already correct, which:
+--   1. Risks a window between DROP and CREATE in which the policy is missing.
+--   2. Would either rename the policy away from `participants_self_or_admin_read`
+--      (breaking the two pgTAP files that name it in their header comments)
+--      or recreate it under the same name (a churn-only diff).
+--   3. Violates Constitution Principle X (single-purpose migrations) by
+--      duplicating ownership of the same policy across migrations 0007 and 0011.
+--
+-- Decision: this migration is a header-only marker that reserves slot 0011 so
+-- the migration sequence stays gap-free and downstream slices keep their
+-- expected numbering. The authoritative tightening lives in 0007. See D-004
+-- in `specs/001-eligibility-login/tasks.md` for the full deviation entry.
+--
+-- If a future change ever needs to split `participants_self_or_admin_read`
+-- into two separately named policies (`participants_self_read` +
+-- `participants_admin_read`) — for example to match an admin tooling surface
+-- in Slice 006 — that work belongs in a new migration owned by the slice
+-- that needs the split, not retroactively here.
+
+BEGIN;
+
+-- Intentionally empty: no-op marker, see header comment and D-004 in tasks.md.
+SELECT 1;
+
+COMMIT;

@@ -1,0 +1,161 @@
+# Regression gate for World Cup Madness.
+#
+# Enforces Constitution Principle XI (NON-NEGOTIABLE): the regression suite
+# must be GREEN before the next task starts or merges to main. Three parallel
+# jobs (typecheck / playwright / pgtap) feed a final regression-gate job that
+# downstream branch-protection rules can require.
+#
+# Triggers on every PR targeting main and every push to main. No
+# continue-on-error anywhere — a red job blocks the gate.
+
+name: ci
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+# Cancel in-flight runs for the same ref when a new commit lands, so PRs don't
+# burn minutes on stale commits. Pushes to main always run to completion.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  typecheck:
+    name: typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8.15.9
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck web app
+        run: pnpm -F web typecheck
+
+  playwright:
+    name: playwright
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8.15.9
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Key the Playwright browser cache on the resolved @playwright/test
+      # version so a dependency bump invalidates the cache automatically and
+      # we never run new test code against stale browser binaries.
+      - name: Resolve Playwright version
+        id: playwright-version
+        working-directory: apps/web
+        run: |
+          PLAYWRIGHT_VERSION=$(node -p "require('@playwright/test/package.json').version")
+          echo "version=${PLAYWRIGHT_VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+
+      - name: Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: pnpm -F web exec playwright install --with-deps
+
+      # Even with a cache hit, OS-level deps may be missing on a fresh runner.
+      - name: Install Playwright OS dependencies
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: pnpm -F web exec playwright install-deps
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: 2.98.2
+
+      - name: Start Supabase local stack
+        run: supabase start
+
+      - name: Run Playwright tests
+        run: pnpm -F web e2e
+
+      - name: Stop Supabase local stack
+        if: always()
+        run: supabase stop --no-backup
+
+  pgtap:
+    name: pgtap
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: 2.98.2
+
+      - name: Start Supabase local stack
+        run: supabase start
+
+      # `supabase test db` runs every *.sql under supabase/tests/pgtap/ by
+      # default, but we iterate explicitly so a missing file or a directory
+      # without tests produces a clear log and a non-zero exit. If only the
+      # T005 smoke file exists, that's still acceptable for this slice.
+      - name: Run pgTAP suites
+        run: |
+          shopt -s nullglob
+          files=(supabase/tests/pgtap/*.sql)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "No pgTAP suites found under supabase/tests/pgtap/ — failing."
+            exit 1
+          fi
+          failed=0
+          for f in "${files[@]}"; do
+            echo "::group::supabase test db --file $f"
+            if ! supabase test db --file "$f"; then
+              failed=1
+            fi
+            echo "::endgroup::"
+          done
+          exit "$failed"
+
+      - name: Stop Supabase local stack
+        if: always()
+        run: supabase stop --no-backup
+
+  regression-gate:
+    name: regression-gate
+    runs-on: ubuntu-latest
+    needs: [typecheck, playwright, pgtap]
+    steps:
+      - name: All regression jobs passed
+        run: echo "typecheck, playwright, and pgtap all green — regression gate satisfied."

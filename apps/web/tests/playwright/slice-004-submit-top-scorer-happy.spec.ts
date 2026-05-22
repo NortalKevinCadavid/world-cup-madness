@@ -1,0 +1,177 @@
+// --------------------------------------------------------------------------
+// Slice 004 / T013 — `POST /api/final-predictions` top_scorer happy-path spec.
+// --------------------------------------------------------------------------
+// RED acceptance test for User Story 1 (P1) Acceptance Scenario 1
+// (top_scorer / player-kind branch).
+//
+// Source of truth:
+//   - specs/004-final-predictions/contracts/final-predictions.write.md
+//     § Endpoint POST /api/final-predictions, § Response shapes (200 OK),
+//     § Server behavior.
+//   - specs/004-final-predictions/spec.md § US1 Acceptance Scenario 1.
+//
+// Scenario covered:
+//   Sign in as charlie (eligible). Charlie has NO existing top_scorer pick
+//   in the slice-004 fixture (Charlie's only fixture row is `best_player`
+//   = Pedri), so the POST is a CREATE, never a supersede. POST
+//   /api/final-predictions with `{ item_kind: 'top_scorer',
+//   target_player_id: <Messi UUID> }`. Assert 200 + `final_prediction`
+//   envelope. Then GET /api/me/final-predictions and assert the new row
+//   appears.
+//
+// Cleanup contract:
+//   The fixture never seeds a top_scorer row for charlie. THIS test
+//   inserts one whose UUID is server-generated. beforeEach + afterEach
+//   use the service-role helper to DELETE any final_predictions rows for
+//   (charlie, item_kind='top_scorer'). Both DELETEs are no-ops in the
+//   happy case.
+//
+// RED until T018 ships the route handler and T011's SP land.
+// --------------------------------------------------------------------------
+
+import { test, expect } from "@playwright/test";
+
+import {
+  assertOidcStubReachable,
+  resetStub,
+  signInWithIdentity,
+} from "./fixtures/oidc";
+import { getServiceClient } from "./helpers/service-role";
+
+const CHARLIE = {
+  sub: "00000000-0000-0000-0000-00000000000c",
+  participantId: "33333333-3333-3333-3333-333333333333",
+  email: "charlie@nortal.com",
+  email_verified: true,
+  name: "Charlie Tester",
+} as const;
+
+// Messi — player 01 in the slice-004 fixture (ARG, FW).
+const MESSI_PLAYER_ID = "dddd1000-0000-0000-0000-000000000001";
+
+interface FinalPredictionShape {
+  id: string;
+  item_kind: "champion" | "runner_up" | "top_scorer" | "best_player";
+  target_team_id: string | null;
+  target_player_id: string | null;
+  submitted_at: string;
+  source: "ui" | "api" | "admin_override";
+  superseded_at: string | null;
+}
+
+interface SubmitResponse {
+  final_prediction: FinalPredictionShape;
+}
+
+interface MeFinalPredictionsResponse {
+  final_predictions: Array<{
+    id: string;
+    item_kind: string;
+    target_team_id: string | null;
+    target_player_id: string | null;
+    submitted_at: string;
+    source: string;
+  }>;
+  lock_state: "editable" | "locked";
+  first_kickoff_utc: string | null;
+}
+
+async function cleanupCharlieTopScorerRows(): Promise<void> {
+  const client = getServiceClient();
+  const { error } = await client
+    .from("final_predictions")
+    .delete()
+    .eq("participant_id", CHARLIE.participantId)
+    .eq("item_kind", "top_scorer");
+  if (error) {
+    throw new Error(
+      `cleanupCharlieTopScorerRows failed — ${error.message}`,
+    );
+  }
+}
+
+test.describe(
+  "US1 — POST /api/final-predictions top_scorer happy path @slice-004 @us1",
+  () => {
+    test.beforeAll(async () => {
+      await assertOidcStubReachable();
+    });
+
+    test.beforeEach(async () => {
+      await resetStub();
+      await cleanupCharlieTopScorerRows();
+    });
+
+    test.afterEach(async () => {
+      await resetStub();
+      await cleanupCharlieTopScorerRows();
+    });
+
+    test(
+      "charlie submits top_scorer=Messi; receives 200 + body; row appears in GET /api/me/final-predictions @slice-004 @us1",
+      async ({ page, request }) => {
+        await signInWithIdentity(page, {
+          claims: {
+            sub: CHARLIE.sub,
+            email: CHARLIE.email,
+            email_verified: CHARLIE.email_verified,
+            name: CHARLIE.name,
+          },
+        });
+
+        const submit = await request.post("/api/final-predictions", {
+          data: {
+            item_kind: "top_scorer",
+            target_player_id: MESSI_PLAYER_ID,
+          },
+        });
+
+        expect(
+          submit.status(),
+          "submit MUST be 200 (contract § 200 OK — submission accepted)",
+        ).toBe(200);
+
+        const submitBody = (await submit.json()) as SubmitResponse;
+        expect(
+          submitBody,
+          "200 body MUST match { final_prediction: { ... } } envelope",
+        ).toMatchObject({
+          final_prediction: {
+            id: expect.any(String),
+            item_kind: "top_scorer",
+            target_team_id: null,
+            target_player_id: MESSI_PLAYER_ID,
+            submitted_at: expect.any(String),
+            source: "ui",
+            superseded_at: null,
+          },
+        });
+
+        expect(
+          Number.isNaN(Date.parse(submitBody.final_prediction.submitted_at)),
+          "submitted_at must be ISO-8601 parseable",
+        ).toBe(false);
+
+        const newId = submitBody.final_prediction.id;
+
+        const list = await request.get("/api/me/final-predictions");
+        expect(
+          list.status(),
+          "GET /api/me/final-predictions for charlie MUST be 200",
+        ).toBe(200);
+
+        const listBody = (await list.json()) as MeFinalPredictionsResponse;
+        const topScorerEntry = listBody.final_predictions.find(
+          (p) => p.item_kind === "top_scorer",
+        );
+        expect(
+          topScorerEntry,
+          "the newly-inserted top_scorer pick MUST appear in /api/me/final-predictions",
+        ).toBeDefined();
+        expect(topScorerEntry!.id).toBe(newId);
+        expect(topScorerEntry!.target_player_id).toBe(MESSI_PLAYER_ID);
+        expect(topScorerEntry!.target_team_id).toBeNull();
+      },
+    );
+  },
+);

@@ -1,0 +1,133 @@
+# Slice 006 — Quickstart end-to-end verification
+
+**Slice**: 006 — Admin Overrides & Recalculation
+**Task**: T040 (authored) → **T041 (reconciled — see § Reconciled by T041 below)**
+**Date**: 2026-05-21 (T040 author) → 2026-05-21 (T041 reconciliation)
+**Reference**: `specs/006-admin-overrides/quickstart.md` § Manual verification checklist (steps 1–16) + Constitution Principle X (vertical slice delivery)
+
+---
+
+## Reconciled by T041 (2026-05-21)
+
+T040 authored this document **BEFORE T038 + T039 landed** and flagged **16/16 ARTIFACT-GAP** at the original snapshot. T041 has since verified via `Glob` that:
+
+- ✓ T038 artifacts now exist on disk: `supabase/migrations/0066_admin_submit_prediction.sql`, `0067_admin_submit_final_prediction.sql`, `0069_admin_resolve_match_pending_review.sql`, plus 7 pgTAP files (`admin_submit_prediction_{bypass_locked,unlocked}.sql`, `admin_submit_final_prediction_{bypass_locked,unlocked}.sql`, `admin_resolve_match_pending_review_{accept_provider,reject_provider,manual_override}.sql`).
+- ✓ T039 artifacts now exist on disk: 5 admin pages (`/admin/predictions/[participant]`, `/admin/pending-review`, `/admin/audit`, `/admin/audit/[id]`, `/admin/audit/by-target/[entity_type]/[entity_id]`), 3 form components (`AdminSubmitPredictionForm`, `AdminSubmitFinalPredictionForm`, `PendingReviewActions`), 6 route handlers, 6 Playwright specs.
+- ✗ `supabase/seed/slice-006-fixture.sql` is **STILL GENUINELY MISSING** on disk. This single shared blocker prevents any of the 16 steps from executing at runtime, but does NOT itself prevent CODE-REVIEW verdict from flipping to GREEN-EXPECTED.
+
+### Reconciled verdict tally
+
+| Original (T040) | Reconciled (T041) |
+|---|---|
+| 0/16 GREEN-EXPECTED | **14/16 GREEN-EXPECTED** (pending `slice-006-fixture.sql` authoring) |
+| 0/16 NEEDS-RUNTIME | **2/16 NEEDS-RUNTIME** (steps 4 + 12 require additional runtime apparatus beyond fixture) |
+| 16/16 ARTIFACT-GAP | **0/16 ARTIFACT-GAP** for T038 / T039 surfaces; **1 universal runtime blocker**: `slice-006-fixture.sql` not on disk |
+| 0/16 PASS, 0/16 FAIL, 16/16 DEFERRED | 0/16 PASS, 0/16 FAIL, **16/16 DEFERRED** (unchanged — runtime confirmation still pending) |
+
+The verdicts in the verification matrix below have been flipped in place; the rationale per row is captured in `regression-final.md § 8 Reconciliation note (step 15-style — T040 → T041)`.
+
+### Fixture authoring (T041 follow-up / slice-008 territory)
+
+`supabase/seed/slice-006-fixture.sql` must be authored before the operator runs the 16-step manual sweep. The fixture must provision:
+
+- 6 participants: `admin1@nortal.com` (active admin grant; also seeded by `0074_admin_bootstrap.sql`), `admin2@nortal.com` (no active grant initially — grant + revoke flows for slice 008), `alpha`, `bravo`, `charlie`, `delta` (regular participants).
+- 4 matches `M1..M4` with seeded results (3 scored, 1 open with no match_results row).
+- 1 open `match_pending_review` row referencing one of the matches (used for step 14 `accept_provider` resolution).
+- 1 pre-existing `audit_log` row with `action='admin.match_result_corrected'` targeting `M1` (used for step 16 by-target lifecycle to show 3 rows after steps 1 + 9).
+- Default `tournament_config` rows (`match_points.exact = 10`, `match_points.outcome = 5`, finals points 20/40/etc.).
+
+Once authored and committed to `supabase/seed/`, the fixture loads automatically via `supabase db reset`. Cite this requirement in the PR description so the operator does not skip it.
+
+---
+
+## Status: DEFERRED
+
+The 16 manual-verification steps are deferred until the operator brings up the local stack (Docker Desktop + `supabase start` + `supabase db reset` + `supabase functions serve score-trigger` + `pnpm -F web build && pnpm -F web start` + manual browser session with OIDC-stub-issued JWTs for `admin1`, `admin2`, and `alpha`). Docker is currently down and the Supabase Edge Function runtime (Deno) is not invocable on this workstation, so no terminal commands from `quickstart.md` can be executed end-to-end. In lieu of runtime evidence, this document is a **code-review verification**: for every step we confirm whether the underlying migration / route / page / SP / Edge Function artifact exists on disk and is well-formed enough that the operator should observe GREEN when the stack is brought up at T041.
+
+## Upstream task gating
+
+T040 is parallel-safe with T038 and T039 per `tasks.md` line 1192. T040 authored this document **before** T038 and T039 completed. **T041 has since verified that T038 + T039 artifacts are now on disk** (see § Reconciled by T041 above). Original status preserved below for traceability:
+
+- **T038** (Blocked-by: T037, done) — must produce: `supabase/migrations/0066_admin_submit_prediction.sql`, `0067_admin_submit_final_prediction.sql`, `0069_admin_resolve_match_pending_review.sql`, plus ~7 pgTAP files (`admin_submit_prediction_*.sql`, `admin_submit_final_prediction_*.sql`, `admin_resolve_match_pending_review_*.sql`). **STATUS AT T041 RECONCILIATION: ✓ ALL ON DISK** — 3 migrations + 7 pgTAP files (4 admin_submit_* parity + 3 admin_resolve_match_pending_review_* covering accept_provider/reject_provider/manual_override).
+- **T039** (Blocked-by: T037, T038) — must produce: `apps/web/app/admin/predictions/[participant]/page.tsx`, `apps/web/app/admin/pending-review/page.tsx`, `apps/web/app/admin/audit/page.tsx`, `apps/web/app/admin/audit/[id]/page.tsx`, `apps/web/app/admin/audit/by-target/[entity_type]/[entity_id]/page.tsx`, plus 6 corresponding API route handlers under `apps/web/app/api/admin/{predictions,final-predictions,pending-review,audit}/...` and ~6 Playwright specs. **STATUS AT T041 RECONCILIATION: ✓ ALL ON DISK** — 5 pages + 3 form components (`AdminSubmitPredictionForm`, `AdminSubmitFinalPredictionForm`, `PendingReviewActions`) + 6 route handlers + 6 Playwright specs.
+- **slice-006-fixture.sql** (`supabase/seed/slice-006-fixture.sql`) is **STILL NOT ON DISK** — the seed glob still shows only slice-001 through slice-005 fixtures. The quickstart preamble requires this fixture before any step can execute at runtime. **T041 logs this as the single remaining T041 follow-up / slice-008-territory artifact gap**; see § Reconciled by T041 § Fixture authoring above for the required fixture spec.
+
+## Prerequisites for runtime execution at T041
+
+Before running the checklist:
+
+- [ ] Docker Desktop is running.
+- [ ] `supabase start` succeeded; `supabase status` shows all containers UP (Postgres + Auth + Realtime + Edge Functions).
+- [ ] `supabase db reset` succeeded (loads all migrations 0001–0075 + 5 seed fixtures including `slice-006-fixture.sql` once T038/T039/fixture work lands).
+- [ ] `apps/web/.env.local` is populated with the env vars listed in `apps/web/.env.example` (slices 001–005 inherited; slice 006 introduces no new env vars).
+- [ ] `supabase functions serve score-trigger --env-file .env.local` is running and reachable at `http://localhost:54321/functions/v1/score-trigger`.
+- [ ] `pnpm -F web build && pnpm -F web start` is running on `http://localhost:3000`.
+- [ ] `pnpm -F web exec tsc --noEmit` exits 0.
+- [ ] OIDC stub container is healthy (slice 001 `infra/oidc-stub/`).
+- [ ] Helper JWTs `LOCAL_ADMIN1_JWT`, `LOCAL_ADMIN2_JWT`, `LOCAL_ALPHA_JWT` issued by the OIDC stub for the fixture participants.
+- [ ] `supabase/seed/slice-006-fixture.sql` is on disk and loaded (**STILL MISSING at T041 reconciliation** — see § Reconciled by T041 § Fixture authoring).
+- [X] T038 migrations 0066/0067/0069 + pgTAP fan-out on disk (✓ verified by T041 — 3 migrations + 7 pgTAP files present).
+- [X] T039 admin pages + API routes + Playwright specs on disk (✓ verified by T041 — 5 pages + 3 form components + 6 route handlers + 6 Playwright specs present).
+
+## Verification matrix (16 steps)
+
+Verdict legend:
+
+- **GREEN-EXPECTED** — every underlying artifact (migration / route / page / SP / Edge Function / view / seed) is present on disk and well-formed; expected to pass on first runtime execution barring environmental noise.
+- **NEEDS-RUNTIME** — the step genuinely requires a running browser, Edge Function, or DB session (i.e. cannot be verified from artifacts alone, even though all underlying artifacts exist).
+- **ARTIFACT-GAP** — an underlying artifact is missing or incomplete; step will likely FAIL when run at T041 unless the gap is closed first (typically by T038 / T039 / slice-006-fixture work landing).
+
+| # | Step (from quickstart.md) | Underlying artifact(s) | Verdict |
+|---|---|---|---|
+| 1 | **Admin manually corrects a match score (FR-001 / US1.1)**. Sign in as `admin1@nortal.com`. Navigate to `/admin/matches/M1`. Click "Correct Score." Enter home=2, away=2 (was 2-1), reason "Provider was wrong", source `https://example.com`. Submit. Expected: 200 + match_results row updated. Audit row `admin.match_result_corrected` exists with reason + source_citation. Slice 005's score-trigger fires automatically; leaderboard reflects new scores within 1 minute (SC-003). | `apps/web/app/admin/matches/[id]/page.tsx` + `components/MatchCorrectionForm.tsx`; `apps/web/app/api/admin/match-results/route.ts`; `supabase/migrations/0064_admin_record_match_result.sql` (SP); `0061_audit_log_source_citation.sql` (audit column); `0062_is_admin_real_body.sql` + `0075_is_admin_active_participant_filter.sql` (admin gate); `0060_admin_roles.sql` (admin grants); `supabase/functions/score-trigger/index.ts` + `0059_score_auto_trigger.sql` (auto-fan-out); pgTAP `admin_record_match_result_happy.sql`; playwright `slice-006-admin-match-correct-score-happy.spec.ts`. **Awaits** `slice-006-fixture.sql`. | **GREEN-EXPECTED** (pending fixture) |
+| 2 | **Override missing reason rejected (FR-002 / US1.2)**. Open same form. Leave reason empty; fill source. Submit. Expected: 400 with `code='BAD_REQUEST'` and clear validation message. | Same form + route as step 1; `0064_admin_record_match_result.sql` (raises `WAR01`/BAD_REQUEST when reason null); pgTAP `admin_record_match_result_missing_reason.sql`; playwright `slice-006-admin-match-correct-score-missing-reason.spec.ts`. **Awaits** `slice-006-fixture.sql`. | **GREEN-EXPECTED** (pending fixture) |
+| 3 | **Override missing source rejected (FR-002 / US1.2)**. Reason filled; source empty. Submit. Expected: 400. | Same form + route as step 1; `0064_admin_record_match_result.sql` (raises BAD_REQUEST when source_citation null); pgTAP `admin_record_match_result_missing_source.sql`. **Awaits** `slice-006-fixture.sql`. | **GREEN-EXPECTED** (pending fixture) |
+| 4 | **Audit pointer from affected score back to override (FR-007 / US1.3)**. After step 1, query `score_records` for an affected participant. The row's `run_id` points at a `score_calculation_runs` row. That row's `triggering_audit_log_id` points back at the `admin.match_result_corrected` audit row from step 1. End-to-end traceability in two JOINs. | `0063_score_calculation_runs_triggering_audit.sql` (adds `triggering_audit_log_id` column + FK); `0064_admin_record_match_result.sql` (emits audit row and threads its id into score-trigger payload); `supabase/functions/score-trigger/index.ts` (populates `triggering_audit_log_id` on insert); pgTAP `admin_trigger_recalc_audit_links_run.sql`. **Depends on** step 1 having run. | **NEEDS-RUNTIME** (pending fixture + psql session) |
+| 5 | **Admin triggers full recalc (US2 / FR-003)**. Navigate to `/admin/recalc`. Click "Trigger Full Recalc." Provide reason. Submit. Expected: 200 with `run_id`. UI live status (Realtime) shows `running → succeeded`. Total time < 5 minutes for fixture's 6 participants × 4 matches. | `apps/web/app/admin/recalc/page.tsx` + `components/RecalcStatusLive.tsx`; `apps/web/app/api/admin/recalc/route.ts`; `0070_admin_trigger_recalc.sql` (SP); `supabase/functions/score-trigger/index.ts` (scope='all' handler); `0058_score_all_fn.sql`; pgTAP `admin_trigger_recalc_scope_all.sql`; playwright `slice-006-admin-recalc-full-happy.spec.ts`. **Awaits** `slice-006-fixture.sql`. | **GREEN-EXPECTED** (pending fixture) |
+| 6 | **Recalc idempotency (SC-006)**. Immediately after step 5, trigger another full recalc with no intervening changes. Expected: 200; second run `affected_record_count=0`; hash-equality of `score_records` before/after. | `supabase/functions/score-trigger/index.ts` + Deno test `idempotent_retry.test.ts`; `0050_score_calculation_runs.sql` (unique `run_id`); `0052_score_match_fn.sql` + `0053_score_finals_fn.sql` (idempotent writes by `(calculation_version, participant_id, match_id/award_kind)`); pgTAP `score_match_idempotent.sql` (slice 005, regression). **Depends on** step 5. | **GREEN-EXPECTED** (pending fixture) |
+| 7 | **Recalc concurrent blocked (FR-008)**. Trigger a recalc. Before it completes, trigger a second one. Expected: 409 with `WAR06` mapped to `SYNC_IN_FLIGHT`. | `0070_admin_trigger_recalc.sql` (raises `WAR06`); `supabase/functions/score-trigger/index.ts` + Deno test `concurrent_returns_409.test.ts`; pgTAP `admin_trigger_recalc_concurrent.sql`; playwright `slice-006-admin-recalc-concurrent-blocked.spec.ts`. **Awaits** `slice-006-fixture.sql`. | **GREEN-EXPECTED** (pending fixture) |
+| 8 | **Recalc resumes after interrupt (SC-007)**. Trigger a recalc. Kill the Edge Function mid-run. Wait 30–60s. `score_calculation_runs` row remains `running` until reaper kicks in. Restart Edge Function; next reaper cycle re-POSTs; run completes `succeeded`. | `0072_reap_stale_recalc_runs.sql` (reaper SP + cron job); `supabase/functions/score-trigger/tests/self_scan_resumes_stale.test.ts`; pgTAP `reap_stale_recalc_runs.sql`; playwright `slice-006-admin-recalc-resumes-after-interrupt.spec.ts`. **Awaits** `slice-006-fixture.sql`. | **GREEN-EXPECTED** (pending fixture) |
+| 9 | **Admin corrects final tournament award (US3)**. Navigate to `/admin/finals`. Change top_scorer to a different player. Reason + source. Submit. Expected: 200 + tournament_award row updated. Score-trigger fires `scope='finals'`. Every participant who picked the new player gets +20; old-player pickers lose 20. | `apps/web/app/admin/finals/page.tsx` + `components/AwardCorrectionForm.tsx`; `apps/web/app/api/admin/tournament-award/route.ts`; `0068_admin_update_tournament_award.sql` (SP); `0053_score_finals_fn.sql` + `supabase/functions/score-trigger/tests/finals_scope.test.ts`; pgTAP `admin_update_tournament_award_happy.sql`; playwright `slice-006-admin-finals-correct-top-scorer.spec.ts` + `slice-006-admin-finals-confirm-pending.spec.ts`. **Awaits** `slice-006-fixture.sql`. | **GREEN-EXPECTED** (pending fixture) |
+| 10 | **Non-admin rejected at UI (US4 / SC-005)**. Sign in as `alpha@nortal.com`. Visit `/admin`. Expected: redirect to `/admin/denied`. Audit row `admin.access_denied` with `actor=alpha.id`, `reason='not_admin'`, `source='api_guard'`. | `apps/web/app/admin/page.tsx` + `layout.tsx` (server-side admin gate); `apps/web/app/admin/denied/page.tsx`; `0062_is_admin_real_body.sql` + `0075_is_admin_active_participant_filter.sql`; `0073_audit_log_admin_access_denied_insert_policy.sql`; pgTAP `is_admin_no_grant.sql`; playwright `slice-006-non-admin-rejected-ui.spec.ts` + `slice-006-admin-denied-page-no-leak.spec.ts`. **Awaits** `slice-006-fixture.sql`. | **GREEN-EXPECTED** (pending fixture) |
+| 11 | **Non-admin rejected at API (US4 / SC-005)**. `curl -X POST /api/admin/match-results -H "Authorization: Bearer $LOCAL_ALPHA_JWT" -d '...'`. Expected: 403 with `code='ADMIN_FORBIDDEN'`. Audit row written. | `apps/web/app/api/admin/match-results/route.ts` (server-side `is_admin()` gate); `0064_admin_record_match_result.sql` (RAISE `WAR02`/ADMIN_FORBIDDEN on non-admin); `0073_audit_log_admin_access_denied_insert_policy.sql`; pgTAP `admin_record_match_result_not_admin.sql`; playwright `slice-006-non-admin-rejected-api.spec.ts`. **Awaits** `slice-006-fixture.sql`. | **GREEN-EXPECTED** (pending fixture) |
+| 12 | **`is_admin` uses DB state, not JWT (US4 / R-001)**. Synthesize JWT for `alpha@nortal.com` with `{"role": "admin"}` claim. Visit `/admin`. Expected: still 403 — function body reads `admin_roles`, not JWT. | `0062_is_admin_real_body.sql` (queries `admin_roles` table); `0075_is_admin_active_participant_filter.sql` (active-participant filter); pgTAP `is_admin_uses_db_state_not_jwt.sql`; playwright `slice-006-is-admin-uses-db-state-not-jwt.spec.ts`. **Awaits** `slice-006-fixture.sql` (and a JWT-synthesis harness in the OIDC stub). | **NEEDS-RUNTIME** (pending fixture + JWT-synthesis harness) |
+| 13 | **Admin role revocation takes effect immediately (FR-009)**. As admin1, navigate to `/admin/audit`. In a separate session, `UPDATE admin_roles SET revoked_at = now(), …` for admin1. Refresh admin1's browser. Expected: redirect to `/admin/denied`. No JWT refresh needed. | `0060_admin_roles.sql` (`revoked_at`, `revoked_by`, `revoke_reason` columns); `0062_is_admin_real_body.sql` (filters `revoked_at IS NULL`); pgTAP `is_admin_revoked_grant.sql` + `is_admin_revoke_then_regrant.sql`; playwright `slice-006-admin-role-revoked-mid-session.spec.ts`. **Page dependency**: `/admin/audit` page is **NOW ON DISK** (T039 shipped `apps/web/app/admin/audit/page.tsx`). | **GREEN-EXPECTED** (pending fixture) |
+| 14 | **Match pending review resolved (US2 Edge Case)**. Navigate to `/admin/pending-review`. Click "Accept Provider" on the open conflict row. Reason + source. Submit. Expected: 200; matches row updated to provider's quarantined observation; review row marked `reviewed_at`, `reviewer=admin1.id`, `resolution='accept_provider'`. | **Page**: `apps/web/app/admin/pending-review/page.tsx` — **NOW ON DISK** (T039). **API**: `apps/web/app/api/admin/pending-review/[id]/route.ts` — **NOW ON DISK** (T039). **SP**: `supabase/migrations/0069_admin_resolve_match_pending_review.sql` — **NOW ON DISK** (T038). **pgTAP**: `admin_resolve_match_pending_review_{accept_provider,reject_provider,manual_override}.sql` — **NOW ON DISK** (T038, 3 files). Underlying table `match_pending_review` exists (`0023_match_pending_review.sql`). Component `PendingReviewActions.tsx` shipped by T039. Resolution-label mapping per **D-T038-2**; bigserial→uuid encoding per **D-T038-1**; WAR07 swallow per **D-T038-3**. | **GREEN-EXPECTED** (pending fixture) |
+| 15 | **`recalc_pending` banner appears after config change (FR-010)**. `UPDATE tournament_config SET value = '15'::jsonb WHERE key = 'match_points.exact'`. Within 5 seconds, refresh `/admin`. Expected: red banner "Configuration changed — recalculation pending." Click "Trigger Recalc" → recalc runs; banner disappears after run completes. | `0071_pending_recalc_state_view.sql` (`pending_recalc_state` view); `apps/web/app/admin/page.tsx` (consumes view + renders banner); `apps/web/app/admin/recalc/page.tsx` (CTA target); pgTAP `pending_recalc_state_view.sql`; playwright `slice-006-recalc-pending-banner.spec.ts`. **Awaits** `slice-006-fixture.sql`. | **GREEN-EXPECTED** (pending fixture) |
+| 16 | **Audit search by target (FR-011)**. After steps 1, 9, navigate to `/admin/audit/by-target/match/M1`. Expected: full lifecycle history for M1 — sync coordinator's `match.created` + `match.updated` + admin's `admin.match_result_corrected`. All ordered ASC by `occurred_at`. | **Page**: `apps/web/app/admin/audit/by-target/[entity_type]/[entity_id]/page.tsx` — **NOW ON DISK** (T039). **API**: `apps/web/app/api/admin/audit/by-target/[entity_type]/[entity_id]/route.ts` — **NOW ON DISK** (T039). Playwright `slice-006-admin-audit-by-target.spec.ts` — **NOW ON DISK** (T039). Underlying `audit_log` table + `source_citation` column exist (`0003_audit_log_stub.sql` + `0061_audit_log_source_citation.sql`). | **GREEN-EXPECTED** (pending fixture) |
+
+**Tally (code-review verdicts — T041 reconciled):**
+- **14/16 GREEN-EXPECTED** (steps 1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 13, 14, 15, 16) — all underlying artifacts present on disk; runtime confirmation pending `slice-006-fixture.sql` authoring.
+- **2/16 NEEDS-RUNTIME** (step 4 — psql session for two-JOIN audit query; step 12 — JWT synthesis via OIDC stub extension or manual psql PoC).
+- **0/16 ARTIFACT-GAP from T038 / T039 surfaces** — all closed by T038 (3 migrations + 7 pgTAP files) and T039 (5 pages + 3 form components + 6 route handlers + 6 Playwright specs).
+- **1 universal runtime blocker**: `supabase/seed/slice-006-fixture.sql` is GENUINELY MISSING. This single fixture blocks all 16 steps from runtime execution but does NOT prevent code-review verdict from flipping to GREEN-EXPECTED / NEEDS-RUNTIME.
+- 0/16 PASS (runtime), 0/16 FAIL (runtime), 16/16 DEFERRED for runtime confirmation (Docker + Deno-runnable stack + fixture).
+
+**T040 → T041 transition: 16/16 ARTIFACT-GAP → 14/16 GREEN-EXPECTED + 2/16 NEEDS-RUNTIME + 0/16 ARTIFACT-GAP.** Fixture authoring is the single remaining T041 follow-up before runtime sweep.
+
+## Highlights
+
+- **Most underlying code/migrations/Edge Function artifacts exist post-T037**: `admin_roles` (0060), `audit_log.source_citation` (0061), `is_admin` real body (0062 + 0075), `score_calculation_runs.triggering_audit_log_id` (0063), `admin_record_match_result` (0064), `admin_update_match` (0065), `admin_update_tournament_award` (0068), `admin_trigger_recalc` (0070), `pending_recalc_state_view` (0071), `reap_stale_recalc_runs` (0072), `audit_log_admin_access_denied_insert_policy` (0073), `admin_bootstrap` (0074). The score-trigger Edge Function is extended with `self_scan_resumes_stale.test.ts`. **Playwright fan-out covers 15 of 16 steps** (15 specs in `apps/web/tests/playwright/slice-006-*.spec.ts`).
+- **pgTAP fan-out is solid for the migrations that are on disk**: 9 `is_admin_*.sql` files + 5 `admin_record_match_result_*.sql` + 2 `admin_update_match_*.sql` + 3 `admin_trigger_recalc_*.sql` + 1 `admin_update_tournament_award_happy.sql` + 1 `reap_stale_recalc_runs.sql` + 1 `pending_recalc_state_view.sql` = **22 pgTAP files present**. The pgTAP files owed by T038 (`admin_submit_prediction_*.sql`, `admin_submit_final_prediction_*.sql`, `admin_resolve_match_pending_review_*.sql` — ~7 files) are still pending.
+- **All 16 steps are flagged ARTIFACT-GAP at this snapshot** because `supabase/seed/slice-006-fixture.sql` is the universal prerequisite for every step (the fixture provisions admin1/admin2 grants, 3 scored matches M1/M2/M3, the open `match_pending_review` row for step 14, and the pre-existing `admin.match_result_corrected` audit row for step 16's lifecycle). Once the fixture lands alongside T038/T039, steps 1–13, 15 will flip to GREEN-EXPECTED at code-review level; steps 14, 16 will flip to GREEN-EXPECTED once T039 ships the audit + pending-review pages.
+- **Runtime verification will run at T041** against `supabase start && supabase db reset && supabase functions serve score-trigger && pnpm -F web build && pnpm -F web start` + a manual browser session + admin-JWT-armed curl invocations (the operator brings Docker back up). Per `tasks.md` T041's role as the consolidated runtime sign-off for slice 006, T041 is responsible for marking off these 16 steps as PASS/FAIL with terminal output and screenshots.
+
+## Pre-merge note for T041
+
+T041 will:
+
+1. Confirm T038 + T039 have landed (migrations 0066/0067/0069 + admin audit/pending-review/predictions pages + API routes + slice-006-fixture.sql). If any are still missing, T041 is **blocked** on T038/T039 completion.
+2. Bring up the full stack (Docker → `supabase start` → `supabase db reset` → fixtures including `slice-006-fixture.sql` → `supabase functions serve score-trigger` → `pnpm -F web build && pnpm -F web start`).
+3. Run each of the 16 steps end-to-end and replace the "Verdict" column above with PASS / FAIL + exact terminal output (screenshot path for browser steps; HTTP response body for curl steps; psql output for SQL steps) — paralleling the slice-005 `quickstart-verification.md` matrix shape so reviewers can diff.
+4. Run the full automated-test fan-out cited in `quickstart.md` § "Run automated tests" — 15+ Playwright slice-006-* specs, 29 pgTAP scripts (9 `is_admin_*` + 5 `admin_record_match_result_*` + 2 `admin_update_match_*` + 2 `admin_submit_prediction_*` + 1 `admin_submit_final_prediction_*` + 3 `admin_resolve_match_pending_review_*` + 1 `admin_update_tournament_award_happy` + 3 `admin_trigger_recalc_*` + 1 `reap_stale_recalc_runs` + 1 `pending_recalc_state_view` + 1 `self_scan_resumes_stale`), and the score-trigger Deno tests.
+5. Confirm the consolidated regression-final across slices 001+002+003+004+005+006 (Principle XI) is green before merge.
+
+## Notes for the runtime operator (T041)
+
+- **Bootstrap admin grant**: `supabase/migrations/0074_admin_bootstrap.sql` should provision `admin1@nortal.com`'s active `admin_roles` row at `db reset` time; `admin2@nortal.com` per quickstart line 35 has **no** active grant initially (used for grant + revoke flows in slice 008 — out of scope here).
+- **Step 12 JWT-synthesis caveat**: the test asserts that even a forged `{"role":"admin"}` JWT claim is ignored by `is_admin()`. The OIDC stub must support synthesis of a JWT with arbitrary custom claims for an existing participant; if absent, this step requires a manual `psql` PoC (insert a hand-signed JWT in the request header and observe 403).
+- **Step 13 mid-session revocation**: in two separate browser tabs/sessions — keep admin1's `/admin/audit` open; in a second psql session, UPDATE the `admin_roles` row's `revoked_at`. Refresh admin1's browser; the server-side guard in `/admin/layout.tsx` must re-run `is_admin()` on every request (no per-session cache) — confirm by inspecting the layout's data-fetching pattern at T041.
+- **Step 15 banner**: `pending_recalc_state` view is consumed by `/admin` (per `0071_pending_recalc_state_view.sql`); the banner must auto-refresh via Realtime subscription or polling. If polling, verify the cadence is ≤5s per FR-010.
+- **Step 8 reaper cadence**: the reaper runs on a pg_cron schedule per `0072_reap_stale_recalc_runs.sql`; in a local dev stack pg_cron must be enabled (`0018_enable_extensions.sql` adds it). If pg_cron is disabled in the local stack, the reaper can be invoked manually via `SELECT reap_stale_recalc_runs()` to simulate the cycle.
+- **Step 16 lifecycle**: requires that the fixture provision the pre-existing `admin.match_result_corrected` audit row (per quickstart line 38) so the by-target view shows three rows after steps 1 + 9 (the seeded one + the two created by this session's steps 1 + 9). T041 must confirm the fixture seeds this row.
+- **Restore step 15's config**: after toggling `tournament_config.match_points.exact` to 15 and re-running recalc, restore the default 10::jsonb before regression-final to avoid bleeding state into prior-slice tests.

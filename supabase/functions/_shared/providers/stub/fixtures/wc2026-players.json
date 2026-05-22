@@ -1,0 +1,18 @@
+[
+  { "external_id": "stub-player-01", "full_name": "Lionel Messi",       "display_name": "Messi",       "team_external_id": "arg", "country_code": "AR", "position": "FW" },
+  { "external_id": "stub-player-02", "full_name": "Julián Álvarez",     "display_name": "Álvarez",     "team_external_id": "arg", "country_code": "AR", "position": "FW" },
+  { "external_id": "stub-player-03", "full_name": "Hirving Lozano",     "display_name": "Lozano",      "team_external_id": "mex", "country_code": "MX", "position": "MF" },
+  { "external_id": "stub-player-04", "full_name": "Raúl Jiménez",       "display_name": "Jiménez",     "team_external_id": "mex", "country_code": "MX", "position": "FW" },
+  { "external_id": "stub-player-05", "full_name": "Alphonso Davies",    "display_name": "Davies",      "team_external_id": "can", "country_code": "CA", "position": "DF" },
+  { "external_id": "stub-player-06", "full_name": "Jonathan David",     "display_name": "David",       "team_external_id": "can", "country_code": "CA", "position": "FW" },
+  { "external_id": "stub-player-07", "full_name": "Robert Lewandowski", "display_name": "Lewandowski", "team_external_id": "pol", "country_code": "PL", "position": "FW" },
+  { "external_id": "stub-player-08", "full_name": "Piotr Zieliński",    "display_name": "Zieliński",   "team_external_id": "pol", "country_code": "PL", "position": "MF" },
+  { "external_id": "stub-player-09", "full_name": "Pedri",              "display_name": "Pedri",       "team_external_id": "esp", "country_code": "ES", "position": "MF" },
+  { "external_id": "stub-player-10", "full_name": "Lamine Yamal",       "display_name": "Yamal",       "team_external_id": "esp", "country_code": "ES", "position": "FW" },
+  { "external_id": "stub-player-11", "full_name": "Vinícius Júnior",    "display_name": "Vinícius",    "team_external_id": "bra", "country_code": "BR", "position": "FW" },
+  { "external_id": "stub-player-12", "full_name": "Endrick",            "display_name": "Endrick",     "team_external_id": "bra", "country_code": "BR", "position": "FW" },
+  { "external_id": "stub-player-13", "full_name": "Christian Pulisic",  "display_name": "Pulisic",     "team_external_id": "usa", "country_code": "US", "position": "FW" },
+  { "external_id": "stub-player-14", "full_name": "Tyler Adams",        "display_name": "Adams",       "team_external_id": "usa", "country_code": "US", "position": "MF" },
+  { "external_id": "stub-player-15", "full_name": "Takefusa Kubo",      "display_name": "Kubo",        "team_external_id": "jpn", "country_code": "JP", "position": "FW" },
+  { "external_id": "stub-player-16", "full_name": "Wataru Endo",        "display_name": "Endo",        "team_external_id": "jpn", "country_code": "JP", "position": "MF" }
+]
