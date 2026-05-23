@@ -1,0 +1,101 @@
+{
+  "realm": "default",
+  "enabled": true,
+  "sslRequired": "none",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": false,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": false,
+  "permanentLockout": false,
+  "clients": [
+    {
+      "clientId": "world-cup-madness-local",
+      "name": "World Cup Madness (local dev)",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "dev-only-do-not-reuse",
+      "protocol": "openid-connect",
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "implicitFlowEnabled": false,
+      "serviceAccountsEnabled": false,
+      "redirectUris": [
+        "http://localhost:54321/auth/v1/callback",
+        "http://127.0.0.1:54321/auth/v1/callback"
+      ],
+      "webOrigins": [
+        "http://localhost:3000",
+        "http://localhost:54321"
+      ],
+      "attributes": {
+        "post.logout.redirect.uris": "http://localhost:3000/*"
+      },
+      "defaultClientScopes": ["web-origins", "profile", "roles", "email"],
+      "optionalClientScopes": ["address", "phone", "offline_access"]
+    }
+  ],
+  "users": [
+    {
+      "id": "00000000-0000-0000-0000-00000000000a",
+      "username": "alpha",
+      "email": "alpha@nortal.com",
+      "emailVerified": true,
+      "firstName": "Alpha",
+      "lastName": "Tester",
+      "enabled": true,
+      "credentials": [
+        { "type": "password", "value": "dev-password", "temporary": false }
+      ]
+    },
+    {
+      "id": "00000000-0000-0000-0000-00000000000b",
+      "username": "bravo",
+      "email": "bravo@nortal.com",
+      "emailVerified": true,
+      "firstName": "Bravo",
+      "lastName": "Tester",
+      "enabled": true,
+      "credentials": [
+        { "type": "password", "value": "dev-password", "temporary": false }
+      ]
+    },
+    {
+      "id": "00000000-0000-0000-0000-00000000000c",
+      "username": "charlie",
+      "email": "charlie@nortal.com",
+      "emailVerified": true,
+      "firstName": "Charlie",
+      "lastName": "Tester",
+      "enabled": true,
+      "credentials": [
+        { "type": "password", "value": "dev-password", "temporary": false }
+      ]
+    },
+    {
+      "id": "00000000-0000-0000-0000-0000000000d3",
+      "username": "admin1",
+      "email": "admin1@nortal.com",
+      "emailVerified": true,
+      "firstName": "Admin",
+      "lastName": "One",
+      "enabled": true,
+      "credentials": [
+        { "type": "password", "value": "dev-password", "temporary": false }
+      ]
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000099",
+      "username": "newuser",
+      "email": "newuser@nortal.com",
+      "emailVerified": true,
+      "firstName": "New",
+      "lastName": "User",
+      "enabled": true,
+      "credentials": [
+        { "type": "password", "value": "dev-password", "temporary": false }
+      ]
+    }
+  ]
+}

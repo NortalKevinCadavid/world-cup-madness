@@ -1021,8 +1021,14 @@ COMMIT;
 -- read the NEW key 'eligibility.allowed_domains' via config_read (fail-closed
 -- on WCG06 -> return false to deny login). The signature (p_uid uuid)
 -- RETURNS boolean STABLE is preserved EXACTLY per Principle XI.
--- The body remains SECURITY INVOKER to mirror the slice 001 contract; the
--- only change is the data source.
+--
+-- D-T021-007 (2026-05-22): switched SECURITY INVOKER -> SECURITY DEFINER.
+-- The participants RLS policy in slice 001 references this function for its
+-- row-eligibility check; if the function runs SECURITY INVOKER, its SELECT
+-- on participants re-triggers the same RLS policy, which re-calls this
+-- function — infinite recursion ("stack depth limit exceeded"). The slice 001
+-- sibling at slot 0005 carries the same fix; both must stay aligned. The
+-- function remains read-only, so running as the owner is safe.
 
 BEGIN;
 
@@ -1030,7 +1036,7 @@ CREATE OR REPLACE FUNCTION public.is_eligible_nortal_participant(p_uid uuid)
 RETURNS boolean
 LANGUAGE plpgsql
 STABLE
-SECURITY INVOKER
+SECURITY DEFINER
 SET search_path = public, pg_temp
 AS $$
 DECLARE

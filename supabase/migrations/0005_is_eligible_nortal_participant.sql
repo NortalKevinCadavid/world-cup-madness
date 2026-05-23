@@ -7,7 +7,15 @@ CREATE OR REPLACE FUNCTION public.is_eligible_nortal_participant(p_uid uuid)
 RETURNS boolean
 LANGUAGE sql
 STABLE
-SECURITY INVOKER
+-- D-T021-007: SECURITY DEFINER so the SELECT on public.participants bypasses
+-- the participants RLS policy. The RLS policy uses
+-- is_eligible_nortal_participant(auth.uid()) as its row-eligibility check;
+-- running SECURITY INVOKER causes the participants read inside this function
+-- to re-trigger the RLS policy, which re-calls this function — infinite
+-- recursion that surfaces as Postgres "stack depth limit exceeded" on any
+-- caller. DEFINER breaks the cycle. The function is read-only and the
+-- LOCKED signature is preserved.
+SECURITY DEFINER
 SET search_path = public, pg_temp
 AS $$
   SELECT EXISTS (

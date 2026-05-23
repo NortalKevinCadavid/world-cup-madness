@@ -482,8 +482,114 @@ END;
 $$;
 
 -- ---------------------------------------------------------------------------
+-- D-001 revision: AFTER INSERT trigger on auth.users — provisioning path.
+-- ---------------------------------------------------------------------------
+-- This trigger replaces the [auth.hook.before_user_created] hook wiring.
+-- Reasons (per official Supabase docs at supabase.com/docs/guides/auth/managing-user-data
+-- and GitHub discussion #39576):
+--   1. before_user_created runs in a SEPARATE database connection from the
+--      auth.users INSERT, so a participants row inserted there can never
+--      satisfy participants.auth_user_id → auth.users(id) FK.
+--   2. The trigger runs inside the same transaction as auth.users INSERT,
+--      so NEW.id IS the actual auth.users.id; FK is immediately satisfiable.
+--   3. The custom_access_token hook (handle_auth_user_signed_in) sees the
+--      same auth.users.id as event->>'user_id', so the participant lookup
+--      after sign-in always finds the row this trigger just inserted.
+--
+-- The trigger function is intentionally minimal: it ONLY provisions the
+-- participants row. Eligibility (domain check), deactivation checks, refresh
+-- whitelist updates, email-drift detection, and the access.granted audit
+-- row all remain in handle_auth_user_signed_in (custom_access_token hook),
+-- which is the only invocation point on returning sign-ins anyway.
+--
+-- Failure semantics: the trigger swallows exceptions (RAISE LOG only) so a
+-- provisioning glitch never blocks sign-up. The custom_access_token hook's
+-- NOT-FOUND fallback path will retry provisioning at token-issuance time.
+
+CREATE OR REPLACE FUNCTION public.handle_auth_user_created_trigger()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, auth, pg_temp
+AS $$
+DECLARE
+  v_email        text;
+  v_display_name text;
+  v_region       text;
+BEGIN
+  -- Fixture-loading bypass: seeds set `SET LOCAL app.skip_auth_provisioning='true'`
+  -- so they can insert deterministic auth.users + participants pairs without
+  -- the trigger creating a competing participants row with a fresh uuid.
+  IF current_setting('app.skip_auth_provisioning', true) = 'true' THEN
+    RETURN NEW;
+  END IF;
+
+  -- Resolve identity claims from the auth.users row. NEW.email is the
+  -- canonical email; raw_user_meta_data is the JWT user_metadata payload
+  -- Supabase Auth normalizes from the IdP.
+  v_email := COALESCE(
+    NULLIF(NEW.email, ''),
+    NULLIF(NEW.raw_user_meta_data ->> 'email', '')
+  );
+
+  -- Display-name fallback ladder matches handle_auth_user_signed_in.
+  v_display_name := COALESCE(
+    NULLIF(NEW.raw_user_meta_data ->> 'display_name', ''),
+    NULLIF(NEW.raw_user_meta_data ->> 'name', ''),
+    NULLIF(NEW.raw_user_meta_data ->> 'given_name', ''),
+    NULLIF(NEW.raw_user_meta_data ->> 'preferred_username', ''),
+    NULLIF(split_part(COALESCE(v_email, ''), '@', 1), '')
+  );
+
+  v_region := NULLIF(NEW.raw_user_meta_data ->> 'region', '');
+
+  -- Defensive: no email = no provisioning. custom_access_token hook will
+  -- reject the sign-in (or surface as missing_claims).
+  IF v_email IS NULL OR trim(v_email) = '' THEN
+    RAISE LOG 'on_auth_user_created: no email claim for auth.user %, skipping provisioning', NEW.id;
+    RETURN NEW;
+  END IF;
+
+  -- Idempotent provisioning. ON CONFLICT (auth_user_id_uk) DO UPDATE keeps
+  -- a re-fired trigger (e.g. password-reset re-insert paths) a no-op INSERT
+  -- that just bumps last_login_at — matches the original hook semantic.
+  INSERT INTO public.participants (
+    auth_user_id, email, display_name, region, status
+  ) VALUES (
+    NEW.id, v_email, v_display_name, v_region, 'active'
+  )
+  ON CONFLICT ON CONSTRAINT participants_auth_user_id_uk DO UPDATE
+    SET last_login_at = now();
+
+  RETURN NEW;
+
+EXCEPTION WHEN OTHERS THEN
+  -- Critical: a trigger exception aborts the entire auth.users INSERT
+  -- transaction, blocking sign-up. We log and continue; the
+  -- custom_access_token hook's NOT-FOUND fallback covers retry provisioning.
+  RAISE LOG 'handle_auth_user_created_trigger failed for auth.user %: % (SQLSTATE %)',
+    NEW.id, SQLERRM, SQLSTATE;
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW
+  EXECUTE FUNCTION public.handle_auth_user_created_trigger();
+
+COMMENT ON FUNCTION public.handle_auth_user_created_trigger() IS
+  'Slice 001 / FR-003 / D-001 revision (2026-05-22): AFTER INSERT trigger '
+  'on auth.users that provisions the linked participants row inside the same '
+  'transaction. Replaces the [auth.hook.before_user_created] wiring per '
+  'Supabase canonical pattern (supabase.com/docs/guides/auth/managing-user-data). '
+  'Eligibility checks + audit logging remain in handle_auth_user_signed_in.';
+
+-- ---------------------------------------------------------------------------
 -- End of slice 001 auth hooks: handle_auth_user_created (T024) +
--- handle_auth_user_signed_in (T040). No further hook functions in this slice.
+-- handle_auth_user_signed_in (T040) + on_auth_user_created trigger (D-001 rev).
 -- ---------------------------------------------------------------------------
 
 COMMIT;

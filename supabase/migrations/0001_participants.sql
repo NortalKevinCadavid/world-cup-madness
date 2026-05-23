@@ -60,6 +60,9 @@ CREATE TABLE public.participants (
 
   -- FR-003: 1:1 link to Supabase Auth identity. ON DELETE RESTRICT so deleting
   -- an auth user cannot silently drop tournament data (data-model.md § Entity 1).
+  -- Provisioning happens via the AFTER INSERT trigger on auth.users (slot 0009),
+  -- which fires AFTER the auth.users row exists, so this FK can be satisfied
+  -- immediately without DEFERRABLE.
   auth_user_id    uuid NOT NULL
                     REFERENCES auth.users (id) ON DELETE RESTRICT,
 

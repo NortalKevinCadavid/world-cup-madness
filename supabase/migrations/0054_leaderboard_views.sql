@@ -301,12 +301,17 @@ picks AS (
   -- guarantees at most one ACTIVE row per (participant_id, item_kind), MAX
   -- collapses to the single value. NULL when the participant never submitted
   -- that item.
+  -- D-T029-A: Postgres has no built-in MAX(uuid) aggregate, so the pivot
+  -- routes each uuid through ::text before MAX collapses it. The cast back to
+  -- uuid is safe because final_predictions_active_uk guarantees at most one
+  -- active row per (participant_id, item_kind) — MAX over a single value or
+  -- NULL is identity, and uuid::text round-trip is lossless.
   SELECT
     fp.participant_id,
-    MAX(CASE WHEN fp.item_kind = 'champion'    THEN fp.target_team_id   END) AS champion_team_id,
-    MAX(CASE WHEN fp.item_kind = 'runner_up'   THEN fp.target_team_id   END) AS runner_up_team_id,
-    MAX(CASE WHEN fp.item_kind = 'top_scorer'  THEN fp.target_player_id END) AS top_scorer_player_id,
-    MAX(CASE WHEN fp.item_kind = 'best_player' THEN fp.target_player_id END) AS best_player_player_id,
+    (MAX(CASE WHEN fp.item_kind = 'champion'    THEN fp.target_team_id::text   END))::uuid AS champion_team_id,
+    (MAX(CASE WHEN fp.item_kind = 'runner_up'   THEN fp.target_team_id::text   END))::uuid AS runner_up_team_id,
+    (MAX(CASE WHEN fp.item_kind = 'top_scorer'  THEN fp.target_player_id::text END))::uuid AS top_scorer_player_id,
+    (MAX(CASE WHEN fp.item_kind = 'best_player' THEN fp.target_player_id::text END))::uuid AS best_player_player_id,
     MAX(fp.submitted_at) AS submitted_at
   FROM public.final_predictions fp
   WHERE fp.superseded_at IS NULL

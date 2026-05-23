@@ -120,6 +120,12 @@
 
 BEGIN;
 
+-- Bypass the on_auth_user_created AFTER INSERT trigger (slot 0009) for the
+-- duration of this fixture transaction so deterministic participant ids are
+-- preserved. Without this, the trigger would insert a competing participants
+-- row with gen_random_uuid() before our explicit INSERT runs.
+SET LOCAL app.skip_auth_provisioning = 'true';
+
 -- ---------------------------------------------------------------------------
 -- auth.users  (5 rows total: 4 eligible-by-domain + 1 ineligible)
 -- ---------------------------------------------------------------------------
