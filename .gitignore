@@ -35,6 +35,11 @@ apps/web/.next/
 apps/web/out/
 apps/web/next-env.d.ts
 
+# Defensive — slice 009's measure-bundle script + ad-hoc `npx next build`
+# invocations from the wrong cwd can drop a .next/ at the repo root. Catch
+# any .next/ anywhere in the tree.
+.next/
+
 # Playwright
 apps/web/test-results/
 apps/web/playwright-report/
