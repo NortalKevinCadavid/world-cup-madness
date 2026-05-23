@@ -2,26 +2,236 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* ============================================================
+   Design tokens — slice 009-ui-beautification
+   Source of truth: specs/009-ui-beautification/contracts/design-tokens.md
+   Names below are LOCKED after slice close. Values may be tuned
+   freely by a future re-skin slice.
+   Colors are expressed as HSL component triples so Tailwind utils
+   can compose alpha via `hsl(var(--token) / <alpha-value>)`.
+   ============================================================ */
 
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* --- Primitive palette: festival (vibrant red/orange) --- */
+    --festival-50:  20 100% 97%;
+    --festival-100: 18 100% 93%;
+    --festival-200: 18 100% 85%;
+    --festival-300: 18 100% 75%;
+    --festival-400: 16 95% 62%;
+    --festival-500: 14 90% 53%;
+    --festival-600: 12 85% 46%;
+    --festival-700: 11 80% 39%;
+    --festival-800: 10 75% 32%;
+    --festival-900: 9 70% 25%;
+
+    /* --- Primitive palette: field (pitch green) --- */
+    --field-50:  150 60% 96%;
+    --field-100: 150 55% 90%;
+    --field-200: 150 50% 80%;
+    --field-300: 150 48% 68%;
+    --field-400: 150 45% 54%;
+    --field-500: 150 50% 42%;
+    --field-600: 150 55% 33%;
+    --field-700: 150 60% 26%;
+    --field-800: 150 65% 19%;
+    --field-900: 150 70% 13%;
+
+    /* --- Primitive palette: sky (accent blue) --- */
+    --sky-50:  205 95% 96%;
+    --sky-100: 205 90% 90%;
+    --sky-200: 205 85% 80%;
+    --sky-300: 205 80% 68%;
+    --sky-400: 205 75% 55%;
+    --sky-500: 205 80% 45%;
+    --sky-600: 205 85% 37%;
+    --sky-700: 205 88% 30%;
+    --sky-800: 205 90% 23%;
+    --sky-900: 205 92% 17%;
+
+    /* --- Primitive palette: gold (trophy / top-3 highlight) --- */
+    --gold: 44 92% 56%;
+
+    /* --- Primitive palette: ink (neutral grays, warm undertone) --- */
+    --ink-50:  30 14% 98%;
+    --ink-100: 30 13% 95%;
+    --ink-200: 28 12% 88%;
+    --ink-300: 26 10% 78%;
+    --ink-400: 25 9% 64%;
+    --ink-500: 25 8% 50%;
+    --ink-600: 24 8% 38%;
+    --ink-700: 24 9% 28%;
+    --ink-800: 24 10% 18%;
+    --ink-900: 24 12% 10%;
+
+    /* --- Semantic surface tokens (light) --- */
+    --background: var(--ink-50);
+    --foreground: var(--ink-900);
+    --card: 0 0% 100%;
+    --card-foreground: var(--ink-900);
+    --popover: 0 0% 100%;
+    --popover-foreground: var(--ink-900);
+    --border: var(--ink-200);
+    --input: var(--ink-300);
+    --ring: var(--festival-500);
+
+    /* --- Semantic interaction tokens (light) --- */
+    --primary: var(--festival-600);
+    --primary-foreground: 0 0% 100%;
+    --secondary: var(--field-600);
+    --secondary-foreground: 0 0% 100%;
+    --accent: var(--sky-500);
+    --accent-foreground: var(--ink-900);
+    --muted: var(--ink-100);
+    --muted-foreground: var(--ink-600);
+    --destructive: 0 75% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* --- Domain-specific tokens (light) --- */
+    --win: var(--field-600);
+    --loss: 0 70% 50%;
+    --draw: var(--ink-500);
+    --rank-up: var(--field-600);
+    --rank-down: 0 70% 50%;
+    --rank-same: var(--ink-500);
+    --locked: var(--ink-400);
+    --open: var(--festival-500);
+    --scored: var(--sky-500);
+
+    /* --- Radii --- */
+    --radius-sm: 0.25rem;
+    --radius: 0.5rem;
+    --radius-md: 0.625rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+    --radius-full: 9999px;
+
+    /* --- Typography --- */
+    --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
+      "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-display: var(--font-manrope), var(--font-inter), ui-sans-serif,
+      system-ui, sans-serif;
+
+    /* --- Motion tokens --- */
+    --motion-duration-fast: 100ms;
+    --motion-duration-base: 150ms;
+    --motion-duration-slow: 300ms;
+    --motion-duration-deliberate: 600ms;
+    --motion-easing-standard: cubic-bezier(0.4, 0, 0.2, 1);
+    --motion-easing-emphasis: cubic-bezier(0.2, 0, 0, 1);
+    --motion-easing-exit: cubic-bezier(0.4, 0, 1, 1);
+  }
+
+  .dark {
+    /* --- Semantic surface tokens (dark) --- */
+    --background: var(--ink-900);
+    --foreground: var(--ink-50);
+    --card: var(--ink-800);
+    --card-foreground: var(--ink-50);
+    --popover: var(--ink-800);
+    --popover-foreground: var(--ink-50);
+    --border: var(--ink-700);
+    --input: var(--ink-600);
+    --ring: var(--festival-400);
+
+    /* --- Semantic interaction tokens (dark) --- */
+    --primary: var(--festival-500);
+    --primary-foreground: var(--ink-50);
+    --secondary: var(--field-500);
+    --secondary-foreground: var(--ink-50);
+    --accent: var(--sky-400);
+    --accent-foreground: var(--ink-900);
+    --muted: var(--ink-700);
+    --muted-foreground: var(--ink-300);
+    --destructive: 0 65% 55%;
+    --destructive-foreground: var(--ink-50);
+
+    /* --- Domain-specific tokens (dark) --- */
+    --win: var(--field-400);
+    --loss: 0 60% 60%;
+    --draw: var(--ink-400);
+    --rank-up: var(--field-400);
+    --rank-down: 0 60% 60%;
+    --rank-same: var(--ink-400);
+    --locked: var(--ink-500);
+    --open: var(--festival-400);
+    --scored: var(--sky-400);
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+@layer base {
+  html {
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
+  body {
+    color: hsl(var(--foreground));
+    background: hsl(var(--background));
+    font-family: var(--font-sans);
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Visible focus ring on every interactive element (FR-UI-006) */
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+}
+
+/* ============================================================
+   Reduced motion override
+   When the user has explicitly set wcm.motion=reduce OR the OS
+   preference is reduce, the MotionProvider sets data-motion=reduce
+   on <html>. This rule then neutralizes non-essential motion.
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+html[data-motion="reduce"] *,
+html[data-motion="reduce"] *::before,
+html[data-motion="reduce"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* ============================================================
+   Print rules — spec Edge Case "Print view"
+   ============================================================ */
+
+@media print {
+  html,
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  nav,
+  [data-print-hide] {
+    display: none !important;
+  }
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
   }
 }
