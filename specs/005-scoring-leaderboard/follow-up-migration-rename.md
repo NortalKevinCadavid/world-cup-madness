@@ -92,4 +92,11 @@ Suggested: whoever next opens slice 005 follow-up work. This fix is a 5-minute c
 
 ## Status
 
-**Open** — pending implementation.
+**Implemented** — 2026-05-23.
+
+Action log:
+- ✅ `git mv supabase/migrations/0054b_personal_breakdown_view.sql supabase/migrations/0078_personal_breakdown_view.sql`
+- ✅ Header comment rewritten with the slot-history section (replaces the original "Migration slot 0054b per D-023" paragraph).
+- ✅ Idempotency was already in the original SQL — the `CREATE VIEW` statement at line 82 (post-rename) reads `CREATE OR REPLACE VIEW public.personal_breakdown_v`. No SQL diff required for this point of the recommended fix.
+- ⏸️ Backfill of `supabase_migrations.schema_migrations` on the affected dev machine is **NOT** performed by this change-set. The view exists in that machine's DB (applied manually earlier today) but no `version='0078'` row is present. Because the migration is idempotent, the worst case is that the next `supabase migration up` re-applies the `CREATE OR REPLACE VIEW` harmlessly. A clean `supabase db reset` re-applies the migration via the CLI and writes the row normally.
+- ⏭️ Recommended test: run `supabase db reset` on a separate clean local env, verify the `version='0078'` row is present in `supabase_migrations.schema_migrations`, and verify `public.personal_breakdown_v` exists. Then load `/me/breakdown` as a participant with at least one scored prediction and verify the breakdown table renders. (This test is owned by whoever next runs a full local-from-scratch verification; not gated by this commit.)

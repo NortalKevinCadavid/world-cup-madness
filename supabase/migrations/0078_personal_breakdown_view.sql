@@ -1,7 +1,19 @@
 -- Slice 005 / T035 / US4 / FR-014 / data-model.md § Entity 5 / contracts/personal-breakdown.read.md.
--- Migration slot 0054b per D-023 (spec slot 0055b -- on-disk slot 0054b is a sub-slot of
--- T029's 0054_leaderboard_views.sql, reserved for the personal-breakdown view alone so the
--- T029 multi-view migration is not rewritten in-place).
+--
+-- Migration slot history:
+--   - Originally drafted at slot 0054b per D-023 (spec slot 0055b -- on-disk slot 0054b
+--     was a sub-slot of T029's 0054_leaderboard_views.sql, reserved for the personal-
+--     breakdown view alone so the T029 multi-view migration is not rewritten in-place).
+--   - Renamed to slot 0078 on 2026-05-23 (slice 005 follow-up filed during slice 009
+--     debugging) because the Supabase CLI migration runner parses the migration version
+--     from the leading run of digits only ("0054b" matches "0054"), which collided with
+--     0054_leaderboard_views.sql and caused this migration to be silently skipped on
+--     fresh local installs (the view never got created; /me/breakdown returned 500 with
+--     "Could not find the table 'public.personal_breakdown_v' in the schema cache").
+--   - See specs/005-scoring-leaderboard/follow-up-migration-rename.md.
+--   - The CREATE VIEW statement below is already idempotent (CREATE OR REPLACE), so
+--     re-applying this on a database where the view exists from a prior manual workaround
+--     is safe.
 --
 -- personal_breakdown_v: one row per (caller participant x finished match) PLUS one row per
 -- (caller participant x active final_predictions row). The view powers US4's /me/breakdown

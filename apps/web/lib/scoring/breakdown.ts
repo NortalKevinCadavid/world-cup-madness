@@ -29,7 +29,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
  * SECURITY: this helper MUST NOT receive or forward the service-role key.
  *
  * @see specs/005-scoring-leaderboard/contracts/personal-breakdown.read.md
- * @see supabase/migrations/0054b_personal_breakdown_view.sql
+ * @see supabase/migrations/0078_personal_breakdown_view.sql
  */
 
 export type ReasonCode =
