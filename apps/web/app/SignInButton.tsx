@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
+import { LogIn } from 'lucide-react';
+import { Button } from '@/app/components/ui/button';
 
 // Slice 001 D-T021-005: use supabase.auth.signInWithOAuth from the browser so
 // the SDK negotiates PKCE automatically. PKCE returns `?code=` on the redirect
@@ -45,15 +47,15 @@ export function SignInButton() {
 
   return (
     <div className="flex flex-col items-center gap-2">
-      <button
-        type="button"
-        onClick={onClick}
-        disabled={pending}
-        className="rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-700 focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:ring-offset-2 disabled:opacity-50"
-      >
+      <Button size="lg" type="button" onClick={onClick} disabled={pending}>
+        <LogIn className="size-4" aria-hidden />
         {pending ? 'Redirecting…' : 'Sign in'}
-      </button>
-      {error ? <p className="text-sm text-red-700">{error}</p> : null}
+      </Button>
+      {error ? (
+        <p role="alert" className="text-sm text-destructive">
+          {error}
+        </p>
+      ) : null}
     </div>
   );
 }

@@ -1,55 +1,66 @@
-import 'server-only';
+import "server-only";
 
-import Link from 'next/link';
-import { redirect } from 'next/navigation';
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { Trophy, ListChecks, Award, BarChart3, ArrowRight } from "lucide-react";
 
-import { EligibilityError } from '../../../lib/auth/requireEligible';
-import { getCurrentParticipant } from '../../../lib/auth/getCurrentParticipant';
-import type { Participant } from '../../../lib/types/participant';
+import { EligibilityError } from "../../../lib/auth/requireEligible";
+import { getCurrentParticipant } from "../../../lib/auth/getCurrentParticipant";
+import type { Participant } from "../../../lib/types/participant";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/app/components/ui/card";
+import { Badge } from "@/app/components/ui/badge";
+import { Separator } from "@/app/components/ui/separator";
+import { Button } from "@/app/components/ui/button";
 
-/**
- * Participant dashboard — the post-sign-in landing page. Renders a welcome
- * header, the participant's identity badge, and quick-link cards to the
- * primary prediction-pool surfaces (Matches, Leaderboard, My picks,
- * Breakdown).
- *
- * Server component. Any thrown EligibilityError is translated to a redirect
- * to /auth/denied (mirrors the participant-layout gate as defense-in-depth).
- */
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
-interface CardProps {
-  href: string;
-  title: string;
-  description: string;
-  emoji: string;
-}
-
-function Card({ href, title, description, emoji }: CardProps) {
-  return (
-    <Link
-      href={href}
-      className="group block rounded-lg border border-neutral-200 bg-white p-5 transition hover:border-neutral-400 hover:shadow-sm"
-    >
-      <div className="flex items-start gap-3">
-        <span className="text-2xl" aria-hidden>{emoji}</span>
-        <div className="flex-1">
-          <h2 className="text-base font-semibold text-neutral-900 group-hover:text-neutral-700">
-            {title}
-          </h2>
-          <p className="mt-1 text-sm text-neutral-600">{description}</p>
-        </div>
-        <span aria-hidden className="text-neutral-400 group-hover:text-neutral-700">→</span>
-      </div>
-    </Link>
-  );
-}
+const QUICK_LINKS = [
+  {
+    href: "/matches",
+    title: "Matches",
+    description:
+      "Browse the fixture catalog and lock in your score predictions before kickoff.",
+    icon: ListChecks,
+    accent: "primary" as const,
+  },
+  {
+    href: "/leaderboard",
+    title: "Leaderboard",
+    description:
+      "See the tournament-wide ranking and how you stack up against your peers.",
+    icon: Trophy,
+    accent: "gold" as const,
+  },
+  {
+    href: "/me/finals",
+    title: "Final picks",
+    description:
+      "Pick the champion, runner-up, top scorer, and best player before the first kickoff.",
+    icon: Award,
+    accent: "secondary" as const,
+  },
+  {
+    href: "/me/breakdown",
+    title: "Your breakdown",
+    description:
+      "See exactly how your points were earned, match by match.",
+    icon: BarChart3,
+    accent: "accent" as const,
+  },
+];
 
 function formatRelative(iso: string | null): string {
-  if (!iso) return 'never';
+  if (!iso) return "never";
   const d = new Date(iso);
-  if (isNaN(d.getTime())) return iso;
-  return d.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
 }
 
 export default async function DashboardPage() {
@@ -58,70 +69,119 @@ export default async function DashboardPage() {
     participant = await getCurrentParticipant();
   } catch (err) {
     if (err instanceof EligibilityError) {
-      redirect('/auth/denied');
+      redirect("/auth/denied");
     }
     throw err;
   }
 
   return (
-    <main className="max-w-5xl mx-auto px-6 py-8 flex flex-col gap-8">
-      <header className="flex flex-col gap-2">
-        <h1 className="text-3xl font-semibold text-neutral-900">
+    <main className="mx-auto flex max-w-5xl flex-col gap-8 px-4 py-6 sm:px-6 sm:py-8">
+      <header className="space-y-3">
+        <Badge variant="gold" className="motion-safe:animate-in motion-safe:fade-in">
+          <Trophy className="size-3" aria-hidden /> FIFA World Cup 2026
+        </Badge>
+        <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
           Welcome, {participant.display_name}
         </h1>
-        <p className="text-sm text-neutral-600">
-          FIFA World Cup 2026 prediction pool — Nortal internal. Submit your match predictions, pick your finalists, and chase the leaderboard.
+        <p className="max-w-2xl text-sm text-muted-foreground sm:text-base">
+          Submit your match predictions, lock in your tournament finals, and
+          chase the leaderboard. It&rsquo;s the Nortal prediction pool —
+          loud, friendly, and a little ridiculous.
         </p>
       </header>
 
-      <section className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Card
-          href="/matches"
-          title="Matches"
-          emoji="⚽"
-          description="Browse the fixture catalog and submit score predictions for upcoming matches."
-        />
-        <Card
-          href="/leaderboard"
-          title="Leaderboard"
-          emoji="🏆"
-          description="See the tournament-wide ranking and how you stack up against your peers."
-        />
-        <Card
-          href="/me/finals"
-          title="My picks"
-          emoji="🥇"
-          description="Pick the champion, runner-up, top scorer, and best player before kickoff."
-        />
-        <Card
-          href="/me/breakdown"
-          title="My breakdown"
-          emoji="📊"
-          description="See exactly how your points were earned, match by match."
-        />
+      <section
+        aria-label="Quick links"
+        className="grid grid-cols-1 gap-4 sm:grid-cols-2"
+      >
+        {QUICK_LINKS.map((link) => {
+          const Icon = link.icon;
+          return (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="group block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-lg"
+            >
+              <Card className="h-full motion-safe:transition-transform motion-safe:duration-base motion-safe:ease-standard motion-safe:group-hover:-translate-y-0.5 motion-safe:group-hover:shadow-md">
+                <CardHeader className="flex-row items-start gap-3 space-y-0">
+                  <div
+                    className={
+                      link.accent === "primary"
+                        ? "rounded-md bg-primary/10 p-2 text-primary"
+                        : link.accent === "gold"
+                          ? "rounded-md bg-gold/15 p-2 text-gold"
+                          : link.accent === "secondary"
+                            ? "rounded-md bg-secondary/10 p-2 text-secondary"
+                            : "rounded-md bg-accent/10 p-2 text-accent"
+                    }
+                  >
+                    <Icon className="size-5" aria-hidden />
+                  </div>
+                  <div className="flex-1 space-y-1">
+                    <CardTitle className="text-base">{link.title}</CardTitle>
+                    <CardDescription>{link.description}</CardDescription>
+                  </div>
+                  <ArrowRight
+                    className="size-4 text-muted-foreground motion-safe:transition-transform motion-safe:duration-base motion-safe:group-hover:translate-x-1"
+                    aria-hidden
+                  />
+                </CardHeader>
+              </Card>
+            </Link>
+          );
+        })}
       </section>
 
-      <section className="rounded-lg border border-neutral-200 bg-white p-5">
-        <h2 className="text-sm font-medium text-neutral-500 uppercase tracking-wide mb-3">
-          Your account
-        </h2>
-        <dl className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-2 text-sm">
-          <dt className="font-medium text-neutral-600">Email</dt>
-          <dd className="text-neutral-900">{participant.email}</dd>
-          <dt className="font-medium text-neutral-600">Domain</dt>
-          <dd className="text-neutral-900">{participant.domain}</dd>
-          {participant.region ? (
-            <>
-              <dt className="font-medium text-neutral-600">Region</dt>
-              <dd className="text-neutral-900">{participant.region}</dd>
-            </>
-          ) : null}
-          <dt className="font-medium text-neutral-600">Status</dt>
-          <dd className="text-neutral-900 capitalize">{participant.status}</dd>
-          <dt className="font-medium text-neutral-600">Last sign-in</dt>
-          <dd className="text-neutral-900">{formatRelative(participant.last_login_at)}</dd>
-        </dl>
-      </section>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm uppercase tracking-wide text-muted-foreground">
+            Your account
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <dl className="grid grid-cols-1 gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
+            <div className="flex items-baseline justify-between gap-3 border-b border-border/50 pb-2 sm:border-0 sm:pb-0">
+              <dt className="text-muted-foreground">Email</dt>
+              <dd className="font-medium text-foreground">{participant.email}</dd>
+            </div>
+            <div className="flex items-baseline justify-between gap-3 border-b border-border/50 pb-2 sm:border-0 sm:pb-0">
+              <dt className="text-muted-foreground">Domain</dt>
+              <dd className="font-medium text-foreground">
+                {participant.domain}
+              </dd>
+            </div>
+            {participant.region ? (
+              <div className="flex items-baseline justify-between gap-3 border-b border-border/50 pb-2 sm:border-0 sm:pb-0">
+                <dt className="text-muted-foreground">Region</dt>
+                <dd className="font-medium text-foreground">{participant.region}</dd>
+              </div>
+            ) : null}
+            <div className="flex items-baseline justify-between gap-3 border-b border-border/50 pb-2 sm:border-0 sm:pb-0">
+              <dt className="text-muted-foreground">Status</dt>
+              <dd>
+                <Badge
+                  variant={participant.status === "active" ? "win" : "outline"}
+                  className="capitalize"
+                >
+                  {participant.status}
+                </Badge>
+              </dd>
+            </div>
+            <div className="flex items-baseline justify-between gap-3">
+              <dt className="text-muted-foreground">Last sign-in</dt>
+              <dd className="font-medium text-foreground">
+                {formatRelative(participant.last_login_at)}
+              </dd>
+            </div>
+          </dl>
+        </CardContent>
+        <Separator />
+        <CardFooter className="pt-4 text-xs text-muted-foreground">
+          <Button asChild variant="link" size="sm" className="p-0">
+            <Link href="/design-system">View the design system →</Link>
+          </Button>
+        </CardFooter>
+      </Card>
     </main>
   );
 }

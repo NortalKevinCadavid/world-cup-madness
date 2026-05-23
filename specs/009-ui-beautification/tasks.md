@@ -162,9 +162,9 @@ description: "Task list for slice 009-ui-beautification — dispatchable, self-c
 
 > Write FIRST. Commit red run to `specs/009-ui-beautification/red-gate-us2.md`.
 
-- [ ] T041 [P] [US2] Create `apps/web/tests/e2e/009-ui-beautification/us2/dashboard-mobile.spec.ts` covering US2 AS-1. Sign in as a seeded eligible participant, viewport 375×667, navigate to `/dashboard`. Assert: ranks/movement visible, deadline countdown visible, primary CTA visible if predictions open, leaderboard preview visible, `document.documentElement.scrollWidth <= 375`, every interactive target's bounding box ≥ 44×44px (use `page.locator('[role="button"], a, input').evaluateAll(...)`).
+- [X] T041 [P] [US2] Create `apps/web/tests/e2e/009-ui-beautification/us2/dashboard-mobile.spec.ts` covering US2 AS-1. Sign in as a seeded eligible participant, viewport 375×667, navigate to `/dashboard`. Assert: ranks/movement visible, deadline countdown visible, primary CTA visible if predictions open, leaderboard preview visible, `document.documentElement.scrollWidth <= 375`, every interactive target's bounding box ≥ 44×44px (use `page.locator('[role="button"], a, input').evaluateAll(...)`).
 
-- [ ] T042 [P] [US2] Create `apps/web/tests/e2e/009-ui-beautification/us2/match-card.spec.ts` covering US2 AS-2 (match-card content) and the contracts/component-api.md § MatchCard contract. Assert flags render for both teams, kickoff renders in the user's local TZ (set browser TZ via Playwright `timezoneId` and verify the rendered string), status badge visible, score inputs visible in edit mode.
+- [X] T042 [P] [US2] Create `apps/web/tests/e2e/009-ui-beautification/us2/match-card.spec.ts` covering US2 AS-2 (match-card content) and the contracts/component-api.md § MatchCard contract. Assert flags render for both teams, kickoff renders in the user's local TZ (set browser TZ via Playwright `timezoneId` and verify the rendered string), status badge visible, score inputs visible in edit mode.
 
 - [ ] T043 [P] [US2] Create `apps/web/tests/e2e/009-ui-beautification/us2/lock-in.spec.ts` covering US2 AS-3. Submit a prediction, lock it; assert: card transitions to locked visual state IN PLACE (no `page.waitForNavigation()` fires); toast appears within 500ms of server ack (measure via `performance.now()` from button click to toast `data-state="open"`); no full reload (assert `performance.timing.navigationStart` unchanged). Use a network-replay or staged predictions to make this deterministic.
 
@@ -190,11 +190,11 @@ description: "Task list for slice 009-ui-beautification — dispatchable, self-c
 
 ### Implementation for User Story 2
 
-- [ ] T054 [P] [US2] Create `apps/web/app/components/MatchCard.tsx` implementing the contracts/component-api.md § MatchCard contract exactly. Props: `match`, `prediction?`, `mode: 'view'|'edit'|'admin'`, `onSubmit?`, `onLock?`. Uses `<Card>`, `<Flag>`, `<Input>`, `<Button>`, `<Badge>` from previous tasks. Renders symmetric two-team layout with score inputs in edit mode. Status badge uses `--open`/`--locked`/`--scored` tokens with both color and icon (`Unlock`/`Lock`/`Check` from `lucide-react`). Kickoff time formatted via `Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' })`. Loading/empty/error states per contract. Touch targets ≥ 44×44px.
+- [X] T054 [P] [US2] Create `apps/web/app/components/MatchCard.tsx` implementing the contracts/component-api.md § MatchCard contract exactly. Props: `match`, `prediction?`, `mode: 'view'|'edit'|'admin'`, `onSubmit?`, `onLock?`. Uses `<Card>`, `<Flag>`, `<Input>`, `<Button>`, `<Badge>` from previous tasks. Renders symmetric two-team layout with score inputs in edit mode. Status badge uses `--open`/`--locked`/`--scored` tokens with both color and icon (`Unlock`/`Lock`/`Check` from `lucide-react`). Kickoff time formatted via `Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' })`. Loading/empty/error states per contract. Touch targets ≥ 44×44px.
 
 - [ ] T055 [P] [US2] Create `apps/web/app/components/Confetti.tsx` implementing contracts § Confetti. Props: `celebrationKey`, `palette?`, `origin?`. On mount: check `useReducedMotion()`; if `reduce`, set the localStorage marker and return null. Otherwise: read CSS custom properties (`--primary`, `--secondary`, `--accent`, `--gold`) from `:root` via `getComputedStyle(document.documentElement)` to derive the palette; spawn confetti via `canvas-confetti` with `pointer-events: none` on the canvas; mark the key; clean up the canvas after 2s.
 
-- [ ] T056 [P] [US2] Redesign `apps/web/app/(participant)/dashboard/page.tsx` (the new participant dashboard introduced by the pending git state). Layout per spec US2 AS-1: ranks card with movement indicator, deadline countdown card, primary CTA "Make your picks" if open predictions exist, leaderboard preview card (top 5 with current user highlighted). Use `<Card>`, `<Skeleton>` for loading, `<EmptyState>` for "no predictions open", `<ErrorState>` for fetch errors. Mobile-first: stack cards vertically below 768px, grid above.
+- [X] T056 [P] [US2] Redesign `apps/web/app/(participant)/dashboard/page.tsx` (the new participant dashboard introduced by the pending git state). Layout per spec US2 AS-1: ranks card with movement indicator, deadline countdown card, primary CTA "Make your picks" if open predictions exist, leaderboard preview card (top 5 with current user highlighted). Use `<Card>`, `<Skeleton>` for loading, `<EmptyState>` for "no predictions open", `<ErrorState>` for fetch errors. Mobile-first: stack cards vertically below 768px, grid above.
 
 - [ ] T057 [P] [US2] Redesign `apps/web/app/(participant)/matches/` route(s). For each match list and match-detail page: use `<MatchCard>` in `view` or `edit` mode. Predictions are listed in the order defined by slice 002. Lock-in handler calls the existing server action / API route from slice 003 unchanged — DO NOT modify the API; only the UI. On lock success: optimistic-update the card to locked state, render a `<Toast>` confirmation, and conditionally mount `<Confetti celebrationKey="...">` if all picks of the match-day are now locked.
 
@@ -204,13 +204,13 @@ description: "Task list for slice 009-ui-beautification — dispatchable, self-c
 
 - [ ] T060 [P] [US2] Redesign `apps/web/app/(participant)/layout.tsx`. Apply the new top nav (already updated in T035). Wrap content in a `<main>` with appropriate padding. Ensure the dark mode background extends edge-to-edge.
 
-- [ ] T061 [P] [US2] Redesign `apps/web/app/auth/` pages (sign-in, denied) — the user-facing auth surfaces. Use the festive aesthetic. Keep all functional behavior from slice 001 intact (eligibility predicates, redirect targets). Sign-in page becomes a polished landing with a single `<Button size="lg">` "Sign in with Microsoft". Denied page uses `<ErrorState>` with explanation per slice 001's spec.
+- [X] T061 [P] [US2] Redesign `apps/web/app/auth/` pages (sign-in, denied) — the user-facing auth surfaces. Use the festive aesthetic. Keep all functional behavior from slice 001 intact (eligibility predicates, redirect targets). Sign-in page becomes a polished landing with a single `<Button size="lg">` "Sign in with Microsoft". Denied page uses `<ErrorState>` with explanation per slice 001's spec.
 
 - [ ] T062 [US2] Run the full US2 red-gate suite green. Iterate. Append green output to `specs/009-ui-beautification/red-gate-us2.md`.
 
-- [ ] T063 [US2] Run the bundle-budget check: `npm run measure-bundle`. Document delta.
+- [X] T063 [US2] Run the bundle-budget check: `npm run measure-bundle`. Document delta.
 
-- [ ] T064 [US2] Run the full regression suite from slices 001–005 (predictions-relevant). Confirm zero failures. Write `specs/009-ui-beautification/regression-checkpoint-us2.md`.
+- [X] T064 [US2] Run the full regression suite from slices 001–005 (predictions-relevant). Confirm zero failures. Write `specs/009-ui-beautification/regression-checkpoint-us2.md`.
 
 **Checkpoint**: Participant flows fully redesigned, mobile-first verified, regression suite green.
 
