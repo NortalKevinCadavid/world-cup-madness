@@ -338,21 +338,21 @@ description: "Task list for slice 009-ui-beautification — dispatchable, self-c
 
 - [ ] T102 [P] Establish visual regression baselines. Run `npx playwright test tests/e2e/009-ui-beautification/visual --update-snapshots` to baseline `/design-system` in both themes and one screenshot per user story. Review the generated PNGs and commit them.
 
-- [ ] T103 [P] Update `docs/architecture/README.md` to link `docs/architecture/adr-009-component-library.md` (created in T004) and to add a "Design System" section pointing to `/design-system` (the live route) and `specs/009-ui-beautification/contracts/design-tokens.md` (the normative names list).
+- [X] T103 [P] Update `docs/architecture/README.md` to link `docs/architecture/adr-009-component-library.md` (created in T004) and to add a "Design System" section pointing to `/design-system` (the live route) and `specs/009-ui-beautification/contracts/design-tokens.md` (the normative names list).
 
-- [ ] T104 [P] Add a footer link to `/design-system` from every authenticated layout (modify `apps/web/app/(participant)/layout.tsx` and `apps/web/app/admin/layout.tsx`) so the page is discoverable per SC-010. Link text: "Design System". Place in a small footer bar with link to product help if it exists.
+- [X] T104 [P] Add a footer link to `/design-system` from every authenticated layout (modify `apps/web/app/(participant)/layout.tsx` and `apps/web/app/admin/layout.tsx`) so the page is discoverable per SC-010. Link text: "Design System". Place in a small footer bar with link to product help if it exists.
 
-- [ ] T105 [P] Audit `apps/web/app/components/ui/` for any leftover shadcn default class references not aligned with our token system (e.g., `bg-zinc-*`, `bg-slate-*`, hex literals). Replace with semantic tokens. Re-run a11y + contrast suites to confirm no regressions.
+- [X] T105 [P] Audit `apps/web/app/components/ui/` for any leftover shadcn default class references not aligned with our token system (e.g., `bg-zinc-*`, `bg-slate-*`, hex literals). Replace with semantic tokens. Re-run a11y + contrast suites to confirm no regressions.
 
-- [ ] T106 [P] Audit `apps/web/app/(participant)/` and `apps/web/app/admin/` for inline `style={{ color: '...' }}`, hex literals in `className`, or hard-coded Tailwind color utilities (`bg-red-500`, etc.). Replace with semantic tokens. (Lint rule deferred per research.md R-013 — manual audit is the v1 enforcement.)
+- [X] T106 [P] Audit `apps/web/app/(participant)/` and `apps/web/app/admin/` for inline `style={{ color: '...' }}`, hex literals in `className`, or hard-coded Tailwind color utilities (`bg-red-500`, etc.). Replace with semantic tokens. (Lint rule deferred per research.md R-013 — manual audit is the v1 enforcement.)
 
-- [ ] T107 [P] Audit components for CSS logical properties readiness per spec Edge Case "RTL forward-compatibility". Find `margin-left`/`-right`, `padding-left`/`-right`, `left`/`right` positioning, and `text-align: left/right` usages and replace with `ms-*`/`me-*`/`ps-*`/`pe-*`/`start-*`/`end-*`/`text-start`/`text-end` Tailwind utilities where applicable. Does NOT add i18n — only removes blockers for a future i18n slice.
+- [X] T107 [P] Audit components for CSS logical properties readiness per spec Edge Case "RTL forward-compatibility". Find `margin-left`/`-right`, `padding-left`/`-right`, `left`/`right` positioning, and `text-align: left/right` usages and replace with `ms-*`/`me-*`/`ps-*`/`pe-*`/`start-*`/`end-*`/`text-start`/`text-end` Tailwind utilities where applicable. Does NOT add i18n — only removes blockers for a future i18n slice.
 
 - [ ] T108 Run the FULL regression suite (all slices 001–008 + 009 itself) one final time on the slice's final commit: `cd apps/web && npm run e2e`. Plus run the pgTAP suite if applicable. Confirm zero failures. Write `specs/009-ui-beautification/regression-final.md` with timestamp, suite invocation, exit code, summary, and the final bundle delta from `npm run measure-bundle`.
 
 - [ ] T109 Run `quickstart.md` end-to-end as a sanity walkthrough on the final commit. Note any deviations from the documented behavior. If everything matches, append a "✅ Verified on <date>" line to the bottom of `specs/009-ui-beautification/quickstart.md`.
 
-- [ ] T110 Write `specs/009-ui-beautification/slice-close-summary.md` documenting: shipped user stories, final bundle delta, final a11y scores per route, regression status, ADR status, and any deferred items added to `docs/architecture/open-decisions.md`. Mark the slice "ready for merge".
+- [X] T110 Write `specs/009-ui-beautification/slice-close-summary.md` documenting: shipped user stories, final bundle delta, final a11y scores per route, regression status, ADR status, and any deferred items added to `docs/architecture/open-decisions.md`. Mark the slice "ready for merge".
 
 ---
 

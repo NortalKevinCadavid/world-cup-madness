@@ -157,6 +157,17 @@ export default async function AdminLayout({
     <div className="admin-shell min-h-screen flex flex-col bg-muted/30">
       <TopNav participant={participant} isAdmin={true} activeSection="admin" />
       <div className="flex-1">{children}</div>
+      <footer className="border-t border-border bg-card/50">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 text-xs text-muted-foreground sm:px-6">
+          <span>Admin — World Cup Madness</span>
+          <a
+            href="/design-system"
+            className="rounded text-muted-foreground underline-offset-2 transition-colors duration-fast hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card"
+          >
+            Design system
+          </a>
+        </div>
+      </footer>
     </div>
   );
 }
