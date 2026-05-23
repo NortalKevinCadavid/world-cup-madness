@@ -1,4 +1,13 @@
 import { defineConfig, devices } from "@playwright/test";
+import { config as loadDotenv } from "dotenv";
+import { resolve } from "node:path";
+
+// Load .env.local for Playwright tests. This is a Next.js convention
+// (Next loads .env.local automatically) that Playwright does NOT inherit,
+// so without this step `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and
+// other test-required env vars are missing when service-role helpers run.
+// See the slice 001 OIDC fixture follow-up (2026-05-23) for context.
+loadDotenv({ path: resolve(__dirname, ".env.local"), quiet: true });
 
 // Slice 009-ui-beautification broadens testDir from "./tests/playwright"
 // to "./tests" so both pre-existing slice suites

@@ -1,238 +1,219 @@
 // --------------------------------------------------------------------------
 // DEV-ONLY: not used in any production environment.
 // --------------------------------------------------------------------------
-// Playwright fixture helpers for driving the local/CI fake-IdP OIDC sidecar
-// (ghcr.io/navikt/mock-oauth2-server:3.0.3) declared in
-// `docker-compose.override.yml` at the repo root.
+// Playwright fixture helpers for driving the local/CI OIDC sidecar.
 //
-// The sidecar exposes:
-//   - http://localhost:8090/default/.well-known/openid-configuration
-//   - http://localhost:8090/default/jwks
-//   - http://localhost:8090/default/authorize
-//   - http://localhost:8090/default/token
-//   - http://localhost:8090/default/userinfo
+// The sidecar (service "oidc-stub" / container "wcm-oidc-stub") is currently
+// **real Keycloak 25** per `docker-compose.override.yml`. The original
+// design used `navikt/mock-oauth2-server:3.0.3`, which exposed a runtime
+// config endpoint (`PUT /<issuerId>`) that let tests inject arbitrary
+// claim payloads on the fly. Keycloak does NOT expose that endpoint —
+// it serves only the seeded users from `infra/keycloak/realm-export.json`
+// with a fixed claim set per user.
 //
-// And — critically for tests — a "config" endpoint that lets us shape the
-// exact claim payload returned for the NEXT token request:
-//   - PUT http://localhost:8090/default
+// This fixture therefore drives Keycloak's interactive login form (fills
+// username + password, clicks Sign In) for tests whose claim payload maps
+// 1:1 to a seeded user. Tests that need runtime claim mutation (slice 001
+// edge cases — email-drift, missing-claims, fresh-user) throw a clear
+// error pointing to the follow-up doc.
 //
-// This helper exposes a small high-level API that slice-001 acceptance
-// tests (T016, T017, ...) consume to synthesize identity payloads
-// (eligible, ineligible, missing-claims, email-drift, etc.) without
-// depending on Microsoft Entra ID.
-//
-// Spec deviation note (D-001): the slice's spec referenced a
-// `before_user_signed_in` Supabase Auth hook, but Supabase CLI v2 only
-// supports `custom_access_token` — which fires on BOTH initial sign-in AND
-// refresh-token issuance. The fixture below therefore exposes BOTH a
-// one-shot identity-mint (initial sign-in) and a separate refresh-token
-// helper so tests can exercise either path independently.
+// Background:
+//   - `docker-compose.override.yml` swapped the sidecar to Keycloak because
+//     Supabase Auth's [auth.external.keycloak] config hardcodes Keycloak's
+//     URL conventions. The previous mock-oauth2-server used different
+//     paths that caused Supabase's redirect builder to 404.
+//   - The fix for this fixture is documented in
+//     `specs/001-eligibility-login/follow-up-oidc-stub-keycloak-vs-mock-oauth2.md`.
+//   - Reference implementation that drove this rewrite:
+//     `tests/playwright/slice-005-breakdown-after-rename.spec.ts`.
 // --------------------------------------------------------------------------
 
-import type { Page } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
 
 // --------------------------------------------------------------------------
-// Types
+// Types — kept stable for backwards-compat with the ~127 consuming specs.
 // --------------------------------------------------------------------------
 
 /**
- * Standard OIDC ID-token claims that slice-001 fixtures may set. All fields
- * are optional so tests can deliberately omit one (e.g. drop `email` to
- * exercise the "missing claim" edge case E-1).
+ * Standard OIDC ID-token claims that slice fixtures may set. All fields
+ * are optional. With the Keycloak-driven backend, only `email` is
+ * load-bearing: it picks which seeded Keycloak user to sign in as.
+ *
+ * Other fields (sub, name, etc.) are tolerated for backwards-compat with
+ * the consuming specs but ignored at runtime — Keycloak serves the seeded
+ * claim values for the user regardless of what's passed here.
  */
 export interface OidcIdentityClaims {
-  /** Subject — stable per-user identifier from the IdP. Maps to auth.users.id linkage. */
+  /** Subject — IGNORED at runtime; kept for type compat. */
   sub?: string;
-  /** Email address. Omitting this triggers the missing-claims path. */
+  /** Email address. The ONLY load-bearing field — selects the Keycloak user. */
   email?: string;
-  /** Whether the IdP marks the email as verified. */
+  /** Whether the IdP marks the email as verified. IGNORED at runtime. */
   email_verified?: boolean;
-  /** Display name (full name). Drives `participants.display_name`. */
+  /** Display name. IGNORED at runtime — Keycloak serves the seeded display name. */
   name?: string;
-  /** Optional given name. */
+  /** IGNORED at runtime. */
   given_name?: string;
-  /** Optional family name. */
+  /** IGNORED at runtime. */
   family_name?: string;
-  /** Optional preferred-username claim. */
+  /** IGNORED at runtime. */
   preferred_username?: string;
-  /** Optional issuer override (defaults to the stub's default issuer). */
+  /** IGNORED at runtime. */
   iss?: string;
-  /** Optional audience override (defaults to SUPABASE_AUTH_OIDC_AUDIENCE). */
+  /** IGNORED at runtime. */
   aud?: string | string[];
-  /**
-   * Arbitrary extra claims merged into the token (e.g. a `groups` array).
-   * Useful for slices 002+ where role/group claims may matter.
-   */
+  /** Extra claims — IGNORED at runtime. */
   [extra: string]: unknown;
 }
 
-/**
- * Options accepted by `signInWithIdentity`.
- */
+/** Options accepted by `signInWithIdentity`. */
 export interface SignInOptions {
-  /** The identity payload the stub should mint. */
+  /** The identity payload to sign in with. Only `email` is honored. */
   claims: OidcIdentityClaims;
-  /**
-   * Optional override of the stub's base URL. Defaults to
-   * `process.env.OIDC_STUB_BASE_URL ?? "http://localhost:8090"`. The path
-   * `/default` is appended automatically.
-   */
-  stubBaseUrl?: string;
-  /**
-   * Optional override of where on the Next.js app to start the sign-in
-   * flow. Defaults to `/` (the landing page) where a "Sign in" link
-   * triggers the Supabase Auth redirect.
-   */
+  /** Optional override of where on the Next.js app to start the sign-in flow. Default "/". */
   startPath?: string;
-  /**
-   * Optional URL fragment we expect to land on after a successful sign-in.
-   * Defaults to `/dashboard`. Failure scenarios (denied, missing claims)
-   * override this with `/auth/denied`.
-   */
+  /** Optional URL fragment we expect to land on after sign-in. Default "/dashboard". */
   expectedPostSignInPath?: string;
-}
-
-/**
- * Options accepted by `mintRefreshedAccessToken` — used to exercise the
- * `custom_access_token` Supabase hook on the refresh path specifically
- * (Deviation D-001).
- */
-export interface RefreshOptions {
-  /** The (potentially updated) claims to embed in the refreshed token. */
-  claims: OidcIdentityClaims;
-  /** Optional stub base URL override (see SignInOptions). */
+  /**
+   * Optional override of the Keycloak base URL.
+   * Defaults to `process.env.OIDC_STUB_BASE_URL ?? "http://localhost:8090"`.
+   */
   stubBaseUrl?: string;
 }
 
-/**
- * Shape of the JSON payload the mock-oauth2-server expects when we PUT to
- * `/<issuerId>` to register the next token's claims.
- */
-interface MockOauth2ConfigPayload {
-  tokenCallbacks: Array<{
-    issuerId: string;
-    tokenExpiry: number;
-    requestMappings: Array<{
-      requestParam: string;
-      match: string;
-      claims: OidcIdentityClaims;
-    }>;
-  }>;
+/** Options accepted by `mintRefreshedAccessToken`. */
+export interface RefreshOptions {
+  /** The (potentially updated) claims. IGNORED — Keycloak doesn't support runtime claim mutation. */
+  claims: OidcIdentityClaims;
+  /** Optional Keycloak base URL override. */
+  stubBaseUrl?: string;
 }
 
 // --------------------------------------------------------------------------
-// Internal helpers
+// Configuration
 // --------------------------------------------------------------------------
 
 const DEFAULT_STUB_BASE_URL =
   process.env.OIDC_STUB_BASE_URL ?? "http://localhost:8090";
 
-const DEFAULT_ISSUER_ID = "default";
+/** Keycloak realm name — matches `infra/keycloak/realm-export.json`. */
+const KEYCLOAK_REALM = "default";
+
+/** Shared password for every seeded dev user. */
+const KEYCLOAK_DEV_PASSWORD = "dev-password";
+
+/**
+ * Email → Keycloak username lookup for the seeded dev users in
+ * `infra/keycloak/realm-export.json`. Tests that pass any other email
+ * trigger the "runtime claim injection required" error path.
+ */
+const SEEDED_USER_BY_EMAIL: Readonly<Record<string, string>> = {
+  "alpha@nortal.com": "alpha",
+  "bravo@nortal.com": "bravo",
+  "charlie@nortal.com": "charlie",
+  "admin1@nortal.com": "admin1",
+  "newuser@nortal.com": "newuser",
+};
+
+const FOLLOWUP_REF =
+  "specs/001-eligibility-login/follow-up-oidc-stub-keycloak-vs-mock-oauth2.md";
 
 function resolveStubUrl(override?: string): string {
   return (override ?? DEFAULT_STUB_BASE_URL).replace(/\/+$/, "");
 }
 
-function buildConfigPayload(claims: OidcIdentityClaims): MockOauth2ConfigPayload {
-  return {
-    tokenCallbacks: [
-      {
-        issuerId: DEFAULT_ISSUER_ID,
-        tokenExpiry: 3600,
-        requestMappings: [
-          {
-            requestParam: "scope",
-            match: "openid",
-            claims,
-          },
-        ],
-      },
-    ],
-  };
-}
-
 /**
- * Posts the per-test claim payload to the mock-oauth2-server's runtime
- * configuration endpoint. The NEXT token request the stub serves will
- * include exactly these claims.
+ * Resolve a Keycloak username from the claim payload. Throws a precise
+ * actionable error if the email doesn't match a seeded user — those tests
+ * need the runtime-claim-injection path documented in the follow-up.
  */
-async function registerNextTokenClaims(
-  claims: OidcIdentityClaims,
-  stubBaseUrl: string,
-): Promise<void> {
-  const url = `${stubBaseUrl}/${DEFAULT_ISSUER_ID}`;
-  const response = await fetch(url, {
-    method: "PUT",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify(buildConfigPayload(claims)),
-  });
-  if (!response.ok) {
-    const body = await response.text().catch(() => "<unreadable body>");
+function resolveKeycloakUsername(claims: OidcIdentityClaims): string {
+  const email = (claims.email ?? "").toLowerCase().trim();
+  const username = SEEDED_USER_BY_EMAIL[email];
+  if (!username) {
     throw new Error(
-      `OIDC stub config PUT ${url} failed: ${response.status} ${response.statusText} — ${body}`,
+      [
+        `OIDC fixture: claims.email="${claims.email}" does not match a seeded Keycloak user.`,
+        `Seeded users (see infra/keycloak/realm-export.json):`,
+        ...Object.entries(SEEDED_USER_BY_EMAIL).map(
+          ([e, u]) => `  - ${e} → ${u}`,
+        ),
+        ``,
+        `Tests that need to sign in as a non-seeded identity (email-drift,`,
+        `missing-claims, freshly-created participant, outsider rejection)`,
+        `require runtime claim injection, which Keycloak does NOT support.`,
+        `See ${FOLLOWUP_REF} for the three remediation paths.`,
+        ``,
+        `Quick fix: use .fixme() on this test until the runtime-claim-injection`,
+        `path is restored (Path C in the follow-up).`,
+      ].join("\n"),
     );
   }
+  return username;
 }
 
 // --------------------------------------------------------------------------
-// Public API
+// Public API — same signatures as the original fixture, Keycloak-backed.
 // --------------------------------------------------------------------------
 
 /**
- * Drives the Next.js sign-in flow end-to-end:
+ * Drives the Next.js sign-in flow end-to-end against the local Keycloak:
  *
- *   1. Registers the requested identity claims with the OIDC stub so the
- *      next /token call returns exactly those claims.
- *   2. Navigates to `startPath` (default "/") on the app under test.
- *   3. Clicks the "Sign in" link, which redirects to Supabase Auth, then
- *      to the stub's /authorize, then back through /callback.
- *   4. Waits until the browser settles on `expectedPostSignInPath`
- *      (default "/dashboard"). On a denied scenario callers should pass
- *      `expectedPostSignInPath: "/auth/denied"`.
+ *   1. Resolves a seeded Keycloak username from `claims.email`.
+ *   2. Navigates to `startPath` on the app under test.
+ *   3. Clicks the "Sign in" button, which redirects to Supabase Auth
+ *      then to Keycloak's login form.
+ *   4. Fills username + password and submits.
+ *   5. Waits for the browser to settle on `expectedPostSignInPath`.
  *
- * Returns the final URL the page settled on (so tests can assert on query
- * params like `?reason=domain_not_approved`).
+ * Returns the final URL the page settled on.
  *
- * Exercises the INITIAL sign-in path of the `custom_access_token` Supabase
- * hook (Deviation D-001). For the refresh path use
- * `mintRefreshedAccessToken`.
+ * @throws if `claims.email` is not a seeded user; see `resolveKeycloakUsername`.
  */
 export async function signInWithIdentity(
   page: Page,
   options: SignInOptions,
 ): Promise<string> {
-  const stubBaseUrl = resolveStubUrl(options.stubBaseUrl);
+  const username = resolveKeycloakUsername(options.claims);
   const startPath = options.startPath ?? "/";
   const expectedPostSignInPath = options.expectedPostSignInPath ?? "/dashboard";
 
-  await registerNextTokenClaims(options.claims, stubBaseUrl);
-
+  // 1. Land on the app's sign-in entry point. The slice 009 redesign uses
+  //    a <Button> for the sign-in trigger, not a <Link>; we accept either
+  //    to remain robust across UI revisions.
   await page.goto(startPath);
-  await page.getByRole("link", { name: /sign in/i }).click();
+  const signInTrigger = page
+    .getByRole("button", { name: /sign in/i })
+    .or(page.getByRole("link", { name: /sign in/i }))
+    .first();
+  await expect(signInTrigger).toBeVisible({ timeout: 10_000 });
+  await signInTrigger.click();
 
-  // Supabase Auth + OIDC stub round-trip — mock-oauth2-server with
-  // `interactiveLogin: false` (set in docker-compose.override.yml)
-  // auto-approves, so we just wait for the final landing URL.
+  // 2. Wait for Keycloak's interactive login form to appear. Waiting on the
+  //    username textbox (instead of a URL pattern) sidesteps redirect-chain
+  //    races: localhost:3000 → Supabase Auth → Keycloak.
+  const usernameField = page.getByRole("textbox", {
+    name: /username or email/i,
+  });
+  await expect(usernameField).toBeVisible({ timeout: 15_000 });
+
+  // 3. Submit credentials. Keycloak's password field has accessible name
+  //    "Password"; the submit button is accessible name "Sign In".
+  await usernameField.fill(username);
+  await page.getByRole("textbox", { name: /^password$/i }).fill(KEYCLOAK_DEV_PASSWORD);
+  await page.getByRole("button", { name: /^sign in$/i }).click();
+
+  // 4. Wait for the post-sign-in destination. Tests that expect a denied
+  //    flow override `expectedPostSignInPath` to "/auth/denied".
   await page.waitForURL(
     (url) => url.pathname.startsWith(expectedPostSignInPath),
-    { timeout: 15_000 },
+    { timeout: 20_000 },
   );
 
   return page.url();
 }
 
-/**
- * Convenience alias for `signInWithIdentity({ claims })`. Useful when
- * tests don't need to override paths.
- *
- * @example
- *   await mintIdentity(page, {
- *     email: "alpha@nortal.com",
- *     email_verified: true,
- *     name: "Alpha Tester",
- *     sub: "00000000-0000-0000-0000-000000000001",
- *   });
- */
+/** Convenience alias for `signInWithIdentity({ claims })`. */
 export async function mintIdentity(
   page: Page,
   claims: OidcIdentityClaims,
@@ -241,55 +222,39 @@ export async function mintIdentity(
 }
 
 /**
- * Exercises the REFRESH path of the `custom_access_token` Supabase hook
- * (Deviation D-001). Registers a (potentially mutated) claim payload with
- * the stub, then triggers a token refresh by reloading the dashboard with
- * the access token expired. This is the helper slice-001 tests use to
- * verify mid-session eligibility revocation (Edge case E-3 / FR-007).
+ * `mintRefreshedAccessToken` was used to drive Supabase Auth's
+ * `custom_access_token` hook on the refresh path (Deviation D-001) by
+ * mutating the claim payload BETWEEN sign-in and refresh. That mutation
+ * relied on the mock-oauth2-server's runtime config endpoint, which
+ * Keycloak does not expose.
  *
- * Assumes the page is already signed in (call `signInWithIdentity` first).
+ * Until the runtime-claim-injection path is restored (Path C in the
+ * follow-up), this helper THROWS so callers see a precise error rather
+ * than silently no-op'ing the mutation.
+ *
+ * There is exactly one caller in the test suite — fixme that single test
+ * until the follow-up path lands.
  */
 export async function mintRefreshedAccessToken(
-  page: Page,
-  options: RefreshOptions,
+  _page: Page,
+  _options: RefreshOptions,
 ): Promise<void> {
-  const stubBaseUrl = resolveStubUrl(options.stubBaseUrl);
-  await registerNextTokenClaims(options.claims, stubBaseUrl);
-
-  // Force Supabase Auth to issue a fresh token by clearing the current
-  // access token in localStorage. The Next.js client will detect the
-  // missing token on the next API call and request a refresh, which fires
-  // the `custom_access_token` hook on the refresh path.
-  await page.evaluate(() => {
-    const keys = Object.keys(window.localStorage).filter((k) =>
-      k.startsWith("sb-"),
-    );
-    for (const k of keys) {
-      const raw = window.localStorage.getItem(k);
-      if (raw && raw.includes("access_token")) {
-        try {
-          const parsed = JSON.parse(raw);
-          if (parsed && typeof parsed === "object") {
-            delete parsed.access_token;
-            window.localStorage.setItem(k, JSON.stringify(parsed));
-          }
-        } catch {
-          /* ignore non-JSON entries */
-        }
-      }
-    }
-  });
-
-  await page.reload();
+  throw new Error(
+    [
+      `OIDC fixture: mintRefreshedAccessToken is unavailable while the OIDC`,
+      `sidecar is real Keycloak (claim mutation between sign-in and refresh`,
+      `requires the mock-oauth2-server's runtime config endpoint).`,
+      ``,
+      `Until the runtime-claim-injection path is restored, mark the calling`,
+      `test with .fixme() and link to ${FOLLOWUP_REF}.`,
+    ].join("\n"),
+  );
 }
 
 /**
- * Sanity probe — confirms the OIDC stub is reachable and serving a valid
- * discovery document. Useful as a Playwright `beforeAll` guard so slice-001
- * tests fail fast with a clear message when the sidecar is down.
- *
- * Returns the parsed discovery document on success; throws on any
- * structural problem (wrong issuer, missing endpoints, non-2xx, etc.).
+ * Sanity probe — confirms Keycloak is reachable and serving a valid
+ * discovery document. Use as a `beforeAll` guard so tests fail fast with
+ * a clear message when the sidecar is down or on the wrong port.
  */
 export async function assertOidcStubReachable(
   stubBaseUrl?: string,
@@ -300,12 +265,14 @@ export async function assertOidcStubReachable(
   jwks_uri: string;
 }> {
   const base = resolveStubUrl(stubBaseUrl);
-  const url = `${base}/${DEFAULT_ISSUER_ID}/.well-known/openid-configuration`;
+  const url = `${base}/realms/${KEYCLOAK_REALM}/.well-known/openid-configuration`;
   const response = await fetch(url);
   if (!response.ok) {
     throw new Error(
-      `OIDC stub discovery probe ${url} failed: ${response.status} ${response.statusText}. ` +
-        `Is the sidecar running? Try \`docker compose ps oidc-stub\`.`,
+      `Keycloak discovery probe ${url} failed: ${response.status} ${response.statusText}. ` +
+        `Is the sidecar running? Try \`docker ps --filter name=wcm-oidc-stub\`. ` +
+        `If you see mock-oauth2-server URLs in earlier logs, the slice 001 ` +
+        `OIDC fixture was rewritten on 2026-05-23 — see ${FOLLOWUP_REF}.`,
     );
   }
   const doc = (await response.json()) as Record<string, unknown>;
@@ -318,7 +285,7 @@ export async function assertOidcStubReachable(
   for (const k of required) {
     if (typeof doc[k] !== "string") {
       throw new Error(
-        `OIDC stub discovery doc at ${url} is missing required field "${k}".`,
+        `Keycloak discovery doc at ${url} is missing required field "${k}".`,
       );
     }
   }
@@ -331,24 +298,14 @@ export async function assertOidcStubReachable(
 }
 
 /**
- * Clears any per-test claim configuration from the OIDC stub so the next
- * test starts from a clean slate. Idempotent and safe to call when nothing
- * is registered.
+ * No-op now that the sidecar is Keycloak — the mock-oauth2-server runtime
+ * config endpoint that this helper used to clear is no longer present.
+ * Playwright's per-test browser contexts already isolate cookies, so
+ * inter-test bleed is not a concern.
  *
- * Slice-001 tests typically call this in `afterEach`.
+ * Kept as an exported function so the 413+ existing callers continue to
+ * compile without per-spec edits.
  */
-export async function resetStub(stubBaseUrl?: string): Promise<void> {
-  const base = resolveStubUrl(stubBaseUrl);
-  // Resetting to an empty tokenCallbacks list makes the stub fall back to
-  // its default identity (the one declared in docker-compose.override.yml's
-  // JSON_CONFIG env var).
-  await registerNextTokenClaims(
-    {
-      sub: "default-test-subject",
-      email: "placeholder@nortal.com",
-      email_verified: true,
-      name: "Placeholder User",
-    },
-    base,
-  );
+export async function resetStub(_stubBaseUrl?: string): Promise<void> {
+  // Intentionally empty. Browser-context isolation handles inter-test cleanup.
 }
