@@ -236,17 +236,17 @@ description: "Task list for slice 009-ui-beautification — dispatchable, self-c
 
 ### Implementation for User Story 3
 
-- [ ] T070 [P] [US3] Create `apps/web/app/components/RankDelta.tsx` per contracts § RankDelta. Props: `current`, `previous`. Renders icon + numeric magnitude + accessible label, color-coded via `--rank-up`/`--rank-down`/`--rank-same`/`--accent` (new). Use `lucide-react` icons `ArrowUp`, `ArrowDown`, `Minus`, `Sparkles` (new).
+- [X] T070 [P] [US3] Create `apps/web/app/components/RankDelta.tsx` per contracts § RankDelta. Props: `current`, `previous`. Renders icon + numeric magnitude + accessible label, color-coded via `--rank-up`/`--rank-down`/`--rank-same`/`--accent` (new). Use `lucide-react` icons `ArrowUp`, `ArrowDown`, `Minus`, `Sparkles` (new).
 
-- [ ] T071 [P] [US3] Create `apps/web/app/components/LeaderboardRow.tsx` per contracts § LeaderboardRow. Props: `entry`, `isMe`, `onExpand?`. Renders a `<TableRow>` with rank + `<RankDelta>`, name (with ellipsis + `<Tooltip>` for overflow), score (tabular figures via `font-display`), and a Tie badge when `tiedWith.length > 0` (clickable `<Popover>` trigger). When `isMe`, row has `aria-current="true"` and an `--accent`-tinted background. Row is anchored for "jump to my row" via `data-me-row` attribute.
+- [X] T071 [P] [US3] Create `apps/web/app/components/LeaderboardRow.tsx` per contracts § LeaderboardRow. Props: `entry`, `isMe`, `onExpand?`. Renders a `<TableRow>` with rank + `<RankDelta>`, name (with ellipsis + `<Tooltip>` for overflow), score (tabular figures via `font-display`), and a Tie badge when `tiedWith.length > 0` (clickable `<Popover>` trigger). When `isMe`, row has `aria-current="true"` and an `--accent`-tinted background. Row is anchored for "jump to my row" via `data-me-row` attribute.
 
-- [ ] T072 [US3] Redesign `apps/web/app/(participant)/leaderboard/page.tsx`. Server fetches the leaderboard from the existing slice 005 API/RPC unchanged. Renders a `<Table>` of `<LeaderboardRow>`s. Sticky header with rank/name/score/movement columns. "Jump to my row" button in a sticky toolbar that scrolls the `[data-me-row]` element into view via `scrollIntoView({ block: 'center' })`. Empty state via `<EmptyState>`. Error state via `<ErrorState>`. Loading via `<Skeleton>` rows.
+- [X] T072 [US3] Redesign `apps/web/app/(participant)/leaderboard/page.tsx`. Server fetches the leaderboard from the existing slice 005 API/RPC unchanged. Renders a `<Table>` of `<LeaderboardRow>`s. Sticky header with rank/name/score/movement columns. "Jump to my row" button in a sticky toolbar that scrolls the `[data-me-row]` element into view via `scrollIntoView({ block: 'center' })`. Empty state via `<EmptyState>`. Error state via `<ErrorState>`. Loading via `<Skeleton>` rows.
 
-- [ ] T073 [US3] Implement the tie-breaker disclosure component inline in `apps/web/app/(participant)/leaderboard/TieBreakerPopover.tsx`. Reads the tie-breaker chain from the same scoring data already on the page (no new API). Renders the chain as an ordered list with each criterion explained, citing the rule from `docs/architecture/scoring-model.md` (link in the popover footer).
+- [X] T073 [US3] Implement the tie-breaker disclosure component inline in `apps/web/app/(participant)/leaderboard/TieBreakerPopover.tsx`. Reads the tie-breaker chain from the same scoring data already on the page (no new API). Renders the chain as an ordered list with each criterion explained, citing the rule from `docs/architecture/scoring-model.md` (link in the popover footer).
 
-- [ ] T074 [US3] Run US3 red-gate suite green. Append green output to red-gate-us3.md.
+- [X] T074 [US3] Run US3 red-gate suite green. Append green output to red-gate-us3.md.
 
-- [ ] T075 [US3] Run regression suite. Write `specs/009-ui-beautification/regression-checkpoint-us3.md`.
+- [X] T075 [US3] Run regression suite. Write `specs/009-ui-beautification/regression-checkpoint-us3.md`.
 
 **Checkpoint**: Leaderboard fully redesigned with movement, ties, and jump-to-me.
 

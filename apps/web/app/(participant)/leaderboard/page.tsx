@@ -9,6 +9,7 @@ import { getCurrentParticipant } from '../../../lib/auth/getCurrentParticipant';
 import { getLeaderboard } from '../../../lib/scoring/leaderboard';
 
 import { LeaderboardRefresher } from './components/LeaderboardRefresher';
+import { LeaderboardClient } from './LeaderboardClient';
 
 /**
  * Participant leaderboard page — Slice 005 (T031), US3.
@@ -89,8 +90,9 @@ function createSessionBoundClient() {
 
 export default async function LeaderboardPage() {
   // ----- 1. Eligibility gate ------------------------------------------------
+  let me: Awaited<ReturnType<typeof getCurrentParticipant>>;
   try {
-    await getCurrentParticipant();
+    me = await getCurrentParticipant();
   } catch (err) {
     if (err instanceof EligibilityError) {
       redirect('/auth/denied');
@@ -115,10 +117,12 @@ export default async function LeaderboardPage() {
   return (
     <main
       data-testid="leaderboard-page"
-      className="max-w-5xl mx-auto px-6 py-8 flex flex-col gap-6"
+      className="mx-auto flex max-w-5xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8"
     >
-      <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold text-foreground">Leaderboard</h1>
+      <header className="flex flex-col gap-2">
+        <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
+          Leaderboard
+        </h1>
         <p className="text-sm text-muted-foreground">
           Standings refresh automatically as matches finish. Ties break by
           exact-result count, then outcome-only count, then final-predictions
@@ -136,84 +140,14 @@ export default async function LeaderboardPage() {
         <div
           data-testid="leaderboard-empty"
           role="status"
-          className="rounded border border-border bg-muted/30 p-4 text-sm text-muted-foreground"
+          className="rounded-lg border border-dashed border-border bg-card/50 p-6 text-center text-sm text-muted-foreground"
         >
           The leaderboard will populate once matches finish. Until then, all
           participants are tied at zero.
         </div>
       ) : null}
 
-      <div className="overflow-x-auto rounded-lg border border-border bg-card">
-        <table className="w-full text-sm">
-          <thead className="bg-muted/30 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            <tr>
-              <th scope="col" className="px-4 py-2">
-                Rank
-              </th>
-              <th scope="col" className="px-4 py-2">
-                Participant
-              </th>
-              <th scope="col" className="px-4 py-2 text-right">
-                Total
-              </th>
-              <th scope="col" className="px-4 py-2 text-right">
-                Exact
-              </th>
-              <th scope="col" className="px-4 py-2 text-right">
-                Outcome
-              </th>
-              <th scope="col" className="px-4 py-2 text-right">
-                Finals
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border/50">
-            {leaderboard.map((row) => (
-              <tr
-                key={row.participant_id}
-                data-testid="leaderboard-row"
-                data-rank={row.rank}
-                data-participant-id={row.participant_id}
-                className="hover:bg-muted/30"
-              >
-                <td data-field="rank" className="px-4 py-2 font-medium text-foreground">
-                  {row.rank}
-                </td>
-                <td
-                  data-field="display_name"
-                  className="px-4 py-2 text-foreground"
-                >
-                  {row.display_name}
-                </td>
-                <td
-                  data-field="total_points"
-                  className="px-4 py-2 text-right tabular-nums text-foreground"
-                >
-                  {row.total_points}
-                </td>
-                <td
-                  data-field="exact_count"
-                  className="px-4 py-2 text-right tabular-nums text-muted-foreground"
-                >
-                  {row.exact_count}
-                </td>
-                <td
-                  data-field="outcome_count"
-                  className="px-4 py-2 text-right tabular-nums text-muted-foreground"
-                >
-                  {row.outcome_count}
-                </td>
-                <td
-                  data-field="final_points"
-                  className="px-4 py-2 text-right tabular-nums text-muted-foreground"
-                >
-                  {row.final_points}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <LeaderboardClient rows={leaderboard} currentParticipantId={me.id} />
 
       {/*
         Client island: subscribes to `tournament_config` postgres_changes
