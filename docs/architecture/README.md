@@ -16,6 +16,7 @@ An internal Nortal prediction pool for the FIFA World Cup 2026 — a "March Madn
 | [`open-decisions.md`](open-decisions.md) | OD-001 → OD-008 as a tracked log: question, owner, status, affected FRs. All currently **Open**. |
 | [`scoring-model.md`](scoring-model.md) | Extracted §7: time/locking rules (BR-LOCK-001…006), match scoring (10/5/0), final-tournament scoring (20s), tie-breaker order, important clarifications |
 | [`stack-decision.md`](stack-decision.md) | Draft ADR proposing Next.js + Tailwind on Vercel + Supabase. Status: **Proposed, not approved**. OD-007 remains formally open. |
+| [`adr-009-component-library.md`](adr-009-component-library.md) | ADR for the UI component-primitive library choice (shadcn/ui + Radix UI). Status: **Proposed by slice 009; ratifiable on slice close**. |
 
 ## Document at a glance
 

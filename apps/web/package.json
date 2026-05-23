@@ -9,19 +9,29 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "e2e": "playwright test",
-    "e2e:ui": "playwright test --ui"
+    "e2e:ui": "playwright test --ui",
+    "measure-bundle": "node scripts/measure-bundle.mjs",
+    "a11y": "playwright test tests/e2e/009-ui-beautification/a11y"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.0",
     "@supabase/supabase-js": "^2.45.0",
+    "canvas-confetti": "^1.9.3",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.0",
     "cmdk": "^1.0.0",
+    "lucide-react": "^0.400.0",
     "next": "^14.2.0",
+    "next-themes": "^0.3.0",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
+    "tailwind-merge": "^2.4.0",
     "zod": "^3.23.0"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.10.0",
     "@playwright/test": "^1.60.0",
+    "@types/canvas-confetti": "^1.6.4",
     "@types/node": "^20.12.0",
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",
