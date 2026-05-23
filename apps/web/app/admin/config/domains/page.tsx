@@ -162,13 +162,13 @@ export default async function ConfigDomainsPage() {
         data-testid="admin-config-domains-page"
         className="max-w-4xl mx-auto px-6 py-8 flex flex-col gap-4"
       >
-        <h1 className="text-2xl font-semibold text-neutral-900">
+        <h1 className="text-2xl font-semibold text-foreground">
           Approved corporate domains
         </h1>
         <div
           data-testid="config-error"
           role="alert"
-          className="rounded border border-red-300 bg-red-50 p-4 text-sm text-red-700"
+          className="rounded border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive"
         >
           Failed to load eligibility configuration: {readError.message}
         </div>
@@ -182,13 +182,13 @@ export default async function ConfigDomainsPage() {
         data-testid="admin-config-domains-page"
         className="max-w-4xl mx-auto px-6 py-8 flex flex-col gap-4"
       >
-        <h1 className="text-2xl font-semibold text-neutral-900">
+        <h1 className="text-2xl font-semibold text-foreground">
           Approved corporate domains
         </h1>
         <div
           data-testid="config-error"
           role="alert"
-          className="rounded border border-red-300 bg-red-50 p-4 text-sm text-red-700"
+          className="rounded border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive"
         >
           No `eligibility.allowed_domains` row found in `tournament_config`.
           The slice 008 seed migration may not have run.
@@ -215,13 +215,13 @@ export default async function ConfigDomainsPage() {
       className="max-w-4xl mx-auto px-6 py-8 flex flex-col gap-6"
     >
       <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold text-neutral-900">
+        <h1 className="text-2xl font-semibold text-foreground">
           Approved corporate domains
         </h1>
-        <p className="text-xs font-mono text-neutral-500">
+        <p className="text-xs font-mono text-muted-foreground">
           eligibility.allowed_domains
         </p>
-        <p className="text-sm text-neutral-600">
+        <p className="text-sm text-muted-foreground">
           Manage the list of email domains allowed to sign in. Changes
           propagate within 60 seconds.
         </p>

@@ -104,23 +104,23 @@ export function AdminSubmitFinalPredictionForm({
     <form
       data-testid="admin-submit-final-prediction-form"
       onSubmit={handleSubmit}
-      className="rounded-lg border border-neutral-200 bg-white p-6 flex flex-col gap-4"
+      className="rounded-lg border border-border bg-card p-6 flex flex-col gap-4"
     >
-      <h2 className="text-lg font-semibold text-neutral-900">
+      <h2 className="text-lg font-semibold text-foreground">
         Submit final prediction on behalf
       </h2>
-      <p className="text-xs text-neutral-500">
+      <p className="text-xs text-muted-foreground">
         Lock-bypass is applied by the admin SP if the finals window has closed.
       </p>
 
       <label className="flex flex-col gap-1 text-sm">
-        <span className="font-medium text-neutral-800">Item</span>
+        <span className="font-medium text-foreground">Item</span>
         <select
           name="item_kind"
           value={itemKind}
           onChange={(e) => setItemKind(e.target.value as ItemKind)}
           disabled={pending}
-          className="rounded border border-neutral-300 px-2 py-1.5 focus:border-blue-500 focus:outline-none disabled:bg-neutral-100"
+          className="rounded border border-border px-2 py-1.5 focus:border-blue-500 focus:outline-none disabled:bg-muted"
         >
           {ITEM_KIND_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>
@@ -131,7 +131,7 @@ export function AdminSubmitFinalPredictionForm({
       </label>
 
       <label className="flex flex-col gap-1 text-sm">
-        <span className="font-medium text-neutral-800">
+        <span className="font-medium text-foreground">
           Target id (team uuid for champion/runner_up, player uuid for
           top_scorer/best_player)
         </span>
@@ -143,14 +143,14 @@ export function AdminSubmitFinalPredictionForm({
           disabled={pending}
           required
           aria-invalid={errorField === 'target_id' || undefined}
-          className="rounded border border-neutral-300 px-2 py-1.5 font-mono text-xs focus:border-blue-500 focus:outline-none disabled:bg-neutral-100"
+          className="rounded border border-border px-2 py-1.5 font-mono text-xs focus:border-blue-500 focus:outline-none disabled:bg-muted"
           placeholder="00000000-0000-0000-0000-000000000000"
         />
       </label>
 
       <label className="flex flex-col gap-1 text-sm">
-        <span className="font-medium text-neutral-800">
-          Reason <span className="text-red-600">*</span>
+        <span className="font-medium text-foreground">
+          Reason <span className="text-destructive">*</span>
         </span>
         <textarea
           name="reason"
@@ -159,7 +159,7 @@ export function AdminSubmitFinalPredictionForm({
           onChange={(e) => setReason(e.target.value)}
           disabled={pending}
           aria-invalid={errorField === 'reason' || undefined}
-          className="rounded border border-neutral-300 px-2 py-1.5 focus:border-blue-500 focus:outline-none disabled:bg-neutral-100"
+          className="rounded border border-border px-2 py-1.5 focus:border-blue-500 focus:outline-none disabled:bg-muted"
           placeholder="e.g. on-behalf-of override after participant unavailable"
         />
         {errorField === 'reason' && errorMessage ? (
@@ -167,7 +167,7 @@ export function AdminSubmitFinalPredictionForm({
             data-testid="field-error-reason"
             role="alert"
             aria-live="polite"
-            className="text-sm text-red-600"
+            className="text-sm text-destructive"
           >
             {errorMessage}
           </span>
@@ -175,8 +175,8 @@ export function AdminSubmitFinalPredictionForm({
       </label>
 
       <label className="flex flex-col gap-1 text-sm">
-        <span className="font-medium text-neutral-800">
-          Source citation <span className="text-red-600">*</span>
+        <span className="font-medium text-foreground">
+          Source citation <span className="text-destructive">*</span>
         </span>
         <input
           name="source_citation"
@@ -185,7 +185,7 @@ export function AdminSubmitFinalPredictionForm({
           onChange={(e) => setSource(e.target.value)}
           disabled={pending}
           aria-invalid={errorField === 'source_citation' || undefined}
-          className="rounded border border-neutral-300 px-2 py-1.5 focus:border-blue-500 focus:outline-none disabled:bg-neutral-100"
+          className="rounded border border-border px-2 py-1.5 focus:border-blue-500 focus:outline-none disabled:bg-muted"
           placeholder="https://internal.example/ticket/..."
         />
         {errorField === 'source_citation' && errorMessage ? (
@@ -193,7 +193,7 @@ export function AdminSubmitFinalPredictionForm({
             data-testid="field-error-source_citation"
             role="alert"
             aria-live="polite"
-            className="text-sm text-red-600"
+            className="text-sm text-destructive"
           >
             {errorMessage}
           </span>
@@ -205,7 +205,7 @@ export function AdminSubmitFinalPredictionForm({
           data-testid="admin-submit-final-prediction-form-error"
           role="alert"
           aria-live="polite"
-          className="rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+          className="rounded border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive"
         >
           {errorMessage}
         </div>
@@ -216,7 +216,7 @@ export function AdminSubmitFinalPredictionForm({
           data-testid="admin-submit-final-prediction-form-success"
           role="status"
           aria-live="polite"
-          className="rounded border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700"
+          className="rounded border border-win/40 bg-win/10 px-3 py-2 text-sm text-win"
         >
           {success}
         </div>
@@ -227,7 +227,7 @@ export function AdminSubmitFinalPredictionForm({
           type="submit"
           disabled={pending}
           data-testid="admin-submit-final-prediction-submit"
-          className="rounded border border-blue-700 bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded border border-blue-700 bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50"
         >
           {pending ? 'Submitting…' : 'Submit final prediction'}
         </button>

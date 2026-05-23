@@ -236,13 +236,13 @@ export default async function ConfigProvidersPage() {
         data-testid="admin-config-providers-page"
         className="max-w-4xl mx-auto px-6 py-8 flex flex-col gap-4"
       >
-        <h1 className="text-2xl font-semibold text-neutral-900">
+        <h1 className="text-2xl font-semibold text-foreground">
           Sync providers
         </h1>
         <div
           data-testid="config-error"
           role="alert"
-          className="rounded border border-red-300 bg-red-50 p-4 text-sm text-red-700"
+          className="rounded border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive"
         >
           Failed to load providers configuration: {readError.message}
         </div>
@@ -325,10 +325,10 @@ export default async function ConfigProvidersPage() {
       className="max-w-4xl mx-auto px-6 py-8 flex flex-col gap-6"
     >
       <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold text-neutral-900">
+        <h1 className="text-2xl font-semibold text-foreground">
           Sync providers
         </h1>
-        <p className="text-sm text-neutral-600">
+        <p className="text-sm text-muted-foreground">
           Pick the active provider, tune the per-provider retry/backoff/alert
           knobs, and reveal credentials only when needed. Each section saves
           independently. Switching the active provider does not retroactively
@@ -341,7 +341,7 @@ export default async function ConfigProvidersPage() {
         <div
           data-testid="config-empty"
           role="status"
-          className="rounded border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900"
+          className="rounded border border-open/40 bg-open/10 p-4 text-sm text-open"
         >
           No providers configured. Bootstrap a provider via SQL or import
           config to populate the <code className="font-mono text-xs">providers.*</code>{' '}

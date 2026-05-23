@@ -111,48 +111,48 @@ export default async function AdminAuditDetailPage({
       className="max-w-4xl mx-auto px-6 py-8 flex flex-col gap-6"
     >
       <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold text-neutral-900">
+        <h1 className="text-2xl font-semibold text-foreground">
           Audit row detail
         </h1>
-        <p className="text-xs font-mono text-neutral-500">/admin/audit/{id}</p>
+        <p className="text-xs font-mono text-muted-foreground">/admin/audit/{id}</p>
       </header>
 
       <section
         data-testid="admin-audit-detail-row"
-        className="rounded-lg border border-neutral-200 bg-white p-6"
+        className="rounded-lg border border-border bg-card p-6"
       >
-        <h2 className="text-lg font-semibold text-neutral-900">Row</h2>
+        <h2 className="text-lg font-semibold text-foreground">Row</h2>
         <dl className="mt-3 grid grid-cols-[max-content,1fr] gap-x-4 gap-y-1 text-sm">
-          <dt className="text-neutral-500">id</dt>
-          <dd className="font-mono text-xs text-neutral-800">{row.id}</dd>
-          <dt className="text-neutral-500">occurred_at</dt>
-          <dd className="text-neutral-800">{row.occurred_at}</dd>
-          <dt className="text-neutral-500">action</dt>
-          <dd className="font-mono text-xs text-neutral-800">{row.action}</dd>
-          <dt className="text-neutral-500">actor</dt>
-          <dd className="font-mono text-xs text-neutral-800">
+          <dt className="text-muted-foreground">id</dt>
+          <dd className="font-mono text-xs text-foreground">{row.id}</dd>
+          <dt className="text-muted-foreground">occurred_at</dt>
+          <dd className="text-foreground">{row.occurred_at}</dd>
+          <dt className="text-muted-foreground">action</dt>
+          <dd className="font-mono text-xs text-foreground">{row.action}</dd>
+          <dt className="text-muted-foreground">actor</dt>
+          <dd className="font-mono text-xs text-foreground">
             {row.actor ?? '—'}
           </dd>
-          <dt className="text-neutral-500">entity_type</dt>
-          <dd className="font-mono text-xs text-neutral-800">
+          <dt className="text-muted-foreground">entity_type</dt>
+          <dd className="font-mono text-xs text-foreground">
             {row.entity_type ?? '—'}
           </dd>
-          <dt className="text-neutral-500">entity_id</dt>
-          <dd className="font-mono text-xs text-neutral-800">
+          <dt className="text-muted-foreground">entity_id</dt>
+          <dd className="font-mono text-xs text-foreground">
             {row.entity_id ?? '—'}
           </dd>
-          <dt className="text-neutral-500">source</dt>
-          <dd className="text-neutral-800">{row.source}</dd>
-          <dt className="text-neutral-500">source_citation</dt>
-          <dd className="text-neutral-800">{row.source_citation ?? '—'}</dd>
-          <dt className="text-neutral-500">reason</dt>
-          <dd className="text-neutral-800">{row.reason ?? '—'}</dd>
+          <dt className="text-muted-foreground">source</dt>
+          <dd className="text-foreground">{row.source}</dd>
+          <dt className="text-muted-foreground">source_citation</dt>
+          <dd className="text-foreground">{row.source_citation ?? '—'}</dd>
+          <dt className="text-muted-foreground">reason</dt>
+          <dd className="text-foreground">{row.reason ?? '—'}</dd>
         </dl>
         {row.entity_type && row.entity_id ? (
           <p className="mt-3 text-xs">
             <a
               href={`/admin/audit/by-target/${row.entity_type}/${row.entity_id}`}
-              className="text-blue-700 underline"
+              className="text-primary underline"
               data-testid="admin-audit-detail-by-target-link"
             >
               View full history for this target
@@ -160,10 +160,10 @@ export default async function AdminAuditDetailPage({
           </p>
         ) : null}
         <details className="mt-3 text-xs">
-          <summary className="cursor-pointer text-neutral-700">
+          <summary className="cursor-pointer text-muted-foreground">
             previous_value / new_value (jsonb)
           </summary>
-          <pre className="mt-2 overflow-auto rounded bg-neutral-50 p-2 text-[11px]">
+          <pre className="mt-2 overflow-auto rounded bg-muted/30 p-2 text-[11px]">
             {JSON.stringify(
               {
                 previous_value: row.previous_value,
@@ -178,45 +178,45 @@ export default async function AdminAuditDetailPage({
 
       <section
         data-testid="admin-audit-detail-linkage"
-        className="rounded-lg border border-neutral-200 bg-white p-6"
+        className="rounded-lg border border-border bg-card p-6"
       >
-        <h2 className="text-lg font-semibold text-neutral-900">Linkage</h2>
+        <h2 className="text-lg font-semibold text-foreground">Linkage</h2>
         {run ? (
           <dl className="mt-3 grid grid-cols-[max-content,1fr] gap-x-4 gap-y-1 text-sm">
-            <dt className="text-neutral-500">triggered_recalc_run_id</dt>
+            <dt className="text-muted-foreground">triggered_recalc_run_id</dt>
             <dd
               data-testid="admin-audit-detail-triggered-run-id"
-              className="font-mono text-xs text-neutral-800"
+              className="font-mono text-xs text-foreground"
             >
               {run.id}
             </dd>
-            <dt className="text-neutral-500">scope</dt>
-            <dd className="text-neutral-800">{run.scope}</dd>
-            <dt className="text-neutral-500">trigger</dt>
-            <dd className="text-neutral-800">{run.trigger ?? '—'}</dd>
-            <dt className="text-neutral-500">status</dt>
-            <dd className="text-neutral-800">{run.status}</dd>
-            <dt className="text-neutral-500">started_at</dt>
-            <dd className="text-neutral-800">{run.started_at}</dd>
-            <dt className="text-neutral-500">completed_at</dt>
-            <dd className="text-neutral-800">{run.completed_at ?? '—'}</dd>
-            <dt className="text-neutral-500">affected_score_records_count</dt>
+            <dt className="text-muted-foreground">scope</dt>
+            <dd className="text-foreground">{run.scope}</dd>
+            <dt className="text-muted-foreground">trigger</dt>
+            <dd className="text-foreground">{run.trigger ?? '—'}</dd>
+            <dt className="text-muted-foreground">status</dt>
+            <dd className="text-foreground">{run.status}</dd>
+            <dt className="text-muted-foreground">started_at</dt>
+            <dd className="text-foreground">{run.started_at}</dd>
+            <dt className="text-muted-foreground">completed_at</dt>
+            <dd className="text-foreground">{run.completed_at ?? '—'}</dd>
+            <dt className="text-muted-foreground">affected_score_records_count</dt>
             <dd
               data-testid="admin-audit-detail-affected-records-count"
-              className="text-neutral-800 tabular-nums"
+              className="text-foreground tabular-nums"
             >
               {run.affected_record_count ?? 0}
             </dd>
-            <dt className="text-neutral-500">affected_participants_count</dt>
+            <dt className="text-muted-foreground">affected_participants_count</dt>
             <dd
               data-testid="admin-audit-detail-affected-participants-count"
-              className="text-neutral-800 tabular-nums"
+              className="text-foreground tabular-nums"
             >
               {affectedParticipants}
             </dd>
           </dl>
         ) : (
-          <p className="mt-3 text-sm text-neutral-600">
+          <p className="mt-3 text-sm text-muted-foreground">
             No recalc run was triggered by this audit row.
           </p>
         )}

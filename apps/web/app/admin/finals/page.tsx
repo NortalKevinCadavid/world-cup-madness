@@ -174,17 +174,17 @@ export default async function AdminFinalsPage() {
       className="max-w-4xl mx-auto px-6 py-8 flex flex-col gap-6"
     >
       <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold text-neutral-900">
+        <h1 className="text-2xl font-semibold text-foreground">
           Tournament awards
         </h1>
-        <p className="text-xs font-mono text-neutral-500">/admin/finals</p>
+        <p className="text-xs font-mono text-muted-foreground">/admin/finals</p>
       </header>
 
       <section
         data-testid="admin-finals-current-state"
-        className="rounded-lg border border-neutral-200 bg-white p-6"
+        className="rounded-lg border border-border bg-card p-6"
       >
-        <h2 className="text-lg font-semibold text-neutral-900">
+        <h2 className="text-lg font-semibold text-foreground">
           Current awards
         </h2>
         {award ? (
@@ -195,21 +195,21 @@ export default async function AdminFinalsPage() {
                 data-testid={`admin-finals-slot-${slot.kind}`}
                 className="flex flex-col gap-0.5"
               >
-                <dt className="font-medium text-neutral-800">{slot.label}</dt>
+                <dt className="font-medium text-foreground">{slot.label}</dt>
                 <dd
-                  className="font-mono text-xs text-neutral-700"
+                  className="font-mono text-xs text-muted-foreground"
                   data-field={`${slot.kind}-id`}
                 >
                   {slot.currentId ?? '(not set)'}
                 </dd>
                 <dd
-                  className="text-xs text-neutral-600"
+                  className="text-xs text-muted-foreground"
                   data-field={`${slot.kind}-status`}
                 >
                   <span className="uppercase tracking-wide">
                     {slot.currentStatus}
                   </span>
-                  <span className="ml-2 text-neutral-400">
+                  <span className="ml-2 text-muted-foreground/60">
                     {slot.idColumnNote}
                   </span>
                 </dd>
@@ -217,7 +217,7 @@ export default async function AdminFinalsPage() {
             ))}
           </dl>
         ) : (
-          <p className="mt-2 text-sm text-neutral-600">
+          <p className="mt-2 text-sm text-muted-foreground">
             No tournament_award row found.
           </p>
         )}
@@ -227,13 +227,13 @@ export default async function AdminFinalsPage() {
 
       <section
         data-testid="admin-finals-history"
-        className="rounded-lg border border-neutral-200 bg-white p-6"
+        className="rounded-lg border border-border bg-card p-6"
       >
-        <h2 className="text-lg font-semibold text-neutral-900">
+        <h2 className="text-lg font-semibold text-foreground">
           Recent award updates
         </h2>
         {auditRows.length === 0 ? (
-          <p className="mt-2 text-sm text-neutral-600">
+          <p className="mt-2 text-sm text-muted-foreground">
             No prior admin actions against the tournament awards.
           </p>
         ) : (
@@ -242,14 +242,14 @@ export default async function AdminFinalsPage() {
               <li
                 key={row.id}
                 data-testid="admin-finals-audit-row"
-                className="text-sm text-neutral-800"
+                className="text-sm text-foreground"
               >
-                <span className="font-mono text-xs text-neutral-600">
+                <span className="font-mono text-xs text-muted-foreground">
                   {row.occurred_at}
                 </span>
                 <span className="ml-2 font-mono text-xs">{row.action}</span>
                 {row.reason ? (
-                  <span className="ml-2 text-neutral-700">— {row.reason}</span>
+                  <span className="ml-2 text-muted-foreground">— {row.reason}</span>
                 ) : null}
               </li>
             ))}

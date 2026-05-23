@@ -222,13 +222,13 @@ export function RecalcStatusLive(): JSX.Element {
   return (
     <section
       data-testid="recalc-status-live"
-      className="rounded-lg border border-neutral-200 bg-white p-6 flex flex-col gap-4"
+      className="rounded-lg border border-border bg-card p-6 flex flex-col gap-4"
     >
       <header>
-        <h2 className="text-lg font-semibold text-neutral-900">
+        <h2 className="text-lg font-semibold text-foreground">
           Trigger a recalculation
         </h2>
-        <p className="mt-1 text-xs text-neutral-500">
+        <p className="mt-1 text-xs text-muted-foreground">
           Reason is required and is written to the audit log. Source citation
           is optional but recommended when the trigger follows an external
           decision.
@@ -241,11 +241,11 @@ export function RecalcStatusLive(): JSX.Element {
         className="flex flex-col gap-3"
       >
         <label className="flex flex-col gap-1">
-          <span className="text-sm text-neutral-700">Scope</span>
+          <span className="text-sm text-muted-foreground">Scope</span>
           <select
             value={scope}
             onChange={(e) => setScope(e.target.value as Scope)}
-            className="rounded border border-neutral-300 bg-white px-2 py-2 text-sm"
+            className="rounded border border-border bg-card px-2 py-2 text-sm"
             data-testid="recalc-scope-select"
           >
             <option value="all">All (full tournament)</option>
@@ -255,27 +255,27 @@ export function RecalcStatusLive(): JSX.Element {
         </label>
 
         <label className="flex flex-col gap-1">
-          <span className="text-sm text-neutral-700">Reason</span>
+          <span className="text-sm text-muted-foreground">Reason</span>
           <textarea
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             rows={2}
             required
             data-testid="recalc-reason-input"
-            className="rounded border border-neutral-300 bg-white px-2 py-2 text-sm"
+            className="rounded border border-border bg-card px-2 py-2 text-sm"
             placeholder="Why is this recalculation needed?"
           />
         </label>
 
         <label className="flex flex-col gap-1">
-          <span className="text-sm text-neutral-700">
+          <span className="text-sm text-muted-foreground">
             Source citation (optional)
           </span>
           <input
             value={sourceCitation}
             onChange={(e) => setSourceCitation(e.target.value)}
             data-testid="recalc-source-citation-input"
-            className="rounded border border-neutral-300 bg-white px-2 py-2 text-sm"
+            className="rounded border border-border bg-card px-2 py-2 text-sm"
             placeholder="e.g. FIFA bulletin URL"
           />
         </label>
@@ -285,7 +285,7 @@ export function RecalcStatusLive(): JSX.Element {
             type="submit"
             disabled={submitting}
             data-testid="trigger-recalc-button"
-            className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+            className="rounded bg-primary px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
           >
             {submitting ? 'Triggering…' : 'Trigger Full Recalc'}
           </button>
@@ -296,7 +296,7 @@ export function RecalcStatusLive(): JSX.Element {
             data-testid="recalc-error"
             role="alert"
             aria-live="polite"
-            className="rounded border border-red-300 bg-red-50 p-3 text-sm text-red-700"
+            className="rounded border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive"
           >
             {error}
           </div>
@@ -304,12 +304,12 @@ export function RecalcStatusLive(): JSX.Element {
       </form>
 
       {runId ? (
-        <div className="rounded border border-neutral-200 bg-neutral-50 p-3 text-sm">
+        <div className="rounded border border-border bg-muted/30 p-3 text-sm">
           <p>
             Run ID:{' '}
             <span
               data-testid="recalc-run-id"
-              className="font-mono text-xs text-neutral-800"
+              className="font-mono text-xs text-foreground"
             >
               {runId}
             </span>
@@ -318,7 +318,7 @@ export function RecalcStatusLive(): JSX.Element {
             Status:{' '}
             <span
               data-testid="recalc-status-value"
-              className="font-mono text-xs text-neutral-800"
+              className="font-mono text-xs text-foreground"
             >
               {status ?? 'pending'}
             </span>

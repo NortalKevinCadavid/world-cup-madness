@@ -824,16 +824,16 @@ export function RetentionEditor({
       {/* ===== Section 1: policy_kind ========================================== */}
       <section
         data-section-key="audit.retention.policy_kind"
-        className="flex flex-col gap-3 rounded border border-neutral-200 bg-white p-4"
+        className="flex flex-col gap-3 rounded border border-border bg-card p-4"
       >
         <header className="flex flex-col gap-1">
-          <h2 className="text-lg font-semibold text-neutral-900">
+          <h2 className="text-lg font-semibold text-foreground">
             Retention policy
           </h2>
-          <p className="text-xs font-mono text-neutral-500">
+          <p className="text-xs font-mono text-muted-foreground">
             audit.retention.policy_kind
           </p>
-          <p className="text-sm text-neutral-600">
+          <p className="text-sm text-muted-foreground">
             <strong>Keep</strong> (recommended) preserves the full audit /
             configuration history indefinitely — no rollback or version row is
             ever pruned. <strong>Prune</strong> activates the retention window
@@ -846,7 +846,7 @@ export function RetentionEditor({
           {POLICY_VALUES.map((option) => (
             <label
               key={option}
-              className="inline-flex items-center gap-2 text-sm text-neutral-800"
+              className="inline-flex items-center gap-2 text-sm text-foreground"
             >
               <input
                 type="radio"
@@ -856,11 +856,11 @@ export function RetentionEditor({
                 onChange={() => handlePolicyChange(option)}
                 disabled={pending}
                 data-testid="retention-policy-radio"
-                className="h-4 w-4 border-neutral-300 text-blue-600 focus:ring-blue-500"
+                className="h-4 w-4 border-border text-primary focus:ring-blue-500"
               />
               <span className="font-medium capitalize">{option}</span>
               {option === 'keep' && (
-                <span className="text-xs text-neutral-500">
+                <span className="text-xs text-muted-foreground">
                   (recommended — never prunes)
                 </span>
               )}
@@ -869,7 +869,7 @@ export function RetentionEditor({
         </fieldset>
 
         <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium text-neutral-700">
+          <span className="text-sm font-medium text-muted-foreground">
             Reason (required)
           </span>
           <textarea
@@ -878,12 +878,12 @@ export function RetentionEditor({
             rows={2}
             required
             disabled={pending}
-            className="rounded border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-neutral-100"
+            className="rounded border border-border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-muted"
           />
         </label>
 
         <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium text-neutral-700">
+          <span className="text-sm font-medium text-muted-foreground">
             Source citation (optional)
           </span>
           <input
@@ -891,7 +891,7 @@ export function RetentionEditor({
             value={policy.sourceCitation}
             onChange={(e) => patchPolicy({ sourceCitation: e.target.value })}
             disabled={pending}
-            className="rounded border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-neutral-100"
+            className="rounded border border-border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-muted"
           />
         </label>
 
@@ -901,7 +901,7 @@ export function RetentionEditor({
             onClick={() => void handlePolicyPreview()}
             disabled={pending || policy.validationError !== null}
             data-testid="retention-policy-save"
-            className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50"
           >
             Save
           </button>
@@ -921,7 +921,7 @@ export function RetentionEditor({
           <div
             data-testid="retention-error"
             role="alert"
-            className="rounded border border-red-300 bg-red-50 p-3 text-sm text-red-700"
+            className="rounded border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive"
           >
             {policy.error}
           </div>
@@ -930,13 +930,13 @@ export function RetentionEditor({
           <div
             data-testid="retention-toast"
             role="status"
-            className="rounded border border-green-300 bg-green-50 p-3 text-sm text-green-700"
+            className="rounded border border-win/40 bg-win/10 p-3 text-sm text-win"
           >
             {policy.toast}
           </div>
         )}
 
-        <p className="text-xs text-neutral-400">
+        <p className="text-xs text-muted-foreground/60">
           Current version:{' '}
           <span className="font-mono">{policy.versionId}</span>
         </p>
@@ -945,16 +945,16 @@ export function RetentionEditor({
       {/* ===== Section 2: buffer_months ======================================= */}
       <section
         data-section-key="audit.retention.tournament_end_buffer_months"
-        className="flex flex-col gap-3 rounded border border-neutral-200 bg-white p-4"
+        className="flex flex-col gap-3 rounded border border-border bg-card p-4"
       >
         <header className="flex flex-col gap-1">
-          <h2 className="text-lg font-semibold text-neutral-900">
+          <h2 className="text-lg font-semibold text-foreground">
             Tournament-end buffer (months)
           </h2>
-          <p className="text-xs font-mono text-neutral-500">
+          <p className="text-xs font-mono text-muted-foreground">
             audit.retention.tournament_end_buffer_months
           </p>
-          <p className="text-sm text-neutral-600">
+          <p className="text-sm text-muted-foreground">
             Number of months after the tournament-end timestamp that audit /
             configuration history remains rollback-eligible. Allowed range:{' '}
             {BUFFER_MIN}..{BUFFER_MAX}.
@@ -964,7 +964,7 @@ export function RetentionEditor({
         {!bufferInfoVisible && (
           <div
             role="note"
-            className="rounded border border-blue-200 bg-blue-50 p-3 text-xs text-blue-900"
+            className="rounded border border-accent/40 bg-accent/10 p-3 text-xs text-primary"
           >
             This value only applies when the retention policy is set to{' '}
             <strong>prune</strong>. With the current policy
@@ -973,7 +973,7 @@ export function RetentionEditor({
         )}
 
         <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium text-neutral-700">
+          <span className="text-sm font-medium text-muted-foreground">
             Buffer months
           </span>
           <input
@@ -986,17 +986,17 @@ export function RetentionEditor({
             data-testid="retention-buffer-months-input"
             aria-invalid={buffer.validationError ? true : undefined}
             disabled={pending}
-            className="w-40 rounded border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-neutral-100"
+            className="w-40 rounded border border-border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-muted"
           />
           {buffer.validationError && (
-            <span role="alert" className="text-xs text-red-600">
+            <span role="alert" className="text-xs text-destructive">
               {buffer.validationError}
             </span>
           )}
         </label>
 
         <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium text-neutral-700">
+          <span className="text-sm font-medium text-muted-foreground">
             Reason (required)
           </span>
           <textarea
@@ -1005,12 +1005,12 @@ export function RetentionEditor({
             rows={2}
             required
             disabled={pending}
-            className="rounded border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-neutral-100"
+            className="rounded border border-border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-muted"
           />
         </label>
 
         <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium text-neutral-700">
+          <span className="text-sm font-medium text-muted-foreground">
             Source citation (optional)
           </span>
           <input
@@ -1018,7 +1018,7 @@ export function RetentionEditor({
             value={buffer.sourceCitation}
             onChange={(e) => patchBuffer({ sourceCitation: e.target.value })}
             disabled={pending}
-            className="rounded border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-neutral-100"
+            className="rounded border border-border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-muted"
           />
         </label>
 
@@ -1028,7 +1028,7 @@ export function RetentionEditor({
             onClick={() => void handleBufferPreview()}
             disabled={pending || buffer.validationError !== null}
             data-testid="retention-buffer-months-save"
-            className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50"
           >
             Save
           </button>
@@ -1048,7 +1048,7 @@ export function RetentionEditor({
           <div
             data-testid="retention-error"
             role="alert"
-            className="rounded border border-red-300 bg-red-50 p-3 text-sm text-red-700"
+            className="rounded border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive"
           >
             {buffer.error}
           </div>
@@ -1057,13 +1057,13 @@ export function RetentionEditor({
           <div
             data-testid="retention-toast"
             role="status"
-            className="rounded border border-green-300 bg-green-50 p-3 text-sm text-green-700"
+            className="rounded border border-win/40 bg-win/10 p-3 text-sm text-win"
           >
             {buffer.toast}
           </div>
         )}
 
-        <p className="text-xs text-neutral-400">
+        <p className="text-xs text-muted-foreground/60">
           Current version:{' '}
           <span className="font-mono">{buffer.versionId}</span>
         </p>
@@ -1072,16 +1072,16 @@ export function RetentionEditor({
       {/* ===== Section 3: webhook URL ========================================= */}
       <section
         data-section-key="notifications.audit_failure_webhook_url"
-        className="flex flex-col gap-3 rounded border border-neutral-200 bg-white p-4"
+        className="flex flex-col gap-3 rounded border border-border bg-card p-4"
       >
         <header className="flex flex-col gap-1">
-          <h2 className="text-lg font-semibold text-neutral-900">
+          <h2 className="text-lg font-semibold text-foreground">
             Audit-failure webhook URL
           </h2>
-          <p className="text-xs font-mono text-neutral-500">
+          <p className="text-xs font-mono text-muted-foreground">
             notifications.audit_failure_webhook_url
           </p>
-          <p className="text-sm text-neutral-600">
+          <p className="text-sm text-muted-foreground">
             HTTPS endpoint that receives alerts when an audit row fails to
             write (T061/T062/T063 plumbing). Leave empty to disable webhook
             dispatch — `enqueue_alert` becomes a no-op when this is null.
@@ -1089,7 +1089,7 @@ export function RetentionEditor({
         </header>
 
         <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium text-neutral-700">
+          <span className="text-sm font-medium text-muted-foreground">
             URL (leave empty to clear)
           </span>
           <input
@@ -1100,17 +1100,17 @@ export function RetentionEditor({
             placeholder="https://hooks.example.com/audit-failures"
             aria-invalid={webhookUrl.validationError ? true : undefined}
             disabled={pending}
-            className="rounded border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-neutral-100"
+            className="rounded border border-border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-muted"
           />
           {webhookUrl.validationError && (
-            <span role="alert" className="text-xs text-red-600">
+            <span role="alert" className="text-xs text-destructive">
               {webhookUrl.validationError}
             </span>
           )}
         </label>
 
         <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium text-neutral-700">
+          <span className="text-sm font-medium text-muted-foreground">
             Reason (required)
           </span>
           <textarea
@@ -1119,12 +1119,12 @@ export function RetentionEditor({
             rows={2}
             required
             disabled={pending}
-            className="rounded border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-neutral-100"
+            className="rounded border border-border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-muted"
           />
         </label>
 
         <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium text-neutral-700">
+          <span className="text-sm font-medium text-muted-foreground">
             Source citation (optional)
           </span>
           <input
@@ -1134,7 +1134,7 @@ export function RetentionEditor({
               patchWebhookUrl({ sourceCitation: e.target.value })
             }
             disabled={pending}
-            className="rounded border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-neutral-100"
+            className="rounded border border-border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-muted"
           />
         </label>
 
@@ -1144,7 +1144,7 @@ export function RetentionEditor({
             onClick={() => void handleWebhookUrlPreview()}
             disabled={pending || webhookUrl.validationError !== null}
             data-testid="retention-webhook-url-save"
-            className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50"
           >
             Save
           </button>
@@ -1164,7 +1164,7 @@ export function RetentionEditor({
           <div
             data-testid="retention-error"
             role="alert"
-            className="rounded border border-red-300 bg-red-50 p-3 text-sm text-red-700"
+            className="rounded border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive"
           >
             {webhookUrl.error}
           </div>
@@ -1173,13 +1173,13 @@ export function RetentionEditor({
           <div
             data-testid="retention-toast"
             role="status"
-            className="rounded border border-green-300 bg-green-50 p-3 text-sm text-green-700"
+            className="rounded border border-win/40 bg-win/10 p-3 text-sm text-win"
           >
             {webhookUrl.toast}
           </div>
         )}
 
-        <p className="text-xs text-neutral-400">
+        <p className="text-xs text-muted-foreground/60">
           Current version:{' '}
           <span className="font-mono">{webhookUrl.versionId}</span>
         </p>
@@ -1188,16 +1188,16 @@ export function RetentionEditor({
       {/* ===== Section 4: webhook secret (write-only) ========================= */}
       <section
         data-section-key="notifications.audit_failure_webhook_secret"
-        className="flex flex-col gap-3 rounded border border-neutral-200 bg-white p-4"
+        className="flex flex-col gap-3 rounded border border-border bg-card p-4"
       >
         <header className="flex flex-col gap-1">
-          <h2 className="text-lg font-semibold text-neutral-900">
+          <h2 className="text-lg font-semibold text-foreground">
             Audit-failure webhook secret
           </h2>
-          <p className="text-xs font-mono text-neutral-500">
+          <p className="text-xs font-mono text-muted-foreground">
             notifications.audit_failure_webhook_secret
           </p>
-          <p className="text-sm text-neutral-600">
+          <p className="text-sm text-muted-foreground">
             Shared-secret HMAC key signed into outbound webhook payloads (T063
             verification). The server never returns the existing cleartext —
             type a fresh value to rotate it, or leave empty + save to clear.
@@ -1213,7 +1213,7 @@ export function RetentionEditor({
         </header>
 
         <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium text-neutral-700">
+          <span className="text-sm font-medium text-muted-foreground">
             New secret (leave empty to clear)
           </span>
           <div className="flex items-center gap-2">
@@ -1230,7 +1230,7 @@ export function RetentionEditor({
               autoComplete="new-password"
               spellCheck={false}
               disabled={pending}
-              className="flex-1 rounded border border-neutral-300 px-3 py-2 font-mono text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-neutral-100"
+              className="flex-1 rounded border border-border px-3 py-2 font-mono text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-muted"
             />
             <button
               type="button"
@@ -1240,20 +1240,20 @@ export function RetentionEditor({
               data-testid="retention-webhook-secret-reveal"
               aria-pressed={webhookSecret.revealed}
               disabled={pending}
-              className="rounded border border-neutral-300 px-3 py-2 text-xs font-medium text-neutral-700 hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded border border-border px-3 py-2 text-xs font-medium text-muted-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
             >
               {webhookSecret.revealed ? 'Hide' : 'Reveal'}
             </button>
           </div>
           {webhookSecret.validationError && (
-            <span role="alert" className="text-xs text-red-600">
+            <span role="alert" className="text-xs text-destructive">
               {webhookSecret.validationError}
             </span>
           )}
         </label>
 
         <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium text-neutral-700">
+          <span className="text-sm font-medium text-muted-foreground">
             Reason (required)
           </span>
           <textarea
@@ -1262,12 +1262,12 @@ export function RetentionEditor({
             rows={2}
             required
             disabled={pending}
-            className="rounded border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-neutral-100"
+            className="rounded border border-border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-muted"
           />
         </label>
 
         <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium text-neutral-700">
+          <span className="text-sm font-medium text-muted-foreground">
             Source citation (optional)
           </span>
           <input
@@ -1277,7 +1277,7 @@ export function RetentionEditor({
               patchWebhookSecret({ sourceCitation: e.target.value })
             }
             disabled={pending}
-            className="rounded border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-neutral-100"
+            className="rounded border border-border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-muted"
           />
         </label>
 
@@ -1287,7 +1287,7 @@ export function RetentionEditor({
             onClick={() => void handleWebhookSecretPreview()}
             disabled={pending || webhookSecret.validationError !== null}
             data-testid="retention-webhook-secret-save"
-            className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50"
           >
             Save
           </button>
@@ -1307,7 +1307,7 @@ export function RetentionEditor({
           <div
             data-testid="retention-error"
             role="alert"
-            className="rounded border border-red-300 bg-red-50 p-3 text-sm text-red-700"
+            className="rounded border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive"
           >
             {webhookSecret.error}
           </div>
@@ -1316,19 +1316,19 @@ export function RetentionEditor({
           <div
             data-testid="retention-toast"
             role="status"
-            className="rounded border border-green-300 bg-green-50 p-3 text-sm text-green-700"
+            className="rounded border border-win/40 bg-win/10 p-3 text-sm text-win"
           >
             {webhookSecret.toast}
           </div>
         )}
 
-        <p className="text-xs text-neutral-400">
+        <p className="text-xs text-muted-foreground/60">
           Current version:{' '}
           <span className="font-mono">{webhookSecret.versionId}</span>
         </p>
       </section>
 
-      {pending && <div className="text-sm text-neutral-500">Submitting…</div>}
+      {pending && <div className="text-sm text-muted-foreground">Submitting…</div>}
     </div>
   );
 }

@@ -272,25 +272,25 @@ description: "Task list for slice 009-ui-beautification — dispatchable, self-c
 
 ### Implementation for User Story 4
 
-- [ ] T081 [US4] Redesign `apps/web/app/admin/layout.tsx`. New top nav for admin context (variant of TopNav from T035 with admin-specific links). Mobile responsive (admin is usually desktop but must not break on mobile).
+- [X] T081 [US4] Redesign `apps/web/app/admin/layout.tsx`. New top nav for admin context (variant of TopNav from T035 with admin-specific links). Mobile responsive (admin is usually desktop but must not break on mobile).
 
-- [ ] T082 [P] [US4] Redesign `apps/web/app/admin/page.tsx` (admin dashboard). Show summary cards (pending reviews, audit volume, config health) using `<Card>` components. Quick-action buttons. Link to each sub-tool.
+- [X] T082 [P] [US4] Redesign `apps/web/app/admin/page.tsx` (admin dashboard). Show summary cards (pending reviews, audit volume, config health) using `<Card>` components. Quick-action buttons. Link to each sub-tool.
 
-- [ ] T083 [P] [US4] Redesign `apps/web/app/admin/audit/` route. Dense `<Table>` (use shadcn `Table` with compact row padding — tailwind class `py-1` on cells instead of the default `py-4`). Preserve existing pagination, filtering, and search from slice 007. No new audit functionality.
+- [X] T083 [P] [US4] Redesign `apps/web/app/admin/audit/` route. Dense `<Table>` (use shadcn `Table` with compact row padding — tailwind class `py-1` on cells instead of the default `py-4`). Preserve existing pagination, filtering, and search from slice 007. No new audit functionality.
 
-- [ ] T084 [P] [US4] Redesign `apps/web/app/admin/predictions/`, `apps/web/app/admin/pending-review/`, `apps/web/app/admin/matches/`, `apps/web/app/admin/finals/` routes. Same density posture. Use `<MatchCard mode="admin">` where appropriate.
+- [X] T084 [P] [US4] Redesign `apps/web/app/admin/predictions/`, `apps/web/app/admin/pending-review/`, `apps/web/app/admin/matches/`, `apps/web/app/admin/finals/` routes. Same density posture. Use `<MatchCard mode="admin">` where appropriate.
 
-- [ ] T085 [P] [US4] Redesign `apps/web/app/admin/config/` route. Forms use shadcn `<Form>` pattern (or `<Input>` + `<Label>` directly). Saving any config emits the existing slice 008 audit event unchanged.
+- [X] T085 [P] [US4] Redesign `apps/web/app/admin/config/` route. Forms use shadcn `<Form>` pattern (or `<Input>` + `<Label>` directly). Saving any config emits the existing slice 008 audit event unchanged.
 
-- [ ] T086 [P] [US4] Redesign `apps/web/app/admin/recalc/` and `apps/web/app/admin/denied/` routes. Same posture.
+- [X] T086 [P] [US4] Redesign `apps/web/app/admin/recalc/` and `apps/web/app/admin/denied/` routes. Same posture.
 
-- [ ] T087 [US4] Create `apps/web/app/components/ConfirmDestructive.tsx` — a shared destructive-action confirmation pattern. Renders a `<Dialog>` requiring explicit action: for medium-risk actions, a clearly-labeled "Confirm" button; for high-risk actions (participant deactivation, config rollback), a text input requiring the user to type the affected entity's name verbatim before the confirm button enables. Used by every destructive admin action.
+- [X] T087 [US4] Create `apps/web/app/components/ConfirmDestructive.tsx` — a shared destructive-action confirmation pattern. Renders a `<Dialog>` requiring explicit action: for medium-risk actions, a clearly-labeled "Confirm" button; for high-risk actions (participant deactivation, config rollback), a text input requiring the user to type the affected entity's name verbatim before the confirm button enables. Used by every destructive admin action.
 
 - [ ] T088 [US4] Apply `<ConfirmDestructive>` to every destructive admin action in T083–T086. Audit each admin route for buttons that currently call a destructive endpoint on first click and wrap them. Verify behavior with T078's red-gate.
 
-- [ ] T089 [US4] Run US4 red-gate suite green. Append green output to red-gate-us4.md. The density assertion (T077) MUST pass — if it fails for a specific route, reduce padding or column count until ≥ 80% holds.
+- [X] T089 [US4] Run US4 red-gate suite green. Append green output to red-gate-us4.md. The density assertion (T077) MUST pass — if it fails for a specific route, reduce padding or column count until ≥ 80% holds.
 
-- [ ] T090 [US4] Run regression suite from slices 006/007/008. Write `specs/009-ui-beautification/regression-checkpoint-us4.md`.
+- [X] T090 [US4] Run regression suite from slices 006/007/008. Write `specs/009-ui-beautification/regression-checkpoint-us4.md`.
 
 **Checkpoint**: Admin surfaces redesigned, density preserved, destructive actions safe.
 

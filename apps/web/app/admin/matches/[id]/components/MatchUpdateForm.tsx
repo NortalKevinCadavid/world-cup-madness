@@ -188,26 +188,26 @@ export function MatchUpdateForm({ matchId, initial }: MatchUpdateFormProps) {
     <form
       data-testid="admin-match-update-form"
       onSubmit={handleSubmit}
-      className="rounded-lg border border-neutral-200 bg-white p-6 flex flex-col gap-4"
+      className="rounded-lg border border-border bg-card p-6 flex flex-col gap-4"
     >
-      <h2 className="text-lg font-semibold text-neutral-900">
+      <h2 className="text-lg font-semibold text-foreground">
         Update status / kickoff
       </h2>
-      <p className="text-xs text-neutral-500">
+      <p className="text-xs text-muted-foreground">
         Either field may be left unchanged. Slice 003&apos;s kickoff-correction
         fan-out and Slice 004&apos;s first-kickoff-correction triggers fire
         automatically when the relevant column changes.
       </p>
 
       <label className="flex flex-col gap-1 text-sm">
-        <span className="font-medium text-neutral-800">Status</span>
+        <span className="font-medium text-foreground">Status</span>
         <select
           name="status"
           value={status}
           onChange={(e) => setStatus(e.target.value as MatchStatus)}
           disabled={pending}
           aria-invalid={errorField === 'status' || undefined}
-          className="rounded border border-neutral-300 px-2 py-1.5 focus:border-blue-500 focus:outline-none disabled:bg-neutral-100"
+          className="rounded border border-border px-2 py-1.5 focus:border-blue-500 focus:outline-none disabled:bg-muted"
         >
           {MATCH_STATUS_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>
@@ -218,7 +218,7 @@ export function MatchUpdateForm({ matchId, initial }: MatchUpdateFormProps) {
       </label>
 
       <label className="flex flex-col gap-1 text-sm">
-        <span className="font-medium text-neutral-800">
+        <span className="font-medium text-foreground">
           Kickoff (UTC — leave blank for no change)
         </span>
         <input
@@ -228,7 +228,7 @@ export function MatchUpdateForm({ matchId, initial }: MatchUpdateFormProps) {
           onChange={(e) => setKickoffLocal(e.target.value)}
           disabled={pending}
           aria-invalid={errorField === 'kickoff_utc' || undefined}
-          className="rounded border border-neutral-300 px-2 py-1.5 focus:border-blue-500 focus:outline-none disabled:bg-neutral-100"
+          className="rounded border border-border px-2 py-1.5 focus:border-blue-500 focus:outline-none disabled:bg-muted"
         />
         {errorField === 'kickoff_utc' && errorMessage ? (
           <span
@@ -236,7 +236,7 @@ export function MatchUpdateForm({ matchId, initial }: MatchUpdateFormProps) {
             data-testid="field-error-kickoff_utc"
             role="alert"
             aria-live="polite"
-            className="text-sm text-red-600"
+            className="text-sm text-destructive"
           >
             {errorMessage}
           </span>
@@ -244,8 +244,8 @@ export function MatchUpdateForm({ matchId, initial }: MatchUpdateFormProps) {
       </label>
 
       <label className="flex flex-col gap-1 text-sm">
-        <span className="font-medium text-neutral-800">
-          Reason <span className="text-red-600">*</span>
+        <span className="font-medium text-foreground">
+          Reason <span className="text-destructive">*</span>
         </span>
         <textarea
           name="reason"
@@ -257,7 +257,7 @@ export function MatchUpdateForm({ matchId, initial }: MatchUpdateFormProps) {
           aria-describedby={
             errorField === 'reason' ? 'field-error-match-update-reason' : undefined
           }
-          className="rounded border border-neutral-300 px-2 py-1.5 focus:border-blue-500 focus:outline-none disabled:bg-neutral-100"
+          className="rounded border border-border px-2 py-1.5 focus:border-blue-500 focus:outline-none disabled:bg-muted"
           placeholder="e.g. Match postponed pending weather review"
         />
         {errorField === 'reason' && errorMessage ? (
@@ -266,7 +266,7 @@ export function MatchUpdateForm({ matchId, initial }: MatchUpdateFormProps) {
             data-testid="field-error-match-update-reason"
             role="alert"
             aria-live="polite"
-            className="text-sm text-red-600"
+            className="text-sm text-destructive"
           >
             {errorMessage}
           </span>
@@ -274,9 +274,9 @@ export function MatchUpdateForm({ matchId, initial }: MatchUpdateFormProps) {
       </label>
 
       <label className="flex flex-col gap-1 text-sm">
-        <span className="font-medium text-neutral-800">
+        <span className="font-medium text-foreground">
           Source citation (URL or document reference){' '}
-          <span className="text-red-600">*</span>
+          <span className="text-destructive">*</span>
         </span>
         <input
           name="source_citation"
@@ -290,7 +290,7 @@ export function MatchUpdateForm({ matchId, initial }: MatchUpdateFormProps) {
               ? 'field-error-match-update-source_citation'
               : undefined
           }
-          className="rounded border border-neutral-300 px-2 py-1.5 focus:border-blue-500 focus:outline-none disabled:bg-neutral-100"
+          className="rounded border border-border px-2 py-1.5 focus:border-blue-500 focus:outline-none disabled:bg-muted"
           placeholder="https://fifa.example/notices/..."
         />
         {errorField === 'source_citation' && errorMessage ? (
@@ -299,7 +299,7 @@ export function MatchUpdateForm({ matchId, initial }: MatchUpdateFormProps) {
             data-testid="field-error-match-update-source_citation"
             role="alert"
             aria-live="polite"
-            className="text-sm text-red-600"
+            className="text-sm text-destructive"
           >
             {errorMessage}
           </span>
@@ -311,7 +311,7 @@ export function MatchUpdateForm({ matchId, initial }: MatchUpdateFormProps) {
           data-testid="admin-match-update-form-error"
           role="alert"
           aria-live="polite"
-          className="rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+          className="rounded border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive"
         >
           {errorMessage}
         </div>
@@ -322,7 +322,7 @@ export function MatchUpdateForm({ matchId, initial }: MatchUpdateFormProps) {
           data-testid="admin-match-update-form-success"
           role="status"
           aria-live="polite"
-          className="rounded border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700"
+          className="rounded border border-win/40 bg-win/10 px-3 py-2 text-sm text-win"
         >
           {successMessage}
         </div>
@@ -333,7 +333,7 @@ export function MatchUpdateForm({ matchId, initial }: MatchUpdateFormProps) {
           type="submit"
           disabled={pending}
           data-testid="admin-match-update-submit"
-          className="rounded border border-blue-700 bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded border border-blue-700 bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50"
         >
           {pending ? 'Submitting…' : 'Apply update'}
         </button>

@@ -230,13 +230,13 @@ export default async function ConfigPhasesPage() {
         data-testid="admin-config-phases-page"
         className="max-w-4xl mx-auto px-6 py-8 flex flex-col gap-4"
       >
-        <h1 className="text-2xl font-semibold text-neutral-900">
+        <h1 className="text-2xl font-semibold text-foreground">
           Tournament phase
         </h1>
         <div
           data-testid="phase-error"
           role="alert"
-          className="rounded border border-red-300 bg-red-50 p-4 text-sm text-red-700"
+          className="rounded border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive"
         >
           Failed to load phase configuration: {readError.message}
         </div>
@@ -250,13 +250,13 @@ export default async function ConfigPhasesPage() {
         data-testid="admin-config-phases-page"
         className="max-w-4xl mx-auto px-6 py-8 flex flex-col gap-4"
       >
-        <h1 className="text-2xl font-semibold text-neutral-900">
+        <h1 className="text-2xl font-semibold text-foreground">
           Tournament phase
         </h1>
         <div
           data-testid="phase-error"
           role="alert"
-          className="rounded border border-red-300 bg-red-50 p-4 text-sm text-red-700"
+          className="rounded border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive"
         >
           No `tournament.phase.current` row found in `tournament_config`. The
           slice 008 seed migration may not have run.
@@ -274,13 +274,13 @@ export default async function ConfigPhasesPage() {
       className="max-w-4xl mx-auto px-6 py-8 flex flex-col gap-6"
     >
       <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold text-neutral-900">
+        <h1 className="text-2xl font-semibold text-foreground">
           Tournament phase
         </h1>
-        <p className="text-xs font-mono text-neutral-500">
+        <p className="text-xs font-mono text-muted-foreground">
           tournament.phase.current
         </p>
-        <p className="text-sm text-neutral-600">
+        <p className="text-sm text-muted-foreground">
           Drives phase-conditioned UI (group standings, bracket, final pick
           deadline copy). Allowed transitions are typically forward; a backward
           revert is permitted but flagged and audit-logged.

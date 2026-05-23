@@ -58,13 +58,13 @@ function formatJson(value: unknown): string {
 function badgeClasses(kind: ConfigVersion['change_kind']): string {
   switch (kind) {
     case 'initial_seed':
-      return 'bg-neutral-200 text-neutral-800 border-neutral-300';
+      return 'bg-muted text-muted-foreground border-border';
     case 'upsert':
-      return 'bg-blue-100 text-blue-800 border-blue-300';
+      return 'bg-accent/15 text-primary border-accent/40';
     case 'rollback':
-      return 'bg-amber-100 text-amber-900 border-amber-300';
+      return 'bg-open/15 text-open border-open/40';
     default:
-      return 'bg-neutral-100 text-neutral-700 border-neutral-300';
+      return 'bg-muted text-muted-foreground border-border';
   }
 }
 
@@ -93,7 +93,7 @@ export default function VersionTimeline({
     return (
       <div
         data-testid="version-timeline"
-        className="rounded border border-neutral-200 bg-white p-6 text-sm text-neutral-500"
+        className="rounded border border-border bg-card p-6 text-sm text-muted-foreground"
       >
         No version history yet.
       </div>
@@ -103,7 +103,7 @@ export default function VersionTimeline({
   return (
     <ol
       data-testid="version-timeline"
-      className="relative ml-3 border-l border-neutral-200"
+      className="relative ml-3 border-l border-border"
     >
       {versions.map((version) => {
         const isRollbackRow = version.change_kind === 'rollback';
@@ -117,11 +117,11 @@ export default function VersionTimeline({
           >
             <span
               aria-hidden="true"
-              className="absolute -left-1.5 mt-2 h-3 w-3 rounded-full border border-white bg-neutral-400"
+              className="absolute -left-1.5 mt-2 h-3 w-3 rounded-full border border-card bg-muted-foreground/60"
             />
 
             <div className="flex flex-wrap items-center gap-2">
-              <span className="font-mono text-xs text-neutral-500">
+              <span className="font-mono text-xs text-muted-foreground">
                 #{version.version_id}
               </span>
               <span
@@ -132,15 +132,15 @@ export default function VersionTimeline({
               >
                 {badgeLabel(version.change_kind)}
               </span>
-              <span className="text-xs text-neutral-500">
+              <span className="text-xs text-muted-foreground">
                 key: <span className="font-mono">{version.key}</span>
               </span>
-              <span className="ml-auto text-xs text-neutral-500">
+              <span className="ml-auto text-xs text-muted-foreground">
                 {formatCreatedAt(version.created_at)}
               </span>
             </div>
 
-            <div className="mt-2 text-sm text-neutral-700">
+            <div className="mt-2 text-sm text-muted-foreground">
               <div>
                 <span className="font-medium">Actor:</span>{' '}
                 <span className="font-mono text-xs">
@@ -152,35 +152,35 @@ export default function VersionTimeline({
                 <span>{version.reason || '—'}</span>
               </div>
               {version.source_citation ? (
-                <div className="mt-1 text-xs text-neutral-500">
+                <div className="mt-1 text-xs text-muted-foreground">
                   Citation: {version.source_citation}
                 </div>
               ) : null}
               {version.parent_version_id !== null ? (
-                <div className="mt-1 text-xs text-neutral-500">
+                <div className="mt-1 text-xs text-muted-foreground">
                   Parent version: #{version.parent_version_id}
                 </div>
               ) : null}
             </div>
 
-            <details className="mt-2 rounded border border-neutral-200 bg-neutral-50 p-2 text-xs">
-              <summary className="cursor-pointer font-medium text-neutral-700">
+            <details className="mt-2 rounded border border-border bg-muted/30 p-2 text-xs">
+              <summary className="cursor-pointer font-medium text-muted-foreground">
                 Diff (previous → new)
               </summary>
               <div className="mt-2 grid grid-cols-1 gap-2 md:grid-cols-2">
                 <div>
-                  <div className="mb-1 text-[10px] uppercase tracking-wide text-neutral-500">
+                  <div className="mb-1 text-[10px] uppercase tracking-wide text-muted-foreground">
                     Previous
                   </div>
-                  <pre className="overflow-auto rounded bg-white p-2 text-xs text-neutral-800">
+                  <pre className="overflow-auto rounded bg-card p-2 text-xs text-foreground">
                     {formatJson(version.previous_value)}
                   </pre>
                 </div>
                 <div>
-                  <div className="mb-1 text-[10px] uppercase tracking-wide text-neutral-500">
+                  <div className="mb-1 text-[10px] uppercase tracking-wide text-muted-foreground">
                     New
                   </div>
-                  <pre className="overflow-auto rounded bg-white p-2 text-xs text-neutral-800">
+                  <pre className="overflow-auto rounded bg-card p-2 text-xs text-foreground">
                     {formatJson(version.new_value)}
                   </pre>
                 </div>
@@ -193,13 +193,13 @@ export default function VersionTimeline({
                   type="button"
                   data-testid="version-rollback-button"
                   data-version-id={version.version_id}
-                  className="rounded border border-neutral-300 bg-white px-3 py-1 text-xs font-medium text-neutral-700 hover:bg-neutral-50"
+                  className="rounded border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground hover:bg-muted/30"
                 >
                   Rollback to this
                 </button>
               </div>
             ) : (
-              <div className="mt-3 text-xs italic text-neutral-500">
+              <div className="mt-3 text-xs italic text-muted-foreground">
                 Cannot roll back a rollback row directly — select its
                 predecessor.
               </div>

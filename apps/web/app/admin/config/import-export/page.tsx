@@ -162,13 +162,13 @@ export default async function ConfigImportExportPage() {
       className="max-w-4xl mx-auto px-6 py-8 flex flex-col gap-6"
     >
       <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold text-neutral-900">
+        <h1 className="text-2xl font-semibold text-foreground">
           Configuration import / export
         </h1>
-        <p className="text-xs font-mono text-neutral-500">
+        <p className="text-xs font-mono text-muted-foreground">
           /admin/config/import-export
         </p>
-        <p className="text-sm text-neutral-600">
+        <p className="text-sm text-muted-foreground">
           Download the current configuration as a signed JSON envelope, or
           import a previously-signed envelope to restore a configuration
           snapshot. Every import is appended to <code>audit_log</code> and

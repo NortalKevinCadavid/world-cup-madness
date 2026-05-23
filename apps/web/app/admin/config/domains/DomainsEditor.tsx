@@ -241,7 +241,7 @@ export function DomainsEditor({
         className="flex flex-col gap-2"
       >
         {domains.length === 0 ? (
-          <li className="rounded border border-dashed border-neutral-300 p-3 text-sm text-neutral-500">
+          <li className="rounded border border-dashed border-border p-3 text-sm text-muted-foreground">
             No domains configured. Add one below to enable sign-in.
           </li>
         ) : (
@@ -249,16 +249,16 @@ export function DomainsEditor({
             <li
               key={`${idx}-${domain}`}
               data-testid="domain-row"
-              className="flex items-center justify-between rounded border border-neutral-200 bg-white p-2"
+              className="flex items-center justify-between rounded border border-border bg-card p-2"
             >
-              <span className="font-mono text-sm text-neutral-800">{domain}</span>
+              <span className="font-mono text-sm text-foreground">{domain}</span>
               <button
                 type="button"
                 onClick={() => handleRemoveDomain(idx)}
                 data-testid="domain-remove-button"
                 data-domain={domain}
                 disabled={pending}
-                className="rounded border border-red-200 px-2 py-1 text-xs font-medium text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded border border-destructive/40 px-2 py-1 text-xs font-medium text-destructive hover:bg-destructive/10 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Remove
               </button>
@@ -280,14 +280,14 @@ export function DomainsEditor({
           placeholder="example.com"
           data-testid="domain-add-input"
           disabled={pending}
-          className="flex-1 rounded border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-neutral-100"
+          className="flex-1 rounded border border-border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-muted"
         />
         <button
           type="button"
           onClick={handleAddDomain}
           data-testid="domain-add-button"
           disabled={pending}
-          className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50"
         >
           Add
         </button>
@@ -295,7 +295,7 @@ export function DomainsEditor({
 
       {/* Reason (required) */}
       <label className="flex flex-col gap-1">
-        <span className="text-sm font-medium text-neutral-700">
+        <span className="text-sm font-medium text-muted-foreground">
           Reason (required)
         </span>
         <textarea
@@ -305,13 +305,13 @@ export function DomainsEditor({
           rows={2}
           required
           disabled={pending}
-          className="rounded border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-neutral-100"
+          className="rounded border border-border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-muted"
         />
       </label>
 
       {/* Source citation (optional) */}
       <label className="flex flex-col gap-1">
-        <span className="text-sm font-medium text-neutral-700">
+        <span className="text-sm font-medium text-muted-foreground">
           Source citation (optional)
         </span>
         <input
@@ -320,7 +320,7 @@ export function DomainsEditor({
           onChange={(e) => setSourceCitation(e.target.value)}
           data-testid="domain-source-citation"
           disabled={pending}
-          className="rounded border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-neutral-100"
+          className="rounded border border-border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-muted"
         />
       </label>
 
@@ -338,7 +338,7 @@ export function DomainsEditor({
         <div
           data-testid="config-toast"
           role="status"
-          className="rounded border border-green-300 bg-green-50 p-3 text-sm text-green-700"
+          className="rounded border border-win/40 bg-win/10 p-3 text-sm text-win"
         >
           {toast}
         </div>
@@ -347,17 +347,17 @@ export function DomainsEditor({
         <div
           data-testid="config-error"
           role="alert"
-          className="rounded border border-red-300 bg-red-50 p-3 text-sm text-red-700"
+          className="rounded border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive"
         >
           {error}
         </div>
       )}
       {pending && (
-        <div className="text-sm text-neutral-500">Submitting…</div>
+        <div className="text-sm text-muted-foreground">Submitting…</div>
       )}
 
       {/* Hidden version_id badge — useful for debugging + Playwright */}
-      <p className="text-xs text-neutral-400">
+      <p className="text-xs text-muted-foreground/60">
         Current version: <span data-testid="domain-version-id">{versionId}</span>
       </p>
     </div>

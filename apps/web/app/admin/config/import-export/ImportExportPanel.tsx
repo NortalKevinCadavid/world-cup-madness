@@ -330,12 +330,12 @@ export default function ImportExportPanel() {
       <a ref={downloadAnchorRef} className="hidden" aria-hidden="true" />
 
       {/* Export card */}
-      <section className="rounded-lg border border-neutral-200 bg-white p-5 flex flex-col gap-3">
+      <section className="rounded-lg border border-border bg-card p-5 flex flex-col gap-3">
         <header className="flex flex-col gap-1">
-          <h2 className="text-lg font-semibold text-neutral-900">
+          <h2 className="text-lg font-semibold text-foreground">
             Export configuration
           </h2>
-          <p className="text-sm text-neutral-600">
+          <p className="text-sm text-muted-foreground">
             Downloads the current configuration as a signed JSON envelope.
             Provider credentials are redacted; the export carries no secret
             material.
@@ -347,7 +347,7 @@ export default function ImportExportPanel() {
             onClick={handleExport}
             disabled={pending}
             data-testid="export-button"
-            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50"
           >
             {pending ? 'Exporting…' : 'Export configuration'}
           </button>
@@ -355,12 +355,12 @@ export default function ImportExportPanel() {
       </section>
 
       {/* Import card */}
-      <section className="rounded-lg border border-neutral-200 bg-white p-5 flex flex-col gap-3">
+      <section className="rounded-lg border border-border bg-card p-5 flex flex-col gap-3">
         <header className="flex flex-col gap-1">
-          <h2 className="text-lg font-semibold text-neutral-900">
+          <h2 className="text-lg font-semibold text-foreground">
             Import configuration
           </h2>
-          <p className="text-sm text-neutral-600">
+          <p className="text-sm text-muted-foreground">
             Upload a previously-signed envelope (downloaded from this page or
             another environment). The signature is verified server-side; an
             import with an invalid or unsigned envelope is rejected.
@@ -369,7 +369,7 @@ export default function ImportExportPanel() {
 
         <form onSubmit={handleImport} className="flex flex-col gap-3">
           <label className="flex flex-col gap-1">
-            <span className="text-sm font-medium text-neutral-700">
+            <span className="text-sm font-medium text-muted-foreground">
               Envelope file (.json)
             </span>
             <input
@@ -378,17 +378,17 @@ export default function ImportExportPanel() {
               onChange={(e) => setFile(e.target.files?.[0] ?? null)}
               disabled={pending}
               data-testid="import-file-input"
-              className="text-sm file:mr-3 file:rounded file:border file:border-neutral-300 file:bg-white file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-neutral-700 hover:file:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50"
+              className="text-sm file:mr-3 file:rounded file:border file:border-border file:bg-card file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-muted-foreground hover:file:bg-muted/30 disabled:cursor-not-allowed disabled:opacity-50"
             />
             {file !== null && (
-              <span className="font-mono text-xs text-neutral-500">
+              <span className="font-mono text-xs text-muted-foreground">
                 {file.name} ({file.size.toLocaleString()} bytes)
               </span>
             )}
           </label>
 
           <label className="flex flex-col gap-1">
-            <span className="text-sm font-medium text-neutral-700">
+            <span className="text-sm font-medium text-muted-foreground">
               Reason (required)
             </span>
             <textarea
@@ -400,7 +400,7 @@ export default function ImportExportPanel() {
               disabled={pending}
               data-testid="import-reason"
               placeholder="e.g. Restoring 2026-05-20 snapshot after rollback drill"
-              className="rounded border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-neutral-100"
+              className="rounded border border-border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-muted"
             />
           </label>
 
@@ -409,7 +409,7 @@ export default function ImportExportPanel() {
               type="submit"
               disabled={!canSubmitImport}
               data-testid="import-submit"
-              className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50"
             >
               {pending ? 'Importing…' : 'Import configuration'}
             </button>
@@ -424,9 +424,9 @@ export default function ImportExportPanel() {
                 key={`${row.key}-${idx}`}
                 data-testid="import-validation-error"
                 data-failed-key={row.key}
-                className="rounded border border-red-300 bg-red-50 p-3 text-sm text-red-700"
+                className="rounded border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive"
               >
-                <div className="font-mono text-xs font-medium text-red-800">
+                <div className="font-mono text-xs font-medium text-destructive">
                   {row.key}
                 </div>
                 <div className="mt-1">{row.reason}</div>
@@ -441,7 +441,7 @@ export default function ImportExportPanel() {
         <div
           data-testid="import-toast"
           role="status"
-          className="rounded border border-green-300 bg-green-50 p-3 text-sm text-green-700"
+          className="rounded border border-win/40 bg-win/10 p-3 text-sm text-win"
         >
           {toast}
         </div>
@@ -452,7 +452,7 @@ export default function ImportExportPanel() {
         <div
           data-testid="import-error"
           role="alert"
-          className="rounded border border-red-300 bg-red-50 p-3 text-sm text-red-700"
+          className="rounded border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive"
         >
           {error}
         </div>

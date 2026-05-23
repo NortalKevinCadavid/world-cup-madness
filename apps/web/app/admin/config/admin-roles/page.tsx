@@ -221,13 +221,13 @@ export default async function ConfigAdminRolesPage() {
         data-testid="admin-config-admin-roles-page"
         className="max-w-4xl mx-auto px-6 py-8 flex flex-col gap-4"
       >
-        <h1 className="text-2xl font-semibold text-neutral-900">
+        <h1 className="text-2xl font-semibold text-foreground">
           Admin roles
         </h1>
         <div
           data-testid="admin-roles-error"
           role="alert"
-          className="rounded border border-red-300 bg-red-50 p-4 text-sm text-red-700"
+          className="rounded border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive"
         >
           Failed to load admin roles: {adminsError.message}
         </div>
@@ -287,8 +287,8 @@ export default async function ConfigAdminRolesPage() {
       className="max-w-4xl mx-auto px-6 py-8 flex flex-col gap-6"
     >
       <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold text-neutral-900">Admin roles</h1>
-        <p className="text-sm text-neutral-600">
+        <h1 className="text-2xl font-semibold text-foreground">Admin roles</h1>
+        <p className="text-sm text-muted-foreground">
           Grant or revoke the <code className="font-mono text-xs">admin</code> role.
           Each grant/revoke records BOTH an{' '}
           <code className="font-mono text-xs">audit_log</code> row (via the slice-006

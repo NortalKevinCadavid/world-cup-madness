@@ -29,7 +29,7 @@ function formatJson(value: unknown): string {
 export function AuditResultsTable({ rows }: AuditResultsTableProps) {
   if (rows.length === 0) {
     return (
-      <div data-testid="audit-results-empty" className="rounded border p-6 text-sm text-neutral-500">
+      <div data-testid="audit-results-empty" className="rounded border p-6 text-sm text-muted-foreground">
         No audit events match the filters.
       </div>
     );
@@ -38,7 +38,7 @@ export function AuditResultsTable({ rows }: AuditResultsTableProps) {
   return (
     <table data-testid="audit-results-table" className="w-full border-collapse text-xs">
       <thead>
-        <tr className="border-b bg-neutral-50">
+        <tr className="border-b bg-muted/30">
           <th className="p-2 text-left">Seq</th>
           <th className="p-2 text-left">Occurred</th>
           <th className="p-2 text-left">Actor</th>
@@ -66,14 +66,14 @@ export function AuditResultsTable({ rows }: AuditResultsTableProps) {
             <td className="p-2 max-w-xs truncate" title={row.source_citation ?? ''}>{row.source_citation ?? '—'}</td>
             <td className="p-2">
               <details>
-                <summary className="cursor-pointer text-neutral-500">view</summary>
-                <pre className="mt-2 overflow-auto rounded bg-neutral-50 p-2 text-xs">{formatJson(row.previous_value)}</pre>
+                <summary className="cursor-pointer text-muted-foreground">view</summary>
+                <pre className="mt-2 overflow-auto rounded bg-muted/30 p-2 text-xs">{formatJson(row.previous_value)}</pre>
               </details>
             </td>
             <td className="p-2">
               <details>
-                <summary className="cursor-pointer text-neutral-500">view</summary>
-                <pre className="mt-2 overflow-auto rounded bg-neutral-50 p-2 text-xs">{formatJson(row.new_value)}</pre>
+                <summary className="cursor-pointer text-muted-foreground">view</summary>
+                <pre className="mt-2 overflow-auto rounded bg-muted/30 p-2 text-xs">{formatJson(row.new_value)}</pre>
               </details>
             </td>
           </tr>

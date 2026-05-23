@@ -327,13 +327,13 @@ export default async function ConfigScoringPage() {
         data-testid="admin-config-scoring-page"
         className="max-w-4xl mx-auto px-6 py-8 flex flex-col gap-4"
       >
-        <h1 className="text-2xl font-semibold text-neutral-900">
+        <h1 className="text-2xl font-semibold text-foreground">
           Scoring &amp; tie-breakers
         </h1>
         <div
           data-testid="config-error"
           role="alert"
-          className="rounded border border-red-300 bg-red-50 p-4 text-sm text-red-700"
+          className="rounded border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive"
         >
           Failed to load scoring configuration: {readError.message}
         </div>
@@ -382,10 +382,10 @@ export default async function ConfigScoringPage() {
       className="max-w-4xl mx-auto px-6 py-8 flex flex-col gap-6"
     >
       <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold text-neutral-900">
+        <h1 className="text-2xl font-semibold text-foreground">
           Scoring &amp; tie-breakers
         </h1>
-        <p className="text-sm text-neutral-600">
+        <p className="text-sm text-muted-foreground">
           Per-match point values, the final-pick reward, the score upper bound,
           and the leaderboard tie-breaker order. Each section saves
           independently. Changes do <em>not</em> retroactively recompute

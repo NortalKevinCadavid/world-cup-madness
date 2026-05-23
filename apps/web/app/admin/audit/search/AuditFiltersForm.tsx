@@ -174,7 +174,7 @@ export function AuditFiltersForm({ initial, onSearch, loading = false }: AuditFi
       </div>
 
       {validationError && (
-        <div data-testid="audit-filters-validation-error" role="alert" className="text-sm text-red-600">
+        <div data-testid="audit-filters-validation-error" role="alert" className="text-sm text-destructive">
           {validationError}
         </div>
       )}
@@ -183,7 +183,7 @@ export function AuditFiltersForm({ initial, onSearch, loading = false }: AuditFi
         type="submit"
         disabled={isLoading}
         data-testid="audit-filters-submit"
-        className="rounded bg-blue-600 px-4 py-2 text-white disabled:opacity-50"
+        className="rounded bg-primary px-4 py-2 text-white disabled:opacity-50"
       >
         {isLoading ? 'Searching…' : 'Search'}
       </button>

@@ -125,10 +125,10 @@ export default async function RecalcPage() {
       className="max-w-5xl mx-auto px-6 py-8 flex flex-col gap-6"
     >
       <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold text-neutral-900">
+        <h1 className="text-2xl font-semibold text-foreground">
           Recalculation
         </h1>
-        <p className="text-sm text-neutral-600">
+        <p className="text-sm text-muted-foreground">
           Trigger a manual rescore and watch its status via Supabase Realtime.
           Every trigger writes an audit row.
         </p>
@@ -158,13 +158,13 @@ export default async function RecalcPage() {
 
       <RecalcStatusLive />
 
-      <section className="rounded-lg border border-neutral-200 bg-white p-6">
-        <h2 className="text-lg font-semibold text-neutral-900">Recent runs</h2>
-        <p className="mt-1 text-xs text-neutral-500">
+      <section className="rounded-lg border border-border bg-card p-6">
+        <h2 className="text-lg font-semibold text-foreground">Recent runs</h2>
+        <p className="mt-1 text-xs text-muted-foreground">
           Last 10 entries in `score_calculation_runs` (newest first).
         </p>
         {runs.length === 0 ? (
-          <p className="mt-3 text-sm text-neutral-600">
+          <p className="mt-3 text-sm text-muted-foreground">
             No recalculation runs have been recorded yet.
           </p>
         ) : (
@@ -176,35 +176,35 @@ export default async function RecalcPage() {
               <li
                 key={r.id}
                 data-testid="recalc-recent-run"
-                className="rounded border border-neutral-200 bg-neutral-50 p-3 text-sm"
+                className="rounded border border-border bg-muted/30 p-3 text-sm"
               >
                 <div className="flex flex-wrap gap-x-4 gap-y-1">
-                  <span className="font-mono text-xs text-neutral-700">
+                  <span className="font-mono text-xs text-muted-foreground">
                     {r.id}
                   </span>
-                  <span className="text-neutral-700">scope={r.scope}</span>
-                  <span className="text-neutral-700">status={r.status}</span>
-                  <span className="text-neutral-700">
+                  <span className="text-muted-foreground">scope={r.scope}</span>
+                  <span className="text-muted-foreground">status={r.status}</span>
+                  <span className="text-muted-foreground">
                     started={r.started_at}
                   </span>
                   {r.completed_at ? (
-                    <span className="text-neutral-700">
+                    <span className="text-muted-foreground">
                       completed={r.completed_at}
                     </span>
                   ) : null}
                   {r.trigger ? (
-                    <span className="text-neutral-700">
+                    <span className="text-muted-foreground">
                       trigger={r.trigger}
                     </span>
                   ) : null}
                   {typeof r.affected_record_count === 'number' ? (
-                    <span className="text-neutral-700">
+                    <span className="text-muted-foreground">
                       affected={r.affected_record_count}
                     </span>
                   ) : null}
                 </div>
                 {r.reason ? (
-                  <p className="mt-1 text-xs text-neutral-600">{r.reason}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">{r.reason}</p>
                 ) : null}
               </li>
             ))}

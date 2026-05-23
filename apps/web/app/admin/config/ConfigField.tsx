@@ -60,10 +60,10 @@ export type ConfigFieldProps = {
 // ---------------------------------------------------------------------------
 
 const SHARED_INPUT_CLASSES =
-  'rounded border border-neutral-300 px-2 py-1.5 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-neutral-100';
+  'rounded border border-border px-2 py-1.5 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-muted';
 
 const SHARED_TEXTAREA_CLASSES =
-  'rounded border border-neutral-300 px-2 py-1.5 font-mono text-xs focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-neutral-100';
+  'rounded border border-border px-2 py-1.5 font-mono text-xs focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-muted';
 
 /** RFC 4122 v1-5 UUID pattern (also accepts uppercase). Empty allowed. */
 const UUID_PATTERN =
@@ -147,7 +147,7 @@ export default function ConfigField({
       <div className="flex flex-col gap-1">
         <label
           htmlFor={fieldId}
-          className="inline-flex items-center gap-2 text-sm font-medium text-neutral-800"
+          className="inline-flex items-center gap-2 text-sm font-medium text-foreground"
         >
           <input
             id={fieldId}
@@ -157,7 +157,7 @@ export default function ConfigField({
             onChange={(e) => emit(e.target.checked)}
             aria-describedby={validationError ? `${fieldId}-error` : undefined}
             aria-invalid={validationError ? true : undefined}
-            className="h-4 w-4 rounded border-neutral-300 text-blue-600 focus:ring-blue-500 disabled:cursor-not-allowed"
+            className="h-4 w-4 rounded border-border text-primary focus:ring-blue-500 disabled:cursor-not-allowed"
           />
           <span>{checked ? 'Enabled' : 'Disabled'}</span>
         </label>
@@ -329,7 +329,7 @@ export default function ConfigField({
                     emit(next);
                   }}
                   aria-label={`Remove entry ${idx + 1}`}
-                  className="rounded border border-red-200 px-2 py-1 text-xs font-medium text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded border border-destructive/40 px-2 py-1 text-xs font-medium text-destructive hover:bg-destructive/10 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Remove
                 </button>
@@ -346,7 +346,7 @@ export default function ConfigField({
               setArrayDraft(next);
               emit(next);
             }}
-            className="rounded border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded border border-accent/40 bg-accent/10 px-3 py-1.5 text-xs font-medium text-primary hover:bg-accent/15 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Add entry
           </button>
@@ -437,7 +437,7 @@ function renderError(
       id={`${fieldId}-error`}
       role="alert"
       aria-live="polite"
-      className="text-xs text-red-600"
+      className="text-xs text-destructive"
     >
       {message}
     </span>

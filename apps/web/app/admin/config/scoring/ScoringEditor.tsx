@@ -573,7 +573,7 @@ export function ScoringEditor({
         <div
           data-testid="scoring-rescore-pending-banner"
           role="status"
-          className="rounded-lg border border-amber-400 bg-amber-50 p-4 text-sm text-amber-900"
+          className="rounded-lg border border-amber-400 bg-open/10 p-4 text-sm text-open"
         >
           <p className="font-semibold">Re-score pending</p>
           <p className="mt-1">
@@ -600,18 +600,18 @@ export function ScoringEditor({
           <section
             key={key}
             data-section-key={key}
-            className="flex flex-col gap-3 rounded border border-neutral-200 bg-white p-4"
+            className="flex flex-col gap-3 rounded border border-border bg-card p-4"
           >
             <header className="flex flex-col gap-1">
-              <h2 className="text-lg font-semibold text-neutral-900">
+              <h2 className="text-lg font-semibold text-foreground">
                 {label.title}
               </h2>
-              <p className="text-xs font-mono text-neutral-500">{key}</p>
-              <p className="text-sm text-neutral-600">{label.help}</p>
+              <p className="text-xs font-mono text-muted-foreground">{key}</p>
+              <p className="text-sm text-muted-foreground">{label.help}</p>
             </header>
 
             <label className="flex flex-col gap-1">
-              <span className="text-sm font-medium text-neutral-700">
+              <span className="text-sm font-medium text-muted-foreground">
                 Value
               </span>
               <input
@@ -624,12 +624,12 @@ export function ScoringEditor({
                 data-testid={`scoring-${alias}-input`}
                 aria-invalid={hasValidationError ? true : undefined}
                 disabled={pending}
-                className="w-40 rounded border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-neutral-100"
+                className="w-40 rounded border border-border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-muted"
               />
             </label>
 
             <label className="flex flex-col gap-1">
-              <span className="text-sm font-medium text-neutral-700">
+              <span className="text-sm font-medium text-muted-foreground">
                 Reason (required)
               </span>
               <textarea
@@ -640,12 +640,12 @@ export function ScoringEditor({
                 rows={2}
                 required
                 disabled={pending}
-                className="rounded border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-neutral-100"
+                className="rounded border border-border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-muted"
               />
             </label>
 
             <label className="flex flex-col gap-1">
-              <span className="text-sm font-medium text-neutral-700">
+              <span className="text-sm font-medium text-muted-foreground">
                 Source citation (optional)
               </span>
               <input
@@ -655,7 +655,7 @@ export function ScoringEditor({
                   patchNumeric(key, { sourceCitation: e.target.value })
                 }
                 disabled={pending}
-                className="rounded border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-neutral-100"
+                className="rounded border border-border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-muted"
               />
             </label>
 
@@ -665,7 +665,7 @@ export function ScoringEditor({
                 onClick={() => void handleNumericPreview(key)}
                 disabled={pending || hasValidationError}
                 data-testid={`scoring-${alias}-save`}
-                className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Save
               </button>
@@ -683,7 +683,7 @@ export function ScoringEditor({
               <div
                 data-testid={`scoring-${alias}-error`}
                 role="alert"
-                className="rounded border border-red-300 bg-red-50 p-3 text-sm text-red-700"
+                className="rounded border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive"
               >
                 {section.error}
               </div>
@@ -692,13 +692,13 @@ export function ScoringEditor({
               <div
                 data-testid={`scoring-${alias}-toast`}
                 role="status"
-                className="rounded border border-green-300 bg-green-50 p-3 text-sm text-green-700"
+                className="rounded border border-win/40 bg-win/10 p-3 text-sm text-win"
               >
                 {section.toast}
               </div>
             )}
 
-            <p className="text-xs text-neutral-400">
+            <p className="text-xs text-muted-foreground/60">
               Current version: <span className="font-mono">{section.versionId}</span>
             </p>
           </section>
@@ -708,16 +708,16 @@ export function ScoringEditor({
       {/* Tie-breaker section. */}
       <section
         data-section-key="scoring.tie_breaker_order"
-        className="flex flex-col gap-3 rounded border border-neutral-200 bg-white p-4"
+        className="flex flex-col gap-3 rounded border border-border bg-card p-4"
       >
         <header className="flex flex-col gap-1">
-          <h2 className="text-lg font-semibold text-neutral-900">
+          <h2 className="text-lg font-semibold text-foreground">
             Tie-breaker order
           </h2>
-          <p className="text-xs font-mono text-neutral-500">
+          <p className="text-xs font-mono text-muted-foreground">
             scoring.tie_breaker_order
           </p>
-          <p className="text-sm text-neutral-600">
+          <p className="text-sm text-muted-foreground">
             Order in which tie-breakers are applied to rank participants with
             identical point totals. Use the up/down arrows to reorder, then
             press Save. The list must contain all four allowed values
@@ -740,14 +740,14 @@ export function ScoringEditor({
                 data-testid="tie-breaker-item"
                 data-rank={idx + 1}
                 data-key={key}
-                className="flex items-center justify-between rounded border border-neutral-200 bg-neutral-50 p-2"
+                className="flex items-center justify-between rounded border border-border bg-muted/30 p-2"
               >
-                <span className="flex items-center gap-2 text-sm text-neutral-800">
-                  <span className="inline-block w-6 text-right font-mono text-neutral-500">
+                <span className="flex items-center gap-2 text-sm text-foreground">
+                  <span className="inline-block w-6 text-right font-mono text-muted-foreground">
                     {idx + 1}.
                   </span>
                   <span className="font-medium">{label}</span>
-                  <span className="font-mono text-xs text-neutral-500">
+                  <span className="font-mono text-xs text-muted-foreground">
                     ({key})
                   </span>
                 </span>
@@ -759,7 +759,7 @@ export function ScoringEditor({
                     data-key={key}
                     aria-label={`Move ${label} up`}
                     disabled={pending || isFirst}
-                    className="rounded border border-neutral-300 px-2 py-1 text-xs font-medium text-neutral-700 hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-30"
+                    className="rounded border border-border px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-30"
                   >
                     {'↑'}
                   </button>
@@ -770,7 +770,7 @@ export function ScoringEditor({
                     data-key={key}
                     aria-label={`Move ${label} down`}
                     disabled={pending || isLast}
-                    className="rounded border border-neutral-300 px-2 py-1 text-xs font-medium text-neutral-700 hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-30"
+                    className="rounded border border-border px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-30"
                   >
                     {'↓'}
                   </button>
@@ -781,7 +781,7 @@ export function ScoringEditor({
         </ol>
 
         <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium text-neutral-700">
+          <span className="text-sm font-medium text-muted-foreground">
             Reason (required)
           </span>
           <textarea
@@ -792,12 +792,12 @@ export function ScoringEditor({
             rows={2}
             required
             disabled={pending}
-            className="rounded border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-neutral-100"
+            className="rounded border border-border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-muted"
           />
         </label>
 
         <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium text-neutral-700">
+          <span className="text-sm font-medium text-muted-foreground">
             Source citation (optional)
           </span>
           <input
@@ -807,7 +807,7 @@ export function ScoringEditor({
               patchTieBreaker({ sourceCitation: e.target.value })
             }
             disabled={pending}
-            className="rounded border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-neutral-100"
+            className="rounded border border-border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-muted"
           />
         </label>
 
@@ -817,7 +817,7 @@ export function ScoringEditor({
             onClick={() => void handleTieBreakerPreview()}
             disabled={pending || tieBreaker.validationError !== null}
             data-testid="tie-breaker-save"
-            className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50"
           >
             Save
           </button>
@@ -835,7 +835,7 @@ export function ScoringEditor({
           <div
             data-testid="tie-breaker-error"
             role="alert"
-            className="rounded border border-red-300 bg-red-50 p-3 text-sm text-red-700"
+            className="rounded border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive"
           >
             {tieBreaker.error}
           </div>
@@ -844,20 +844,20 @@ export function ScoringEditor({
           <div
             data-testid="tie-breaker-toast"
             role="status"
-            className="rounded border border-green-300 bg-green-50 p-3 text-sm text-green-700"
+            className="rounded border border-win/40 bg-win/10 p-3 text-sm text-win"
           >
             {tieBreaker.toast}
           </div>
         )}
 
-        <p className="text-xs text-neutral-400">
+        <p className="text-xs text-muted-foreground/60">
           Current version:{' '}
           <span className="font-mono">{tieBreaker.versionId}</span>
         </p>
       </section>
 
       {pending && (
-        <div className="text-sm text-neutral-500">Submitting…</div>
+        <div className="text-sm text-muted-foreground">Submitting…</div>
       )}
     </div>
   );

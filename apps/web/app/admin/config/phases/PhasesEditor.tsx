@@ -316,8 +316,8 @@ export function PhasesEditor({
 
   return (
     <div data-testid="phases-editor" className="flex flex-col gap-4">
-      <fieldset className="flex flex-col gap-3 rounded border border-neutral-200 bg-white p-4">
-        <legend className="px-1 text-sm font-medium text-neutral-700">
+      <fieldset className="flex flex-col gap-3 rounded border border-border bg-card p-4">
+        <legend className="px-1 text-sm font-medium text-muted-foreground">
           Current phase
         </legend>
         {PHASE_CATALOG.map((phase) => {
@@ -328,8 +328,8 @@ export function PhasesEditor({
               key={phase.value}
               className={`flex items-start gap-3 rounded border p-3 text-sm transition-colors ${
                 isSelected
-                  ? 'border-blue-400 bg-blue-50'
-                  : 'border-neutral-200 hover:bg-neutral-50'
+                  ? 'border-blue-400 bg-accent/10'
+                  : 'border-border hover:bg-muted/30'
               }`}
             >
               <input
@@ -340,21 +340,21 @@ export function PhasesEditor({
                 onChange={() => handleSelect(phase.value)}
                 disabled={pending}
                 data-testid="phase-radio"
-                className="mt-0.5 h-4 w-4 text-blue-600 focus:ring-blue-500"
+                className="mt-0.5 h-4 w-4 text-primary focus:ring-blue-500"
               />
               <span className="flex flex-col gap-0.5">
-                <span className="font-medium text-neutral-900">
+                <span className="font-medium text-foreground">
                   {phase.title}
                   {isCurrent && (
-                    <span className="ml-2 rounded bg-neutral-100 px-2 py-0.5 text-xs font-normal text-neutral-600">
+                    <span className="ml-2 rounded bg-muted px-2 py-0.5 text-xs font-normal text-muted-foreground">
                       current
                     </span>
                   )}
                 </span>
-                <span className="text-xs text-neutral-600">
+                <span className="text-xs text-muted-foreground">
                   {phase.description}
                 </span>
-                <span className="text-xs font-mono text-neutral-400">
+                <span className="text-xs font-mono text-muted-foreground/60">
                   {phase.value}
                 </span>
               </span>
@@ -365,7 +365,7 @@ export function PhasesEditor({
           <span
             data-testid="phase-validation-error"
             role="alert"
-            className="text-xs text-red-600"
+            className="text-xs text-destructive"
           >
             {validationError}
           </span>
@@ -374,7 +374,7 @@ export function PhasesEditor({
 
       {/* Reason (required) */}
       <label className="flex flex-col gap-1">
-        <span className="text-sm font-medium text-neutral-700">
+        <span className="text-sm font-medium text-muted-foreground">
           Reason (required)
         </span>
         <textarea
@@ -384,13 +384,13 @@ export function PhasesEditor({
           rows={2}
           required
           disabled={pending}
-          className="rounded border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-neutral-100"
+          className="rounded border border-border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-muted"
         />
       </label>
 
       {/* Source citation (required for tournament.phase.current per T041) */}
       <label className="flex flex-col gap-1">
-        <span className="text-sm font-medium text-neutral-700">
+        <span className="text-sm font-medium text-muted-foreground">
           Source citation (required)
         </span>
         <input
@@ -401,9 +401,9 @@ export function PhasesEditor({
           required
           disabled={pending}
           placeholder="e.g. FIFA fixture URL, Slack thread, ticket ref"
-          className="rounded border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-neutral-100"
+          className="rounded border border-border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-muted"
         />
-        <span className="text-xs text-neutral-500">
+        <span className="text-xs text-muted-foreground">
           Phase transitions are audit-logged and require a citation so the
           decision is traceable.
         </span>
@@ -416,7 +416,7 @@ export function PhasesEditor({
           onClick={handleSaveClick}
           disabled={saveDisabled}
           data-testid="phase-save"
-          className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50"
         >
           Save
         </button>
@@ -427,9 +427,9 @@ export function PhasesEditor({
         <div
           data-testid="phase-backward-warning"
           role="alert"
-          className="rounded-lg border border-red-400 bg-red-50 p-4 text-sm text-red-900"
+          className="rounded-lg border border-destructive bg-destructive/10 p-4 text-sm text-destructive"
         >
-          <h3 className="text-sm font-semibold text-red-800">
+          <h3 className="text-sm font-semibold text-destructive">
             Backward transition
           </h3>
           <p className="mt-2">
@@ -444,7 +444,7 @@ export function PhasesEditor({
               onClick={handleBackwardCancel}
               data-testid="phase-backward-cancel"
               disabled={pending}
-              className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-md border border-gray-300 bg-card px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Cancel
             </button>
@@ -453,7 +453,7 @@ export function PhasesEditor({
               onClick={handleBackwardConfirm}
               data-testid="phase-backward-confirm"
               disabled={pending}
-              className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-red-300"
+              className="rounded-md bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground hover:bg-destructive/90 disabled:cursor-not-allowed disabled:bg-destructive/40"
             >
               Yes, revert
             </button>
@@ -475,7 +475,7 @@ export function PhasesEditor({
         <div
           data-testid="phase-toast"
           role="status"
-          className="rounded border border-green-300 bg-green-50 p-3 text-sm text-green-700"
+          className="rounded border border-win/40 bg-win/10 p-3 text-sm text-win"
         >
           {toast}
         </div>
@@ -484,17 +484,17 @@ export function PhasesEditor({
         <div
           data-testid="phase-error"
           role="alert"
-          className="rounded border border-red-300 bg-red-50 p-3 text-sm text-red-700"
+          className="rounded border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive"
         >
           {error}
         </div>
       )}
       {pending && (
-        <div className="text-sm text-neutral-500">Submitting…</div>
+        <div className="text-sm text-muted-foreground">Submitting…</div>
       )}
 
       {/* Hidden version_id badge — useful for debugging + Playwright */}
-      <p className="text-xs text-neutral-400">
+      <p className="text-xs text-muted-foreground/60">
         Current version:{' '}
         <span data-testid="phase-version-id">{versionId}</span>
       </p>

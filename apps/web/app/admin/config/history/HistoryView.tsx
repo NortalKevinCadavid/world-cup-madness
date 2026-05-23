@@ -180,15 +180,15 @@ function shortActor(actor: string | null): string {
 function badgeClasses(kind: string): string {
   switch (kind) {
     case 'initial_seed':
-      return 'bg-neutral-200 text-neutral-800 border-neutral-300';
+      return 'bg-muted text-muted-foreground border-border';
     case 'admin_upsert':
-      return 'bg-blue-100 text-blue-800 border-blue-300';
+      return 'bg-accent/15 text-primary border-accent/40';
     case 'admin_rollback':
-      return 'bg-amber-100 text-amber-900 border-amber-300';
+      return 'bg-open/15 text-open border-open/40';
     case 'import_bulk':
       return 'bg-purple-100 text-purple-800 border-purple-300';
     default:
-      return 'bg-neutral-100 text-neutral-700 border-neutral-300';
+      return 'bg-muted text-muted-foreground border-border';
   }
 }
 
@@ -334,10 +334,10 @@ export default function HistoryView({
   return (
     <div className="flex flex-col gap-4">
       {/* Filter input */}
-      <div className="flex items-center gap-2 rounded border border-neutral-200 bg-white p-3">
+      <div className="flex items-center gap-2 rounded border border-border bg-card p-3">
         <label
           htmlFor="history-filter-input"
-          className="text-sm font-medium text-neutral-700"
+          className="text-sm font-medium text-muted-foreground"
         >
           Filter by config key:
         </label>
@@ -348,18 +348,18 @@ export default function HistoryView({
           onChange={(e) => setFilterDraft(e.target.value)}
           data-testid="history-filter-input"
           placeholder="e.g. scoring.final_pick_points"
-          className="flex-1 rounded border border-neutral-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none"
+          className="flex-1 rounded border border-border px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none"
         />
         <button
           type="button"
           onClick={handleClearFilter}
           data-testid="history-filter-clear"
           disabled={filterDraft.length === 0 && initialFilterKey === null}
-          className="rounded border border-neutral-300 bg-white px-3 py-1.5 text-xs font-medium text-neutral-700 hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded border border-border bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted/30 disabled:cursor-not-allowed disabled:opacity-50"
         >
           Clear
         </button>
-        <span className="text-xs text-neutral-500">
+        <span className="text-xs text-muted-foreground">
           Showing up to {limit}
         </span>
       </div>
@@ -368,7 +368,7 @@ export default function HistoryView({
       {initialEntries.length === 0 ? (
         <div
           data-testid="history-timeline"
-          className="rounded border border-neutral-200 bg-white p-6 text-sm text-neutral-500"
+          className="rounded border border-border bg-card p-6 text-sm text-muted-foreground"
         >
           {initialFilterKey
             ? `No version history for ${initialFilterKey}.`
@@ -377,7 +377,7 @@ export default function HistoryView({
       ) : (
         <ol
           data-testid="history-timeline"
-          className="relative ml-3 flex flex-col gap-0 border-l border-neutral-200"
+          className="relative ml-3 flex flex-col gap-0 border-l border-border"
         >
           {initialEntries.map((entry) => (
             <li
@@ -386,11 +386,11 @@ export default function HistoryView({
               data-version-id={entry.version_id}
               data-key={entry.key}
               data-change-kind={entry.change_kind}
-              className="relative mb-6 ml-4 rounded border border-neutral-200 bg-white p-4"
+              className="relative mb-6 ml-4 rounded border border-border bg-card p-4"
             >
               <span
                 aria-hidden="true"
-                className="absolute -left-[1.4rem] top-5 h-3 w-3 rounded-full border-2 border-white bg-neutral-400"
+                className="absolute -left-[1.4rem] top-5 h-3 w-3 rounded-full border-2 border-card bg-muted-foreground/60"
               />
 
               {/* Header line */}
@@ -403,16 +403,16 @@ export default function HistoryView({
                 >
                   {entry.change_kind}
                 </span>
-                <span className="font-mono text-sm text-neutral-700">
+                <span className="font-mono text-sm text-muted-foreground">
                   {entry.key}
                 </span>
-                <span className="ml-auto text-xs text-neutral-500">
+                <span className="ml-auto text-xs text-muted-foreground">
                   #{entry.version_id}
                 </span>
               </div>
 
               {/* Metadata line */}
-              <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-neutral-600">
+              <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
                 <span title={entry.actor ?? 'system'}>
                   <span className="font-medium">Actor:</span>{' '}
                   <span className="font-mono">{shortActor(entry.actor)}</span>
@@ -433,7 +433,7 @@ export default function HistoryView({
               </div>
 
               {/* Reason line */}
-              <div className="mt-2 text-sm text-neutral-700">
+              <div className="mt-2 text-sm text-muted-foreground">
                 <span className="font-medium">Reason:</span>{' '}
                 <span>{entry.reason || '—'}</span>
               </div>
@@ -441,31 +441,31 @@ export default function HistoryView({
               {/* Optional citation */}
               {entry.source_citation !== null &&
                 entry.source_citation.length > 0 && (
-                  <div className="mt-1 text-xs text-neutral-500">
+                  <div className="mt-1 text-xs text-muted-foreground">
                     <span className="font-medium">Citation:</span>{' '}
                     {entry.source_citation}
                   </div>
                 )}
 
               {/* Diff */}
-              <details className="mt-3 rounded border border-neutral-200 bg-neutral-50 p-2 text-xs">
-                <summary className="cursor-pointer font-medium text-neutral-700">
+              <details className="mt-3 rounded border border-border bg-muted/30 p-2 text-xs">
+                <summary className="cursor-pointer font-medium text-muted-foreground">
                   Diff (previous → new)
                 </summary>
                 <div className="mt-2 grid grid-cols-1 gap-2 md:grid-cols-2">
                   <div>
-                    <div className="mb-1 text-[10px] uppercase tracking-wide text-neutral-500">
+                    <div className="mb-1 text-[10px] uppercase tracking-wide text-muted-foreground">
                       Previous
                     </div>
-                    <pre className="overflow-auto rounded bg-white p-2 text-xs text-neutral-800">
+                    <pre className="overflow-auto rounded bg-card p-2 text-xs text-foreground">
                       {formatJson(entry.previous_value)}
                     </pre>
                   </div>
                   <div>
-                    <div className="mb-1 text-[10px] uppercase tracking-wide text-neutral-500">
+                    <div className="mb-1 text-[10px] uppercase tracking-wide text-muted-foreground">
                       New
                     </div>
-                    <pre className="overflow-auto rounded bg-white p-2 text-xs text-neutral-800">
+                    <pre className="overflow-auto rounded bg-card p-2 text-xs text-foreground">
                       {formatJson(entry.new_value)}
                     </pre>
                   </div>
@@ -483,7 +483,7 @@ export default function HistoryView({
                   data-testid="history-entry-rollback"
                   data-version-id={entry.version_id}
                   disabled={pending}
-                  className="rounded border border-neutral-300 bg-white px-3 py-1 text-xs font-medium text-neutral-700 hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground hover:bg-muted/30 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Rollback to this
                 </button>
@@ -502,25 +502,25 @@ export default function HistoryView({
           aria-label="Confirm configuration rollback"
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
         >
-          <div className="w-full max-w-lg rounded-lg bg-white p-6 shadow-xl">
-            <h2 className="text-lg font-semibold text-neutral-900">
+          <div className="w-full max-w-lg rounded-lg bg-card p-6 shadow-xl">
+            <h2 className="text-lg font-semibold text-foreground">
               Confirm rollback
             </h2>
-            <p className="mt-2 text-sm text-neutral-700">
+            <p className="mt-2 text-sm text-muted-foreground">
               You are about to roll back{' '}
-              <code className="rounded bg-neutral-100 px-1 py-0.5 font-mono text-xs">
+              <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">
                 {modal.entry.key}
               </code>{' '}
               to version{' '}
               <span className="font-mono">#{modal.entry.version_id}</span>. The
               current value will be replaced with:
             </p>
-            <pre className="mt-2 max-h-40 overflow-auto rounded border border-neutral-200 bg-neutral-50 p-2 text-xs text-neutral-800">
+            <pre className="mt-2 max-h-40 overflow-auto rounded border border-border bg-muted/30 p-2 text-xs text-foreground">
               {formatJson(modal.entry.new_value)}
             </pre>
 
             <label className="mt-4 flex flex-col gap-1">
-              <span className="text-sm font-medium text-neutral-700">
+              <span className="text-sm font-medium text-muted-foreground">
                 Reason (required)
               </span>
               <textarea
@@ -532,12 +532,12 @@ export default function HistoryView({
                 rows={3}
                 required
                 disabled={pending}
-                className="rounded border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-neutral-100"
+                className="rounded border border-border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-muted"
               />
             </label>
 
             <label className="mt-3 flex flex-col gap-1">
-              <span className="text-sm font-medium text-neutral-700">
+              <span className="text-sm font-medium text-muted-foreground">
                 Source citation (optional)
               </span>
               <input
@@ -551,7 +551,7 @@ export default function HistoryView({
                 data-testid="rollback-source-citation"
                 disabled={pending}
                 placeholder="e.g. Slack thread, ticket ref"
-                className="rounded border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-neutral-100"
+                className="rounded border border-border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-muted"
               />
             </label>
 
@@ -561,7 +561,7 @@ export default function HistoryView({
                 onClick={closeModal}
                 data-testid="rollback-cancel"
                 disabled={pending}
-                className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-md border border-gray-300 bg-card px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -570,7 +570,7 @@ export default function HistoryView({
                 onClick={handleConfirmRollback}
                 data-testid="rollback-confirm"
                 disabled={pending || modal.reason.trim().length === 0}
-                className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {pending ? 'Rolling back…' : 'Confirm rollback'}
               </button>
@@ -584,7 +584,7 @@ export default function HistoryView({
         <div
           data-testid="history-toast"
           role="status"
-          className="rounded border border-green-300 bg-green-50 p-3 text-sm text-green-700"
+          className="rounded border border-win/40 bg-win/10 p-3 text-sm text-win"
         >
           {toast}
         </div>
@@ -595,7 +595,7 @@ export default function HistoryView({
         <div
           data-testid="history-error"
           role="alert"
-          className="rounded border border-red-300 bg-red-50 p-3 text-sm text-red-700"
+          className="rounded border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive"
         >
           {error}
         </div>

@@ -251,13 +251,13 @@ export default async function ConfigRetentionPage() {
         data-testid="admin-config-retention-page"
         className="max-w-4xl mx-auto px-6 py-8 flex flex-col gap-4"
       >
-        <h1 className="text-2xl font-semibold text-neutral-900">
+        <h1 className="text-2xl font-semibold text-foreground">
           Audit retention &amp; notifications
         </h1>
         <div
           data-testid="retention-error"
           role="alert"
-          className="rounded border border-red-300 bg-red-50 p-4 text-sm text-red-700"
+          className="rounded border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive"
         >
           Failed to load retention configuration: {readError.message}
         </div>
@@ -323,10 +323,10 @@ export default async function ConfigRetentionPage() {
       className="max-w-4xl mx-auto px-6 py-8 flex flex-col gap-6"
     >
       <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold text-neutral-900">
+        <h1 className="text-2xl font-semibold text-foreground">
           Audit retention &amp; notifications
         </h1>
-        <p className="text-sm text-neutral-600">
+        <p className="text-sm text-muted-foreground">
           Audit-log retention policy plus the webhook destination used to alert
           on audit-write failures (Slice 007 T061/T062/T063 plumbing). Each
           section saves independently. The webhook secret is write-only — the

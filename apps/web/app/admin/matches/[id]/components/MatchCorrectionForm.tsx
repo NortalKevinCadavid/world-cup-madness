@@ -158,19 +158,19 @@ export function MatchCorrectionForm({
     <form
       data-testid="admin-match-correct-score-form"
       onSubmit={handleSubmit}
-      className="rounded-lg border border-neutral-200 bg-white p-6 flex flex-col gap-4"
+      className="rounded-lg border border-border bg-card p-6 flex flex-col gap-4"
     >
-      <h2 className="text-lg font-semibold text-neutral-900">
+      <h2 className="text-lg font-semibold text-foreground">
         Correct match score
       </h2>
-      <p className="text-xs text-neutral-500">
+      <p className="text-xs text-muted-foreground">
         Every correction is captured in the audit log with the actor, the
         previous and new values, the reason, and the source citation.
       </p>
 
       <div className="grid grid-cols-2 gap-4">
         <label className="flex flex-col gap-1 text-sm">
-          <span className="font-medium text-neutral-800">Home score</span>
+          <span className="font-medium text-foreground">Home score</span>
           <input
             name="home_score"
             type="number"
@@ -184,11 +184,11 @@ export function MatchCorrectionForm({
             disabled={pending}
             required
             aria-invalid={errorField === 'home_score' || undefined}
-            className="rounded border border-neutral-300 px-2 py-1.5 tabular-nums focus:border-blue-500 focus:outline-none disabled:bg-neutral-100"
+            className="rounded border border-border px-2 py-1.5 tabular-nums focus:border-blue-500 focus:outline-none disabled:bg-muted"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm">
-          <span className="font-medium text-neutral-800">Away score</span>
+          <span className="font-medium text-foreground">Away score</span>
           <input
             name="away_score"
             type="number"
@@ -202,14 +202,14 @@ export function MatchCorrectionForm({
             disabled={pending}
             required
             aria-invalid={errorField === 'away_score' || undefined}
-            className="rounded border border-neutral-300 px-2 py-1.5 tabular-nums focus:border-blue-500 focus:outline-none disabled:bg-neutral-100"
+            className="rounded border border-border px-2 py-1.5 tabular-nums focus:border-blue-500 focus:outline-none disabled:bg-muted"
           />
         </label>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <label className="flex flex-col gap-1 text-sm">
-          <span className="font-medium text-neutral-800">
+          <span className="font-medium text-foreground">
             Home score (for scoring)
           </span>
           <input
@@ -224,11 +224,11 @@ export function MatchCorrectionForm({
             }
             disabled={pending}
             required
-            className="rounded border border-neutral-300 px-2 py-1.5 tabular-nums focus:border-blue-500 focus:outline-none disabled:bg-neutral-100"
+            className="rounded border border-border px-2 py-1.5 tabular-nums focus:border-blue-500 focus:outline-none disabled:bg-muted"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm">
-          <span className="font-medium text-neutral-800">
+          <span className="font-medium text-foreground">
             Away score (for scoring)
           </span>
           <input
@@ -243,19 +243,19 @@ export function MatchCorrectionForm({
             }
             disabled={pending}
             required
-            className="rounded border border-neutral-300 px-2 py-1.5 tabular-nums focus:border-blue-500 focus:outline-none disabled:bg-neutral-100"
+            className="rounded border border-border px-2 py-1.5 tabular-nums focus:border-blue-500 focus:outline-none disabled:bg-muted"
           />
         </label>
       </div>
 
       <label className="flex flex-col gap-1 text-sm">
-        <span className="font-medium text-neutral-800">Result status</span>
+        <span className="font-medium text-foreground">Result status</span>
         <select
           name="result_status"
           value={resultStatus}
           onChange={(e) => setResultStatus(e.target.value)}
           disabled={pending}
-          className="rounded border border-neutral-300 px-2 py-1.5 focus:border-blue-500 focus:outline-none disabled:bg-neutral-100"
+          className="rounded border border-border px-2 py-1.5 focus:border-blue-500 focus:outline-none disabled:bg-muted"
         >
           {RESULT_STATUS_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>
@@ -266,8 +266,8 @@ export function MatchCorrectionForm({
       </label>
 
       <label className="flex flex-col gap-1 text-sm">
-        <span className="font-medium text-neutral-800">
-          Reason <span className="text-red-600">*</span>
+        <span className="font-medium text-foreground">
+          Reason <span className="text-destructive">*</span>
         </span>
         <textarea
           name="reason"
@@ -279,7 +279,7 @@ export function MatchCorrectionForm({
           aria-describedby={
             errorField === 'reason' ? 'field-error-reason' : undefined
           }
-          className="rounded border border-neutral-300 px-2 py-1.5 focus:border-blue-500 focus:outline-none disabled:bg-neutral-100"
+          className="rounded border border-border px-2 py-1.5 focus:border-blue-500 focus:outline-none disabled:bg-muted"
           placeholder="e.g. FIFA Bureau decision overturning provider score"
         />
         {errorField === 'reason' && errorMessage ? (
@@ -288,7 +288,7 @@ export function MatchCorrectionForm({
             data-testid="field-error-reason"
             role="alert"
             aria-live="polite"
-            className="text-sm text-red-600"
+            className="text-sm text-destructive"
           >
             {errorMessage}
           </span>
@@ -296,9 +296,9 @@ export function MatchCorrectionForm({
       </label>
 
       <label className="flex flex-col gap-1 text-sm">
-        <span className="font-medium text-neutral-800">
+        <span className="font-medium text-foreground">
           Source citation (URL or document reference){' '}
-          <span className="text-red-600">*</span>
+          <span className="text-destructive">*</span>
         </span>
         <input
           name="source_citation"
@@ -312,7 +312,7 @@ export function MatchCorrectionForm({
               ? 'field-error-source_citation'
               : undefined
           }
-          className="rounded border border-neutral-300 px-2 py-1.5 focus:border-blue-500 focus:outline-none disabled:bg-neutral-100"
+          className="rounded border border-border px-2 py-1.5 focus:border-blue-500 focus:outline-none disabled:bg-muted"
           placeholder="https://fifa.example/m1"
         />
         {errorField === 'source_citation' && errorMessage ? (
@@ -321,7 +321,7 @@ export function MatchCorrectionForm({
             data-testid="field-error-source_citation"
             role="alert"
             aria-live="polite"
-            className="text-sm text-red-600"
+            className="text-sm text-destructive"
           >
             {errorMessage}
           </span>
@@ -333,7 +333,7 @@ export function MatchCorrectionForm({
           data-testid="admin-match-correct-score-form-error"
           role="alert"
           aria-live="polite"
-          className="rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+          className="rounded border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive"
         >
           {errorMessage}
         </div>
@@ -344,7 +344,7 @@ export function MatchCorrectionForm({
           type="submit"
           disabled={pending}
           data-testid="admin-match-correct-score-submit"
-          className="rounded border border-blue-700 bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded border border-blue-700 bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50"
         >
           {pending ? 'Submitting…' : 'Apply correction'}
         </button>

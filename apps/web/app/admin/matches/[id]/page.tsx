@@ -137,56 +137,56 @@ export default async function AdminMatchDetail({
       className="max-w-4xl mx-auto px-6 py-8 flex flex-col gap-6"
     >
       <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold text-neutral-900">
+        <h1 className="text-2xl font-semibold text-foreground">
           Match {params.id}
         </h1>
-        <p className="text-xs font-mono text-neutral-500">
+        <p className="text-xs font-mono text-muted-foreground">
           /admin/matches/{params.id}
         </p>
       </header>
 
       <section
         data-testid="admin-match-detail-current-state"
-        className="rounded-lg border border-neutral-200 bg-white p-6"
+        className="rounded-lg border border-border bg-card p-6"
       >
-        <h2 className="text-lg font-semibold text-neutral-900">
+        <h2 className="text-lg font-semibold text-foreground">
           Current state
         </h2>
         <dl className="mt-3 grid grid-cols-[max-content,1fr] gap-x-4 gap-y-1 text-sm">
-          <dt className="text-neutral-500">Status</dt>
-          <dd data-field="match-status" className="text-neutral-800">
+          <dt className="text-muted-foreground">Status</dt>
+          <dd data-field="match-status" className="text-foreground">
             {match.status}
           </dd>
-          <dt className="text-neutral-500">Kickoff</dt>
-          <dd className="text-neutral-800">{match.kickoff_utc}</dd>
-          <dt className="text-neutral-500">Home team</dt>
-          <dd className="font-mono text-xs text-neutral-700">
+          <dt className="text-muted-foreground">Kickoff</dt>
+          <dd className="text-foreground">{match.kickoff_utc}</dd>
+          <dt className="text-muted-foreground">Home team</dt>
+          <dd className="font-mono text-xs text-muted-foreground">
             {match.home_team_id}
           </dd>
-          <dt className="text-neutral-500">Away team</dt>
-          <dd className="font-mono text-xs text-neutral-700">
+          <dt className="text-muted-foreground">Away team</dt>
+          <dd className="font-mono text-xs text-muted-foreground">
             {match.away_team_id}
           </dd>
           {currentResult ? (
             <>
-              <dt className="text-neutral-500">Home score (official)</dt>
-              <dd data-field="home-score" className="text-neutral-800">
+              <dt className="text-muted-foreground">Home score (official)</dt>
+              <dd data-field="home-score" className="text-foreground">
                 {currentResult.home_score}
               </dd>
-              <dt className="text-neutral-500">Away score (official)</dt>
-              <dd data-field="away-score" className="text-neutral-800">
+              <dt className="text-muted-foreground">Away score (official)</dt>
+              <dd data-field="away-score" className="text-foreground">
                 {currentResult.away_score}
               </dd>
-              <dt className="text-neutral-500">Home score (for scoring)</dt>
-              <dd className="text-neutral-800">
+              <dt className="text-muted-foreground">Home score (for scoring)</dt>
+              <dd className="text-foreground">
                 {currentResult.home_score_for_scoring}
               </dd>
-              <dt className="text-neutral-500">Away score (for scoring)</dt>
-              <dd className="text-neutral-800">
+              <dt className="text-muted-foreground">Away score (for scoring)</dt>
+              <dd className="text-foreground">
                 {currentResult.away_score_for_scoring}
               </dd>
-              <dt className="text-neutral-500">Result status</dt>
-              <dd className="text-neutral-800">{currentResult.result_status}</dd>
+              <dt className="text-muted-foreground">Result status</dt>
+              <dd className="text-foreground">{currentResult.result_status}</dd>
             </>
           ) : null}
         </dl>
@@ -204,13 +204,13 @@ export default async function AdminMatchDetail({
 
       <section
         data-testid="admin-match-detail-history"
-        className="rounded-lg border border-neutral-200 bg-white p-6"
+        className="rounded-lg border border-border bg-card p-6"
       >
-        <h2 className="text-lg font-semibold text-neutral-900">
+        <h2 className="text-lg font-semibold text-foreground">
           Admin actions history
         </h2>
         {auditRows.length === 0 ? (
-          <p className="mt-2 text-sm text-neutral-600">
+          <p className="mt-2 text-sm text-muted-foreground">
             No prior admin actions against this match.
           </p>
         ) : (
@@ -219,14 +219,14 @@ export default async function AdminMatchDetail({
               <li
                 key={row.id}
                 data-testid="admin-match-audit-row"
-                className="text-sm text-neutral-800"
+                className="text-sm text-foreground"
               >
-                <span className="font-mono text-xs text-neutral-600">
+                <span className="font-mono text-xs text-muted-foreground">
                   {row.occurred_at}
                 </span>
                 <span className="ml-2 font-mono text-xs">{row.action}</span>
                 {row.reason ? (
-                  <span className="ml-2 text-neutral-700">— {row.reason}</span>
+                  <span className="ml-2 text-muted-foreground">— {row.reason}</span>
                 ) : null}
               </li>
             ))}
@@ -237,7 +237,7 @@ export default async function AdminMatchDetail({
       <p className="text-sm">
         <a
           href={`/admin/predictions?match_id=${params.id}`}
-          className="text-blue-700 underline"
+          className="text-primary underline"
         >
           View predictions for this match
         </a>

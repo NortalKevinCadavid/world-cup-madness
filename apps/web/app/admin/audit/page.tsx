@@ -161,77 +161,77 @@ export default async function AdminAuditSearchPage({
       className="max-w-5xl mx-auto px-6 py-8 flex flex-col gap-6"
     >
       <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold text-neutral-900">Audit log</h1>
-        <p className="text-xs font-mono text-neutral-500">/admin/audit</p>
+        <h1 className="text-2xl font-semibold text-foreground">Audit log</h1>
+        <p className="text-xs font-mono text-muted-foreground">/admin/audit</p>
       </header>
 
       <form
         data-testid="admin-audit-filter-form"
         method="get"
-        className="rounded-lg border border-neutral-200 bg-white p-6 grid grid-cols-1 sm:grid-cols-2 gap-3"
+        className="rounded-lg border border-border bg-card p-6 grid grid-cols-1 sm:grid-cols-2 gap-3"
       >
         <label className="flex flex-col gap-1 text-sm">
-          <span className="font-medium text-neutral-800">Action</span>
+          <span className="font-medium text-foreground">Action</span>
           <input
             name="action"
             type="text"
             defaultValue={action ?? ''}
             placeholder="admin.match_result_corrected"
-            className="rounded border border-neutral-300 px-2 py-1.5 text-sm font-mono focus:border-blue-500 focus:outline-none"
+            className="rounded border border-border px-2 py-1.5 text-sm font-mono focus:border-blue-500 focus:outline-none"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm">
-          <span className="font-medium text-neutral-800">Actor (uuid)</span>
+          <span className="font-medium text-foreground">Actor (uuid)</span>
           <input
             name="actor"
             type="text"
             defaultValue={actor ?? ''}
             placeholder="00000000-0000-0000-0000-000000000000"
-            className="rounded border border-neutral-300 px-2 py-1.5 text-sm font-mono focus:border-blue-500 focus:outline-none"
+            className="rounded border border-border px-2 py-1.5 text-sm font-mono focus:border-blue-500 focus:outline-none"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm">
-          <span className="font-medium text-neutral-800">Entity type</span>
+          <span className="font-medium text-foreground">Entity type</span>
           <input
             name="entity_type"
             type="text"
             defaultValue={entityType ?? ''}
             placeholder="match | prediction | ..."
-            className="rounded border border-neutral-300 px-2 py-1.5 text-sm focus:border-blue-500 focus:outline-none"
+            className="rounded border border-border px-2 py-1.5 text-sm focus:border-blue-500 focus:outline-none"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm">
-          <span className="font-medium text-neutral-800">Entity id</span>
+          <span className="font-medium text-foreground">Entity id</span>
           <input
             name="entity_id"
             type="text"
             defaultValue={entityId ?? ''}
             placeholder="uuid"
-            className="rounded border border-neutral-300 px-2 py-1.5 text-sm font-mono focus:border-blue-500 focus:outline-none"
+            className="rounded border border-border px-2 py-1.5 text-sm font-mono focus:border-blue-500 focus:outline-none"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm">
-          <span className="font-medium text-neutral-800">From (ISO-8601)</span>
+          <span className="font-medium text-foreground">From (ISO-8601)</span>
           <input
             name="from"
             type="text"
             defaultValue={from ?? ''}
             placeholder="2026-06-01T00:00:00Z"
-            className="rounded border border-neutral-300 px-2 py-1.5 text-sm font-mono focus:border-blue-500 focus:outline-none"
+            className="rounded border border-border px-2 py-1.5 text-sm font-mono focus:border-blue-500 focus:outline-none"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm">
-          <span className="font-medium text-neutral-800">To (ISO-8601)</span>
+          <span className="font-medium text-foreground">To (ISO-8601)</span>
           <input
             name="to"
             type="text"
             defaultValue={to ?? ''}
             placeholder="2026-06-30T23:59:59Z"
-            className="rounded border border-neutral-300 px-2 py-1.5 text-sm font-mono focus:border-blue-500 focus:outline-none"
+            className="rounded border border-border px-2 py-1.5 text-sm font-mono focus:border-blue-500 focus:outline-none"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm sm:col-span-2">
-          <span className="font-medium text-neutral-800">
+          <span className="font-medium text-foreground">
             Free-text (reason + source_citation)
           </span>
           <input
@@ -239,56 +239,56 @@ export default async function AdminAuditSearchPage({
             type="text"
             defaultValue={q ?? ''}
             placeholder="search reason or source citation"
-            className="rounded border border-neutral-300 px-2 py-1.5 text-sm focus:border-blue-500 focus:outline-none"
+            className="rounded border border-border px-2 py-1.5 text-sm focus:border-blue-500 focus:outline-none"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm">
-          <span className="font-medium text-neutral-800">Page size</span>
+          <span className="font-medium text-foreground">Page size</span>
           <input
             name="page_size"
             type="number"
             min={1}
             max={200}
             defaultValue={pageSize}
-            className="rounded border border-neutral-300 px-2 py-1.5 text-sm tabular-nums focus:border-blue-500 focus:outline-none"
+            className="rounded border border-border px-2 py-1.5 text-sm tabular-nums focus:border-blue-500 focus:outline-none"
           />
         </label>
         <div className="sm:col-span-2 flex items-end justify-end">
           <button
             type="submit"
             data-testid="admin-audit-filter-submit"
-            className="rounded border border-blue-700 bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            className="rounded border border-blue-700 bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary"
           >
             Search
           </button>
         </div>
       </form>
 
-      <section className="rounded-lg border border-neutral-200 bg-white p-6">
-        <h2 className="text-lg font-semibold text-neutral-900">Results</h2>
-        <p className="mt-1 text-xs text-neutral-500">
+      <section className="rounded-lg border border-border bg-card p-6">
+        <h2 className="text-lg font-semibold text-foreground">Results</h2>
+        <p className="mt-1 text-xs text-muted-foreground">
           {total} matching row(s) — showing page {page} of {totalPages}.
         </p>
         {rows.length === 0 ? (
-          <p className="mt-3 text-sm text-neutral-600">No matching rows.</p>
+          <p className="mt-3 text-sm text-muted-foreground">No matching rows.</p>
         ) : (
           <ul className="mt-3 flex flex-col gap-2">
             {rows.map((row) => (
               <li
                 key={row.id}
                 data-testid="admin-audit-row"
-                className="text-sm text-neutral-800"
+                className="text-sm text-foreground"
               >
-                <span className="font-mono text-xs text-neutral-600">
+                <span className="font-mono text-xs text-muted-foreground">
                   {row.occurred_at}
                 </span>
                 <span className="ml-2 font-mono text-xs">{row.action}</span>
                 {row.reason ? (
-                  <span className="ml-2 text-neutral-700">— {row.reason}</span>
+                  <span className="ml-2 text-muted-foreground">— {row.reason}</span>
                 ) : null}
                 <a
                   href={`/admin/audit/${row.id}`}
-                  className="ml-2 text-xs text-blue-700 underline"
+                  className="ml-2 text-xs text-primary underline"
                   data-testid="admin-audit-row-detail-link"
                 >
                   view detail
@@ -307,21 +307,21 @@ export default async function AdminAuditSearchPage({
           <a
             href={buildHref(page - 1)}
             data-testid="admin-audit-prev-page"
-            className="rounded border border-neutral-300 bg-white px-3 py-1.5 text-neutral-800 hover:bg-neutral-50"
+            className="rounded border border-border bg-card px-3 py-1.5 text-foreground hover:bg-muted/30"
           >
             Previous
           </a>
         ) : (
           <span />
         )}
-        <span className="text-xs text-neutral-600">
+        <span className="text-xs text-muted-foreground">
           Page {page} / {totalPages} ({total} total)
         </span>
         {page < totalPages ? (
           <a
             href={buildHref(page + 1)}
             data-testid="admin-audit-next-page"
-            className="rounded border border-neutral-300 bg-white px-3 py-1.5 text-neutral-800 hover:bg-neutral-50"
+            className="rounded border border-border bg-card px-3 py-1.5 text-foreground hover:bg-muted/30"
           >
             Next
           </a>

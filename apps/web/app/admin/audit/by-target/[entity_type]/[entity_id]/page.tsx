@@ -73,29 +73,29 @@ export default async function AdminAuditByTargetPage({
       className="max-w-4xl mx-auto px-6 py-8 flex flex-col gap-6"
     >
       <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold text-neutral-900">
+        <h1 className="text-2xl font-semibold text-foreground">
           Audit history by target
         </h1>
-        <p className="text-xs font-mono text-neutral-500">
+        <p className="text-xs font-mono text-muted-foreground">
           /admin/audit/by-target/{entity_type}/{entity_id}
         </p>
       </header>
 
-      <section className="rounded-lg border border-neutral-200 bg-white p-6">
+      <section className="rounded-lg border border-border bg-card p-6">
         <dl className="grid grid-cols-[max-content,1fr] gap-x-4 gap-y-1 text-sm">
-          <dt className="text-neutral-500">entity_type</dt>
-          <dd className="font-mono text-xs text-neutral-800">{entity_type}</dd>
-          <dt className="text-neutral-500">entity_id</dt>
-          <dd className="font-mono text-xs text-neutral-800">{entity_id}</dd>
-          <dt className="text-neutral-500">rows</dt>
-          <dd className="text-neutral-800 tabular-nums">{rows.length}</dd>
+          <dt className="text-muted-foreground">entity_type</dt>
+          <dd className="font-mono text-xs text-foreground">{entity_type}</dd>
+          <dt className="text-muted-foreground">entity_id</dt>
+          <dd className="font-mono text-xs text-foreground">{entity_id}</dd>
+          <dt className="text-muted-foreground">rows</dt>
+          <dd className="text-foreground tabular-nums">{rows.length}</dd>
         </dl>
       </section>
 
-      <section className="rounded-lg border border-neutral-200 bg-white p-6">
-        <h2 className="text-lg font-semibold text-neutral-900">History</h2>
+      <section className="rounded-lg border border-border bg-card p-6">
+        <h2 className="text-lg font-semibold text-foreground">History</h2>
         {rows.length === 0 ? (
-          <p className="mt-3 text-sm text-neutral-600">
+          <p className="mt-3 text-sm text-muted-foreground">
             No audit rows targeting this entity.
           </p>
         ) : (
@@ -104,18 +104,18 @@ export default async function AdminAuditByTargetPage({
               <li
                 key={row.id}
                 data-testid="admin-audit-by-target-row"
-                className="text-sm text-neutral-800"
+                className="text-sm text-foreground"
               >
-                <span className="font-mono text-xs text-neutral-600">
+                <span className="font-mono text-xs text-muted-foreground">
                   {row.occurred_at}
                 </span>
                 <span className="ml-2 font-mono text-xs">{row.action}</span>
                 {row.reason ? (
-                  <span className="ml-2 text-neutral-700">— {row.reason}</span>
+                  <span className="ml-2 text-muted-foreground">— {row.reason}</span>
                 ) : null}
                 <a
                   href={`/admin/audit/${row.id}`}
-                  className="ml-2 text-xs text-blue-700 underline"
+                  className="ml-2 text-xs text-primary underline"
                 >
                   view detail
                 </a>

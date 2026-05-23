@@ -93,8 +93,8 @@ export function PendingReviewActions({ reviewId }: PendingReviewActionsProps) {
       className="mt-3 flex flex-col gap-3"
     >
       <label className="flex flex-col gap-1 text-sm">
-        <span className="font-medium text-neutral-800">
-          Reason <span className="text-red-600">*</span>
+        <span className="font-medium text-foreground">
+          Reason <span className="text-destructive">*</span>
         </span>
         <textarea
           name="reason"
@@ -103,7 +103,7 @@ export function PendingReviewActions({ reviewId }: PendingReviewActionsProps) {
           onChange={(e) => setReason(e.target.value)}
           disabled={pending}
           aria-invalid={errorField === 'reason' || undefined}
-          className="rounded border border-neutral-300 px-2 py-1.5 text-sm focus:border-blue-500 focus:outline-none disabled:bg-neutral-100"
+          className="rounded border border-border px-2 py-1.5 text-sm focus:border-blue-500 focus:outline-none disabled:bg-muted"
           placeholder="e.g. provider observation matches official scorecard"
         />
         {errorField === 'reason' && errorMessage ? (
@@ -111,15 +111,15 @@ export function PendingReviewActions({ reviewId }: PendingReviewActionsProps) {
             data-testid="field-error-reason"
             role="alert"
             aria-live="polite"
-            className="text-sm text-red-600"
+            className="text-sm text-destructive"
           >
             {errorMessage}
           </span>
         ) : null}
       </label>
       <label className="flex flex-col gap-1 text-sm">
-        <span className="font-medium text-neutral-800">
-          Source citation <span className="text-red-600">*</span>
+        <span className="font-medium text-foreground">
+          Source citation <span className="text-destructive">*</span>
         </span>
         <input
           name="source_citation"
@@ -128,7 +128,7 @@ export function PendingReviewActions({ reviewId }: PendingReviewActionsProps) {
           onChange={(e) => setSource(e.target.value)}
           disabled={pending}
           aria-invalid={errorField === 'source_citation' || undefined}
-          className="rounded border border-neutral-300 px-2 py-1.5 text-sm focus:border-blue-500 focus:outline-none disabled:bg-neutral-100"
+          className="rounded border border-border px-2 py-1.5 text-sm focus:border-blue-500 focus:outline-none disabled:bg-muted"
           placeholder="https://fifa.example/..."
         />
         {errorField === 'source_citation' && errorMessage ? (
@@ -136,7 +136,7 @@ export function PendingReviewActions({ reviewId }: PendingReviewActionsProps) {
             data-testid="field-error-source_citation"
             role="alert"
             aria-live="polite"
-            className="text-sm text-red-600"
+            className="text-sm text-destructive"
           >
             {errorMessage}
           </span>
@@ -147,7 +147,7 @@ export function PendingReviewActions({ reviewId }: PendingReviewActionsProps) {
         <div
           role="alert"
           aria-live="polite"
-          className="rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+          className="rounded border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive"
         >
           {errorMessage}
         </div>
@@ -157,7 +157,7 @@ export function PendingReviewActions({ reviewId }: PendingReviewActionsProps) {
         <div
           role="status"
           aria-live="polite"
-          className="rounded border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700"
+          className="rounded border border-win/40 bg-win/10 px-3 py-2 text-sm text-win"
         >
           {success}
         </div>
@@ -169,7 +169,7 @@ export function PendingReviewActions({ reviewId }: PendingReviewActionsProps) {
           disabled={pending}
           onClick={() => submit('accept_provider')}
           data-testid="admin-pending-review-accept-provider"
-          className="rounded border border-blue-700 bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded border border-blue-700 bg-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50"
         >
           Accept provider
         </button>
@@ -178,7 +178,7 @@ export function PendingReviewActions({ reviewId }: PendingReviewActionsProps) {
           disabled={pending}
           onClick={() => submit('reject_provider')}
           data-testid="admin-pending-review-reject-provider"
-          className="rounded border border-neutral-400 bg-white px-3 py-1.5 text-sm font-medium text-neutral-800 hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded border border-muted-foreground bg-card px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted/30 disabled:cursor-not-allowed disabled:opacity-50"
         >
           Reject provider
         </button>
@@ -187,7 +187,7 @@ export function PendingReviewActions({ reviewId }: PendingReviewActionsProps) {
           disabled={pending}
           onClick={() => submit('manual_override')}
           data-testid="admin-pending-review-manual-override"
-          className="rounded border border-neutral-400 bg-white px-3 py-1.5 text-sm font-medium text-neutral-800 hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded border border-muted-foreground bg-card px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted/30 disabled:cursor-not-allowed disabled:opacity-50"
         >
           Manual override
         </button>

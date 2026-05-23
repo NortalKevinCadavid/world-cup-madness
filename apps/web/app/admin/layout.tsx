@@ -154,7 +154,7 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="admin-shell min-h-screen flex flex-col bg-neutral-50">
+    <div className="admin-shell min-h-screen flex flex-col bg-muted/30">
       <TopNav participant={participant} isAdmin={true} activeSection="admin" />
       <div className="flex-1">{children}</div>
     </div>

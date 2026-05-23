@@ -139,34 +139,34 @@ export default async function AdminPredictionsForParticipantPage({
       className="max-w-5xl mx-auto px-6 py-8 flex flex-col gap-6"
     >
       <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold text-neutral-900">
+        <h1 className="text-2xl font-semibold text-foreground">
           Participant predictions
         </h1>
-        <p className="text-xs font-mono text-neutral-500">
+        <p className="text-xs font-mono text-muted-foreground">
           /admin/predictions/{participantId}
         </p>
       </header>
 
       <section
         data-testid="admin-predictions-participant"
-        className="rounded-lg border border-neutral-200 bg-white p-6"
+        className="rounded-lg border border-border bg-card p-6"
       >
-        <h2 className="text-lg font-semibold text-neutral-900">Profile</h2>
+        <h2 className="text-lg font-semibold text-foreground">Profile</h2>
         {participant ? (
           <dl className="mt-3 grid grid-cols-[max-content,1fr] gap-x-4 gap-y-1 text-sm">
-            <dt className="text-neutral-500">Participant id</dt>
-            <dd className="font-mono text-xs text-neutral-800">
+            <dt className="text-muted-foreground">Participant id</dt>
+            <dd className="font-mono text-xs text-foreground">
               {participant.id}
             </dd>
-            <dt className="text-neutral-500">Display name</dt>
-            <dd className="text-neutral-800">
+            <dt className="text-muted-foreground">Display name</dt>
+            <dd className="text-foreground">
               {participant.display_name ?? '—'}
             </dd>
-            <dt className="text-neutral-500">Email</dt>
-            <dd className="text-neutral-800">{participant.email ?? '—'}</dd>
+            <dt className="text-muted-foreground">Email</dt>
+            <dd className="text-foreground">{participant.email ?? '—'}</dd>
           </dl>
         ) : (
-          <p className="mt-3 text-sm text-neutral-600">
+          <p className="mt-3 text-sm text-muted-foreground">
             No participant row found (or RLS-filtered).
           </p>
         )}
@@ -174,13 +174,13 @@ export default async function AdminPredictionsForParticipantPage({
 
       <section
         data-testid="admin-predictions-match-list"
-        className="rounded-lg border border-neutral-200 bg-white p-6"
+        className="rounded-lg border border-border bg-card p-6"
       >
-        <h2 className="text-lg font-semibold text-neutral-900">
+        <h2 className="text-lg font-semibold text-foreground">
           Match predictions
         </h2>
         {predictions.length === 0 ? (
-          <p className="mt-3 text-sm text-neutral-600">
+          <p className="mt-3 text-sm text-muted-foreground">
             No match predictions recorded.
           </p>
         ) : (
@@ -189,19 +189,19 @@ export default async function AdminPredictionsForParticipantPage({
               <li
                 key={row.id}
                 data-testid="admin-predictions-match-row"
-                className="text-sm text-neutral-800"
+                className="text-sm text-foreground"
               >
-                <span className="font-mono text-xs text-neutral-600">
+                <span className="font-mono text-xs text-muted-foreground">
                   {row.match_id}
                 </span>
                 <span className="ml-2 tabular-nums">
                   {row.home_score ?? '—'} - {row.away_score ?? '—'}
                 </span>
-                <span className="ml-2 text-xs text-neutral-500">
+                <span className="ml-2 text-xs text-muted-foreground">
                   source={row.source ?? '—'}
                 </span>
                 {row.superseded_at ? (
-                  <span className="ml-2 text-xs text-neutral-400">
+                  <span className="ml-2 text-xs text-muted-foreground/60">
                     superseded
                   </span>
                 ) : null}
@@ -213,13 +213,13 @@ export default async function AdminPredictionsForParticipantPage({
 
       <section
         data-testid="admin-predictions-final-list"
-        className="rounded-lg border border-neutral-200 bg-white p-6"
+        className="rounded-lg border border-border bg-card p-6"
       >
-        <h2 className="text-lg font-semibold text-neutral-900">
+        <h2 className="text-lg font-semibold text-foreground">
           Final predictions
         </h2>
         {finals.length === 0 ? (
-          <p className="mt-3 text-sm text-neutral-600">
+          <p className="mt-3 text-sm text-muted-foreground">
             No final predictions recorded.
           </p>
         ) : (
@@ -228,17 +228,17 @@ export default async function AdminPredictionsForParticipantPage({
               <li
                 key={row.id}
                 data-testid="admin-predictions-final-row"
-                className="text-sm text-neutral-800"
+                className="text-sm text-foreground"
               >
                 <span className="font-mono text-xs">{row.item_kind}</span>
-                <span className="ml-2 font-mono text-xs text-neutral-600">
+                <span className="ml-2 font-mono text-xs text-muted-foreground">
                   {row.target_team_id ?? row.target_player_id ?? '—'}
                 </span>
-                <span className="ml-2 text-xs text-neutral-500">
+                <span className="ml-2 text-xs text-muted-foreground">
                   source={row.source ?? '—'}
                 </span>
                 {row.superseded_at ? (
-                  <span className="ml-2 text-xs text-neutral-400">
+                  <span className="ml-2 text-xs text-muted-foreground/60">
                     superseded
                   </span>
                 ) : null}
@@ -253,13 +253,13 @@ export default async function AdminPredictionsForParticipantPage({
 
       <section
         data-testid="admin-predictions-history"
-        className="rounded-lg border border-neutral-200 bg-white p-6"
+        className="rounded-lg border border-border bg-card p-6"
       >
-        <h2 className="text-lg font-semibold text-neutral-900">
+        <h2 className="text-lg font-semibold text-foreground">
           Admin actions history
         </h2>
         {auditRows.length === 0 ? (
-          <p className="mt-2 text-sm text-neutral-600">
+          <p className="mt-2 text-sm text-muted-foreground">
             No admin actions against this participant.
           </p>
         ) : (
@@ -268,14 +268,14 @@ export default async function AdminPredictionsForParticipantPage({
               <li
                 key={row.id}
                 data-testid="admin-predictions-audit-row"
-                className="text-sm text-neutral-800"
+                className="text-sm text-foreground"
               >
-                <span className="font-mono text-xs text-neutral-600">
+                <span className="font-mono text-xs text-muted-foreground">
                   {row.occurred_at}
                 </span>
                 <span className="ml-2 font-mono text-xs">{row.action}</span>
                 {row.reason ? (
-                  <span className="ml-2 text-neutral-700">— {row.reason}</span>
+                  <span className="ml-2 text-muted-foreground">— {row.reason}</span>
                 ) : null}
               </li>
             ))}

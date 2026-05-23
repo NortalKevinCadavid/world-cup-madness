@@ -238,7 +238,7 @@ export function LockingEditor({
     <div data-testid="locking-editor" className="flex flex-col gap-4">
       {/* Window (minutes) input */}
       <label className="flex flex-col gap-1">
-        <span className="text-sm font-medium text-neutral-700">
+        <span className="text-sm font-medium text-muted-foreground">
           Window (minutes)
         </span>
         <input
@@ -254,26 +254,26 @@ export function LockingEditor({
             validationError ? 'locking-validation-error' : undefined
           }
           disabled={pending}
-          className="w-40 rounded border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-neutral-100"
+          className="w-40 rounded border border-border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-muted"
         />
         {validationError && (
           <span
             id="locking-validation-error"
             data-testid="locking-validation-error"
             role="alert"
-            className="text-xs text-red-600"
+            className="text-xs text-destructive"
           >
             {validationError}
           </span>
         )}
-        <span className="text-xs text-neutral-500">
+        <span className="text-xs text-muted-foreground">
           Allowed range: 1..1440 minutes (T018 zod schema).
         </span>
       </label>
 
       {/* Reason (required) */}
       <label className="flex flex-col gap-1">
-        <span className="text-sm font-medium text-neutral-700">
+        <span className="text-sm font-medium text-muted-foreground">
           Reason (required)
         </span>
         <textarea
@@ -283,13 +283,13 @@ export function LockingEditor({
           rows={2}
           required
           disabled={pending}
-          className="rounded border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-neutral-100"
+          className="rounded border border-border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-muted"
         />
       </label>
 
       {/* Source citation (optional) */}
       <label className="flex flex-col gap-1">
-        <span className="text-sm font-medium text-neutral-700">
+        <span className="text-sm font-medium text-muted-foreground">
           Source citation (optional)
         </span>
         <input
@@ -298,7 +298,7 @@ export function LockingEditor({
           onChange={(e) => setSourceCitation(e.target.value)}
           data-testid="locking-source-citation"
           disabled={pending}
-          className="rounded border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-neutral-100"
+          className="rounded border border-border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-muted"
         />
       </label>
 
@@ -309,7 +309,7 @@ export function LockingEditor({
           onClick={handlePreview}
           disabled={pending || !!validationError}
           data-testid="locking-preview-button"
-          className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50"
         >
           Preview change
         </button>
@@ -329,7 +329,7 @@ export function LockingEditor({
         <div
           data-testid="config-toast"
           role="status"
-          className="rounded border border-green-300 bg-green-50 p-3 text-sm text-green-700"
+          className="rounded border border-win/40 bg-win/10 p-3 text-sm text-win"
         >
           {toast}
         </div>
@@ -338,17 +338,17 @@ export function LockingEditor({
         <div
           data-testid="config-error"
           role="alert"
-          className="rounded border border-red-300 bg-red-50 p-3 text-sm text-red-700"
+          className="rounded border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive"
         >
           {error}
         </div>
       )}
       {pending && (
-        <div className="text-sm text-neutral-500">Submitting…</div>
+        <div className="text-sm text-muted-foreground">Submitting…</div>
       )}
 
       {/* Hidden version_id badge — useful for debugging + Playwright */}
-      <p className="text-xs text-neutral-400">
+      <p className="text-xs text-muted-foreground/60">
         Current version:{' '}
         <span data-testid="locking-version-id">{versionId}</span>
       </p>

@@ -415,12 +415,12 @@ export function AdminRolesEditor({
   return (
     <div className="flex flex-col gap-6">
       {/* SECTION 1 — Current admins table. */}
-      <section className="flex flex-col gap-3 rounded border border-neutral-200 bg-white p-4">
+      <section className="flex flex-col gap-3 rounded border border-border bg-card p-4">
         <header className="flex flex-col gap-1">
-          <h2 className="text-lg font-semibold text-neutral-900">
+          <h2 className="text-lg font-semibold text-foreground">
             Current admins
           </h2>
-          <p className="text-sm text-neutral-600">
+          <p className="text-sm text-muted-foreground">
             Each row is an active grant from <code className="font-mono text-xs">admin_roles</code>{' '}
             (where <code className="font-mono text-xs">revoked_at IS NULL</code>). Revoking a
             row records a row in{' '}
@@ -435,17 +435,17 @@ export function AdminRolesEditor({
           <div
             data-testid="admin-roles-empty"
             role="status"
-            className="rounded border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900"
+            className="rounded border border-open/40 bg-open/10 p-3 text-sm text-open"
           >
             No active admins. Bootstrap one via SQL or seed.
           </div>
         ) : (
-          <div className="overflow-hidden rounded border border-neutral-200">
+          <div className="overflow-hidden rounded border border-border">
             <table
               data-testid="admin-roles-table"
               className="w-full text-left text-sm"
             >
-              <thead className="bg-neutral-50 text-xs uppercase tracking-wide text-neutral-500">
+              <thead className="bg-muted/30 text-xs uppercase tracking-wide text-muted-foreground">
                 <tr>
                   <th className="px-3 py-2 font-medium">Email</th>
                   <th className="px-3 py-2 font-medium">Display name</th>
@@ -463,22 +463,22 @@ export function AdminRolesEditor({
                       key={admin.id}
                       data-testid="admin-row"
                       data-participant-id={admin.participantId}
-                      className="border-t border-neutral-200"
+                      className="border-t border-border"
                     >
-                      <td className="px-3 py-2 font-mono text-xs text-neutral-800">
-                        {admin.email ?? <em className="text-neutral-400">(unknown)</em>}
+                      <td className="px-3 py-2 font-mono text-xs text-foreground">
+                        {admin.email ?? <em className="text-muted-foreground/60">(unknown)</em>}
                         {isSelf && (
-                          <span className="ml-2 rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-medium text-blue-700">
+                          <span className="ml-2 rounded bg-accent/15 px-1.5 py-0.5 text-[10px] font-medium text-primary">
                             you
                           </span>
                         )}
                       </td>
-                      <td className="px-3 py-2 text-neutral-700">
+                      <td className="px-3 py-2 text-muted-foreground">
                         {admin.displayName ?? (
-                          <em className="text-neutral-400">(unknown)</em>
+                          <em className="text-muted-foreground/60">(unknown)</em>
                         )}
                       </td>
-                      <td className="px-3 py-2 font-mono text-xs text-neutral-500">
+                      <td className="px-3 py-2 font-mono text-xs text-muted-foreground">
                         {admin.grantedAt}
                       </td>
                       <td className="px-3 py-2 text-right">
@@ -487,7 +487,7 @@ export function AdminRolesEditor({
                           onClick={() => handleOpenRevoke(admin)}
                           disabled={pending}
                           data-testid="admin-revoke-button"
-                          className="rounded border border-red-300 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-700 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
+                          className="rounded border border-destructive/40 bg-destructive/10 px-3 py-1.5 text-xs font-medium text-destructive hover:bg-destructive/15 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           Revoke
                         </button>
@@ -504,13 +504,13 @@ export function AdminRolesEditor({
       {/* SECTION 2 — Grant form. */}
       <section
         data-testid="grant-form"
-        className="flex flex-col gap-3 rounded border border-neutral-200 bg-white p-4"
+        className="flex flex-col gap-3 rounded border border-border bg-card p-4"
       >
         <header className="flex flex-col gap-1">
-          <h2 className="text-lg font-semibold text-neutral-900">
+          <h2 className="text-lg font-semibold text-foreground">
             Grant admin role
           </h2>
-          <p className="text-sm text-neutral-600">
+          <p className="text-sm text-muted-foreground">
             Search by email or display name (min {MIN_QUERY_LENGTH} chars). Pick a
             result, supply a reason + source citation, and submit. Grants take
             effect immediately.
@@ -518,7 +518,7 @@ export function AdminRolesEditor({
         </header>
 
         <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium text-neutral-700">
+          <span className="text-sm font-medium text-muted-foreground">
             Participant (search by email or name)
           </span>
           <input
@@ -538,16 +538,16 @@ export function AdminRolesEditor({
             disabled={pending}
             data-testid="grant-search-input"
             placeholder="alice@nortal.com"
-            className="rounded border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-neutral-100"
+            className="rounded border border-border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-muted"
           />
           {grant.selected && (
-            <span className="flex items-center gap-2 text-xs text-neutral-600">
+            <span className="flex items-center gap-2 text-xs text-muted-foreground">
               Selected:{' '}
               <span className="font-mono">{grant.selected.email}</span>
               <button
                 type="button"
                 onClick={handleClearSelection}
-                className="rounded border border-neutral-300 px-2 py-0.5 text-[10px] hover:bg-neutral-100"
+                className="rounded border border-border px-2 py-0.5 text-[10px] hover:bg-muted"
               >
                 Change
               </button>
@@ -558,20 +558,20 @@ export function AdminRolesEditor({
         {!grant.selected && grant.query.trim().length >= MIN_QUERY_LENGTH && (
           <div
             data-testid="grant-search-results"
-            className="overflow-hidden rounded border border-neutral-200"
+            className="overflow-hidden rounded border border-border"
           >
             {grant.searching && (
-              <p className="px-3 py-2 text-xs text-neutral-500">Searching…</p>
+              <p className="px-3 py-2 text-xs text-muted-foreground">Searching…</p>
             )}
             {grant.searchError && (
-              <p className="px-3 py-2 text-xs text-red-600">
+              <p className="px-3 py-2 text-xs text-destructive">
                 {grant.searchError}
               </p>
             )}
             {!grant.searching &&
               !grant.searchError &&
               grant.results.length === 0 && (
-                <p className="px-3 py-2 text-xs text-neutral-500">No matches.</p>
+                <p className="px-3 py-2 text-xs text-muted-foreground">No matches.</p>
               )}
             {grant.results.map((result) => (
               <button
@@ -580,12 +580,12 @@ export function AdminRolesEditor({
                 onClick={() => handleSelectSearchResult(result)}
                 data-testid="grant-search-result"
                 data-participant-id={result.id}
-                className="block w-full border-t border-neutral-200 px-3 py-2 text-left first:border-t-0 hover:bg-neutral-50"
+                className="block w-full border-t border-border px-3 py-2 text-left first:border-t-0 hover:bg-muted/30"
               >
-                <span className="block font-mono text-xs text-neutral-800">
+                <span className="block font-mono text-xs text-foreground">
                   {result.email}
                 </span>
-                <span className="block text-xs text-neutral-500">
+                <span className="block text-xs text-muted-foreground">
                   {result.display_name}
                 </span>
               </button>
@@ -594,7 +594,7 @@ export function AdminRolesEditor({
         )}
 
         <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium text-neutral-700">
+          <span className="text-sm font-medium text-muted-foreground">
             Reason (required)
           </span>
           <textarea
@@ -606,12 +606,12 @@ export function AdminRolesEditor({
             required
             disabled={pending}
             data-testid="grant-reason"
-            className="rounded border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-neutral-100"
+            className="rounded border border-border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-muted"
           />
         </label>
 
         <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium text-neutral-700">
+          <span className="text-sm font-medium text-muted-foreground">
             Source citation (required)
           </span>
           <input
@@ -623,7 +623,7 @@ export function AdminRolesEditor({
             required
             disabled={pending}
             data-testid="grant-source-citation"
-            className="rounded border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-neutral-100"
+            className="rounded border border-border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-muted"
           />
         </label>
 
@@ -633,7 +633,7 @@ export function AdminRolesEditor({
             onClick={handleSubmitGrant}
             disabled={pending || grant.selected === null}
             data-testid="grant-submit"
-            className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50"
           >
             Grant admin role
           </button>
@@ -645,7 +645,7 @@ export function AdminRolesEditor({
         <div
           data-testid="admin-roles-toast"
           role="status"
-          className="rounded border border-green-300 bg-green-50 p-3 text-sm text-green-700"
+          className="rounded border border-win/40 bg-win/10 p-3 text-sm text-win"
         >
           {toast}
         </div>
@@ -654,12 +654,12 @@ export function AdminRolesEditor({
         <div
           data-testid="admin-roles-error"
           role="alert"
-          className="rounded border border-red-300 bg-red-50 p-3 text-sm text-red-700"
+          className="rounded border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive"
         >
           {error}
         </div>
       )}
-      {pending && <p className="text-sm text-neutral-500">Submitting…</p>}
+      {pending && <p className="text-sm text-muted-foreground">Submitting…</p>}
 
       {/* Revoke modal (rendered last so it overlays everything else). */}
       {revokeModal && (
@@ -670,12 +670,12 @@ export function AdminRolesEditor({
           aria-label={`Revoke admin role for ${revokeModal.admin.email ?? revokeModal.admin.participantId}`}
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
         >
-          <div className="w-full max-w-md rounded-lg bg-white p-5 shadow-xl">
+          <div className="w-full max-w-md rounded-lg bg-card p-5 shadow-xl">
             <header className="flex flex-col gap-1">
-              <h2 className="text-base font-semibold text-neutral-900">
+              <h2 className="text-base font-semibold text-foreground">
                 Revoke admin role
               </h2>
-              <p className="text-xs font-mono text-neutral-500">
+              <p className="text-xs font-mono text-muted-foreground">
                 {revokeModal.admin.email ?? revokeModal.admin.participantId}
               </p>
             </header>
@@ -684,7 +684,7 @@ export function AdminRolesEditor({
               <div
                 data-testid="revoke-self-warning"
                 role="alert"
-                className="mt-3 rounded border border-red-400 bg-red-50 p-3 text-sm text-red-800"
+                className="mt-3 rounded border border-destructive bg-destructive/10 p-3 text-sm text-destructive"
               >
                 <p className="font-semibold">
                   You are revoking your OWN admin role.
@@ -697,7 +697,7 @@ export function AdminRolesEditor({
             )}
 
             <label className="mt-3 flex flex-col gap-1">
-              <span className="text-sm font-medium text-neutral-700">
+              <span className="text-sm font-medium text-muted-foreground">
                 Reason (required)
               </span>
               <textarea
@@ -711,12 +711,12 @@ export function AdminRolesEditor({
                 required
                 disabled={pending}
                 data-testid="revoke-reason"
-                className="rounded border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-neutral-100"
+                className="rounded border border-border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-muted"
               />
             </label>
 
             <label className="mt-3 flex flex-col gap-1">
-              <span className="text-sm font-medium text-neutral-700">
+              <span className="text-sm font-medium text-muted-foreground">
                 Source citation (required)
               </span>
               <input
@@ -730,14 +730,14 @@ export function AdminRolesEditor({
                 required
                 disabled={pending}
                 data-testid="revoke-source-citation"
-                className="rounded border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-neutral-100"
+                className="rounded border border-border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-muted"
               />
             </label>
 
             {revokeModal.error && (
               <div
                 role="alert"
-                className="mt-3 rounded border border-red-300 bg-red-50 p-3 text-sm text-red-700"
+                className="mt-3 rounded border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive"
               >
                 {revokeModal.error}
               </div>
@@ -749,7 +749,7 @@ export function AdminRolesEditor({
                 onClick={handleCloseRevoke}
                 disabled={pending}
                 data-testid="revoke-cancel"
-                className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-md border border-gray-300 bg-card px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -758,7 +758,7 @@ export function AdminRolesEditor({
                 onClick={handleConfirmRevoke}
                 disabled={pending}
                 data-testid="revoke-confirm"
-                className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-md bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground hover:bg-destructive/90 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Confirm revoke
               </button>

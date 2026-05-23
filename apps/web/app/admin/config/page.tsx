@@ -250,9 +250,9 @@ export default async function AdminConfigLandingPage() {
       <nav
         data-testid="config-nav-sidebar"
         aria-label="Configuration navigation"
-        className="w-60 shrink-0 flex flex-col gap-1 border-r border-neutral-200 pr-4"
+        className="w-60 shrink-0 flex flex-col gap-1 border-r border-border pr-4"
       >
-        <h2 className="text-xs font-semibold uppercase tracking-wide text-neutral-500 mb-2">
+        <h2 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
           Configuration
         </h2>
         <ul className="flex flex-col gap-1">
@@ -262,7 +262,7 @@ export default async function AdminConfigLandingPage() {
                 href={link.target}
                 data-testid="config-nav-link"
                 data-target={link.target}
-                className="block rounded px-2 py-1.5 text-sm text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900"
+                className="block rounded px-2 py-1.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
               >
                 {link.label}
               </Link>
@@ -273,11 +273,11 @@ export default async function AdminConfigLandingPage() {
 
       <section className="flex-1 flex flex-col gap-6">
         <header className="flex flex-col gap-1">
-          <h1 className="text-2xl font-semibold text-neutral-900">
+          <h1 className="text-2xl font-semibold text-foreground">
             Tournament configuration
           </h1>
-          <p className="text-xs font-mono text-neutral-500">/admin/config</p>
-          <p className="text-sm text-neutral-600">
+          <p className="text-xs font-mono text-muted-foreground">/admin/config</p>
+          <p className="text-sm text-muted-foreground">
             Pick a configuration namespace from the sidebar, or review the
             summary below.
           </p>
@@ -289,53 +289,53 @@ export default async function AdminConfigLandingPage() {
         >
           <div
             data-testid="admin-config-summary-recent-versions"
-            className="rounded border border-neutral-200 bg-white p-4 flex flex-col gap-1"
+            className="rounded border border-border bg-card p-4 flex flex-col gap-1"
           >
-            <p className="text-xs uppercase tracking-wide text-neutral-500">
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">
               Recent versions (last 7 days)
             </p>
-            <p className="text-3xl font-semibold text-neutral-900">
+            <p className="text-3xl font-semibold text-foreground">
               {formatCount(summary.recentVersionsCount)}
             </p>
-            <p className="text-xs text-neutral-500">
+            <p className="text-xs text-muted-foreground">
               <code>tournament_config_versions</code>
             </p>
           </div>
 
           <div
             data-testid="admin-config-summary-pending-ack-tokens"
-            className="rounded border border-neutral-200 bg-white p-4 flex flex-col gap-1"
+            className="rounded border border-border bg-card p-4 flex flex-col gap-1"
           >
-            <p className="text-xs uppercase tracking-wide text-neutral-500">
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">
               Pending acknowledge tokens
             </p>
-            <p className="text-3xl font-semibold text-neutral-900">
+            <p className="text-3xl font-semibold text-foreground">
               {formatCount(summary.pendingAckTokensCount)}
             </p>
-            <p className="text-xs text-neutral-500">
+            <p className="text-xs text-muted-foreground">
               5-minute TTL; consumed on confirm.
             </p>
           </div>
 
           <div
             data-testid="admin-config-summary-latest-export"
-            className="rounded border border-neutral-200 bg-white p-4 flex flex-col gap-1"
+            className="rounded border border-border bg-card p-4 flex flex-col gap-1"
           >
-            <p className="text-xs uppercase tracking-wide text-neutral-500">
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">
               Latest export
             </p>
             {summary.latestExportHref ? (
               <Link
                 href={summary.latestExportHref}
                 data-testid="admin-config-latest-export-link"
-                className="text-sm text-blue-600 underline"
+                className="text-sm text-primary underline"
               >
                 Open audit export surface
               </Link>
             ) : (
-              <p className="text-sm text-neutral-500">—</p>
+              <p className="text-sm text-muted-foreground">—</p>
             )}
-            <p className="text-xs text-neutral-500">
+            <p className="text-xs text-muted-foreground">
               Placeholder until Slice 008 export is finalised.
             </p>
           </div>

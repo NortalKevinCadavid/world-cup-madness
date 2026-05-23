@@ -668,27 +668,27 @@ export function ProvidersEditor({
       {/* Active provider section. */}
       <section
         data-section-key="providers.active"
-        className="flex flex-col gap-3 rounded border border-neutral-200 bg-white p-4"
+        className="flex flex-col gap-3 rounded border border-border bg-card p-4"
       >
         <header className="flex flex-col gap-1">
-          <h2 className="text-lg font-semibold text-neutral-900">
+          <h2 className="text-lg font-semibold text-foreground">
             Active provider
           </h2>
-          <p className="text-xs font-mono text-neutral-500">providers.active</p>
-          <p className="text-sm text-neutral-600">
+          <p className="text-xs font-mono text-muted-foreground">providers.active</p>
+          <p className="text-sm text-muted-foreground">
             The provider id used by the next scheduled sync. Changing this
             does <em>not</em> retroactively re-fetch existing data.
           </p>
         </header>
 
         <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium text-neutral-700">Provider</span>
+          <span className="text-sm font-medium text-muted-foreground">Provider</span>
           <select
             value={active.value}
             onChange={(e) => patchActive({ value: e.target.value })}
             data-testid="active-provider-select"
             disabled={pending}
-            className="w-72 rounded border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-neutral-100"
+            className="w-72 rounded border border-border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-muted"
           >
             {initialState.allProviderIds.map((id) => (
               <option key={id} value={id}>
@@ -699,7 +699,7 @@ export function ProvidersEditor({
         </label>
 
         <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium text-neutral-700">
+          <span className="text-sm font-medium text-muted-foreground">
             Reason (required)
           </span>
           <textarea
@@ -708,12 +708,12 @@ export function ProvidersEditor({
             rows={2}
             required
             disabled={pending}
-            className="rounded border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-neutral-100"
+            className="rounded border border-border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-muted"
           />
         </label>
 
         <label className="flex flex-col gap-1">
-          <span className="text-sm font-medium text-neutral-700">
+          <span className="text-sm font-medium text-muted-foreground">
             Source citation (required)
           </span>
           <input
@@ -722,7 +722,7 @@ export function ProvidersEditor({
             onChange={(e) => patchActive({ sourceCitation: e.target.value })}
             required
             disabled={pending}
-            className="rounded border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-neutral-100"
+            className="rounded border border-border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-muted"
           />
         </label>
 
@@ -732,7 +732,7 @@ export function ProvidersEditor({
             onClick={handleActiveSaveClick}
             disabled={pending}
             data-testid="active-provider-save"
-            className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50"
           >
             Save
           </button>
@@ -743,12 +743,12 @@ export function ProvidersEditor({
             data-testid="active-provider-confirm"
             role="dialog"
             aria-modal="true"
-            className="rounded-lg border border-amber-400 bg-amber-50 p-4"
+            className="rounded-lg border border-amber-400 bg-open/10 p-4"
           >
-            <h3 className="text-sm font-semibold text-amber-900">
+            <h3 className="text-sm font-semibold text-open">
               Confirm provider switch
             </h3>
-            <p className="mt-2 text-sm text-amber-900">
+            <p className="mt-2 text-sm text-open">
               Switching the active provider takes effect on the next scheduled
               sync. In-flight results from the previous adapter are not
               re-fetched. Continue?
@@ -758,7 +758,7 @@ export function ProvidersEditor({
                 type="button"
                 data-testid="active-provider-confirm-cancel"
                 onClick={handleActiveCancelConfirm}
-                className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                className="rounded-md border border-gray-300 bg-card px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
               >
                 Cancel
               </button>
@@ -766,7 +766,7 @@ export function ProvidersEditor({
                 type="button"
                 data-testid="active-provider-confirm-continue"
                 onClick={() => void handleActiveConfirmContinue()}
-                className="rounded-md bg-amber-700 px-4 py-2 text-sm font-medium text-white hover:bg-amber-800"
+                className="rounded-md bg-open px-4 py-2 text-sm font-medium text-white hover:bg-open/90"
               >
                 Continue
               </button>
@@ -786,7 +786,7 @@ export function ProvidersEditor({
           <div
             data-testid="active-provider-error"
             role="alert"
-            className="rounded border border-red-300 bg-red-50 p-3 text-sm text-red-700"
+            className="rounded border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive"
           >
             {active.error}
           </div>
@@ -795,13 +795,13 @@ export function ProvidersEditor({
           <div
             data-testid="active-provider-toast"
             role="status"
-            className="rounded border border-green-300 bg-green-50 p-3 text-sm text-green-700"
+            className="rounded border border-win/40 bg-win/10 p-3 text-sm text-win"
           >
             {active.toast}
           </div>
         )}
 
-        <p className="text-xs text-neutral-400">
+        <p className="text-xs text-muted-foreground/60">
           Current version:{' '}
           <span className="font-mono">{active.versionId}</span>
         </p>
@@ -815,14 +815,14 @@ export function ProvidersEditor({
             key={provider.id}
             data-testid="provider-section"
             data-provider-id={provider.id}
-            className="flex flex-col gap-3 rounded border border-neutral-200 bg-white p-4"
+            className="flex flex-col gap-3 rounded border border-border bg-card p-4"
           >
             <header className="flex items-center justify-between gap-2">
               <div className="flex flex-col gap-1">
-                <h2 className="text-lg font-semibold text-neutral-900">
+                <h2 className="text-lg font-semibold text-foreground">
                   {provider.id}
                 </h2>
-                <p className="text-xs font-mono text-neutral-500">
+                <p className="text-xs font-mono text-muted-foreground">
                   providers.{provider.id}.*
                 </p>
               </div>
@@ -836,7 +836,7 @@ export function ProvidersEditor({
                 }
                 data-testid={`provider-${provider.id}-toggle`}
                 aria-expanded={isExpanded}
-                className="rounded border border-neutral-300 px-3 py-1 text-xs font-medium text-neutral-700 hover:bg-neutral-100"
+                className="rounded border border-border px-3 py-1 text-xs font-medium text-muted-foreground hover:bg-muted"
               >
                 {isExpanded ? 'Collapse' : 'Expand'}
               </button>
@@ -855,7 +855,7 @@ export function ProvidersEditor({
                       <div
                         key={segment}
                         data-testid={`provider-${provider.id}-${alias}-missing`}
-                        className="rounded border border-neutral-200 bg-neutral-50 p-3 text-sm text-neutral-500"
+                        className="rounded border border-border bg-muted/30 p-3 text-sm text-muted-foreground"
                       >
                         <p className="font-medium">{label.title}</p>
                         <p className="font-mono text-xs">{fullKey}</p>
@@ -871,20 +871,20 @@ export function ProvidersEditor({
                     <div
                       key={segment}
                       data-config-key={fullKey}
-                      className="flex flex-col gap-2 rounded border border-neutral-200 bg-neutral-50 p-3"
+                      className="flex flex-col gap-2 rounded border border-border bg-muted/30 p-3"
                     >
                       <header className="flex flex-col gap-1">
-                        <h3 className="text-sm font-semibold text-neutral-900">
+                        <h3 className="text-sm font-semibold text-foreground">
                           {label.title}
                         </h3>
-                        <p className="text-xs font-mono text-neutral-500">
+                        <p className="text-xs font-mono text-muted-foreground">
                           {fullKey}
                         </p>
-                        <p className="text-xs text-neutral-600">{label.help}</p>
+                        <p className="text-xs text-muted-foreground">{label.help}</p>
                       </header>
 
                       <label className="flex flex-col gap-1">
-                        <span className="text-xs font-medium text-neutral-700">
+                        <span className="text-xs font-medium text-muted-foreground">
                           Value
                         </span>
                         <input
@@ -903,12 +903,12 @@ export function ProvidersEditor({
                           data-testid={`provider-${provider.id}-${alias}-input`}
                           aria-invalid={section.validationError ? true : undefined}
                           disabled={pending}
-                          className="w-40 rounded border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-neutral-100"
+                          className="w-40 rounded border border-border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-muted"
                         />
                       </label>
 
                       <label className="flex flex-col gap-1">
-                        <span className="text-xs font-medium text-neutral-700">
+                        <span className="text-xs font-medium text-muted-foreground">
                           Reason (required)
                         </span>
                         <textarea
@@ -921,12 +921,12 @@ export function ProvidersEditor({
                           rows={2}
                           required
                           disabled={pending}
-                          className="rounded border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-neutral-100"
+                          className="rounded border border-border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-muted"
                         />
                       </label>
 
                       <label className="flex flex-col gap-1">
-                        <span className="text-xs font-medium text-neutral-700">
+                        <span className="text-xs font-medium text-muted-foreground">
                           Source citation (optional)
                         </span>
                         <input
@@ -938,7 +938,7 @@ export function ProvidersEditor({
                             })
                           }
                           disabled={pending}
-                          className="rounded border border-neutral-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-neutral-100"
+                          className="rounded border border-border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-muted"
                         />
                       </label>
 
@@ -950,7 +950,7 @@ export function ProvidersEditor({
                           }
                           disabled={pending || section.validationError !== null}
                           data-testid={`provider-${provider.id}-${alias}-save`}
-                          className="rounded bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                          className="rounded bg-primary px-3 py-1.5 text-xs font-medium text-white hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           Save
                         </button>
@@ -972,7 +972,7 @@ export function ProvidersEditor({
                         <div
                           data-testid={`provider-${provider.id}-${alias}-error`}
                           role="alert"
-                          className="rounded border border-red-300 bg-red-50 p-2 text-xs text-red-700"
+                          className="rounded border border-destructive/40 bg-destructive/10 p-2 text-xs text-destructive"
                         >
                           {section.error}
                         </div>
@@ -981,13 +981,13 @@ export function ProvidersEditor({
                         <div
                           data-testid={`provider-${provider.id}-${alias}-toast`}
                           role="status"
-                          className="rounded border border-green-300 bg-green-50 p-2 text-xs text-green-700"
+                          className="rounded border border-win/40 bg-win/10 p-2 text-xs text-win"
                         >
                           {section.toast}
                         </div>
                       )}
 
-                      <p className="text-xs text-neutral-400">
+                      <p className="text-xs text-muted-foreground/60">
                         Current version:{' '}
                         <span className="font-mono">{section.versionId}</span>
                       </p>
@@ -996,15 +996,15 @@ export function ProvidersEditor({
                 })}
 
                 {/* Credential reveal entry. Never renders the value inline. */}
-                <div className="flex items-center justify-between rounded border border-neutral-200 bg-neutral-50 p-3">
+                <div className="flex items-center justify-between rounded border border-border bg-muted/30 p-3">
                   <div className="flex flex-col gap-1">
-                    <h3 className="text-sm font-semibold text-neutral-900">
+                    <h3 className="text-sm font-semibold text-foreground">
                       Credential
                     </h3>
-                    <p className="text-xs font-mono text-neutral-500">
+                    <p className="text-xs font-mono text-muted-foreground">
                       {provider.credential.key}
                     </p>
-                    <p className="text-xs text-neutral-600">
+                    <p className="text-xs text-muted-foreground">
                       {provider.credential.present
                         ? '•••• (reveal to view)'
                         : 'Not configured.'}{' '}
@@ -1020,7 +1020,7 @@ export function ProvidersEditor({
                     onClick={() => void handleReveal(provider.id)}
                     disabled={pending || !provider.credential.present}
                     data-testid={`provider-${provider.id}-reveal-credential`}
-                    className="rounded border border-blue-300 bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-800 hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="rounded border border-accent/40 bg-accent/10 px-3 py-1.5 text-xs font-medium text-primary hover:bg-accent/15 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     Reveal credential
                   </button>
@@ -1040,12 +1040,12 @@ export function ProvidersEditor({
           aria-label={`Credential for ${credentialModal.providerId}`}
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
         >
-          <div className="w-full max-w-md rounded-lg bg-white p-5 shadow-xl">
+          <div className="w-full max-w-md rounded-lg bg-card p-5 shadow-xl">
             <header className="flex flex-col gap-1">
-              <h2 className="text-base font-semibold text-neutral-900">
+              <h2 className="text-base font-semibold text-foreground">
                 Credential — {credentialModal.providerId}
               </h2>
-              <p className="text-xs font-mono text-neutral-500">
+              <p className="text-xs font-mono text-muted-foreground">
                 {credentialModal.key}
               </p>
             </header>
@@ -1053,18 +1053,18 @@ export function ProvidersEditor({
             {credentialModal.error ? (
               <div
                 role="alert"
-                className="mt-3 rounded border border-red-300 bg-red-50 p-3 text-sm text-red-700"
+                className="mt-3 rounded border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive"
               >
                 {credentialModal.error}
               </div>
             ) : credentialModal.value === null ? (
-              <p className="mt-3 text-sm text-neutral-500">
+              <p className="mt-3 text-sm text-muted-foreground">
                 Loading credential…
               </p>
             ) : (
               <div className="mt-3 flex flex-col gap-2">
                 <label className="flex flex-col gap-1">
-                  <span className="text-xs font-medium text-neutral-700">
+                  <span className="text-xs font-medium text-muted-foreground">
                     Value
                   </span>
                   <input
@@ -1073,10 +1073,10 @@ export function ProvidersEditor({
                     value={credentialModal.value}
                     data-testid={`provider-${credentialModal.providerId}-credential-value`}
                     onFocus={(e) => e.currentTarget.select()}
-                    className="rounded border border-neutral-300 bg-neutral-50 px-3 py-2 font-mono text-xs"
+                    className="rounded border border-border bg-muted/30 px-3 py-2 font-mono text-xs"
                   />
                 </label>
-                <p className="text-xs text-neutral-500">
+                <p className="text-xs text-muted-foreground">
                   Copy this value somewhere safe; closing this dialog drops it
                   from the page state.
                 </p>
@@ -1091,7 +1091,7 @@ export function ProvidersEditor({
                   credentialModal.value === null || credentialModal.error !== null
                 }
                 data-testid={`provider-${credentialModal.providerId}-credential-copy`}
-                className="rounded-md border border-blue-300 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-800 hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-md border border-accent/40 bg-accent/10 px-4 py-2 text-sm font-medium text-primary hover:bg-accent/15 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {credentialModal.copied ? 'Copied!' : 'Copy'}
               </button>
@@ -1099,7 +1099,7 @@ export function ProvidersEditor({
                 type="button"
                 onClick={handleCloseCredentialModal}
                 data-testid={`provider-${credentialModal.providerId}-credential-close`}
-                className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                className="rounded-md border border-gray-300 bg-card px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
               >
                 Close
               </button>
@@ -1109,7 +1109,7 @@ export function ProvidersEditor({
       )}
 
       {pending && (
-        <div className="text-sm text-neutral-500">Submitting…</div>
+        <div className="text-sm text-muted-foreground">Submitting…</div>
       )}
     </div>
   );

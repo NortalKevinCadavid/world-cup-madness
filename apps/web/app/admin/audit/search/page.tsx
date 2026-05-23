@@ -308,8 +308,8 @@ export default async function AuditSearchPage({
       className="max-w-6xl mx-auto px-6 py-8 flex flex-col gap-6"
     >
       <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold text-neutral-900">Audit search</h1>
-        <p className="text-xs font-mono text-neutral-500">/admin/audit/search</p>
+        <h1 className="text-2xl font-semibold text-foreground">Audit search</h1>
+        <p className="text-xs font-mono text-muted-foreground">/admin/audit/search</p>
       </header>
 
       <AuditFiltersForm initial={toFormInitial(params)} />
@@ -318,7 +318,7 @@ export default async function AuditSearchPage({
         <div
           data-testid="audit-search-error"
           role="alert"
-          className="rounded border border-red-300 bg-red-50 p-4 text-sm text-red-700"
+          className="rounded border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive"
         >
           Search failed: {queryError}
         </div>
@@ -326,7 +326,7 @@ export default async function AuditSearchPage({
 
       {hasFilters && !queryError ? (
         <div className="flex items-center justify-between">
-          <p className="text-sm text-neutral-600" data-testid="audit-results-count">
+          <p className="text-sm text-muted-foreground" data-testid="audit-results-count">
             {rows.length} result(s)
           </p>
           <Link
@@ -334,7 +334,7 @@ export default async function AuditSearchPage({
             target="_blank"
             rel="noopener noreferrer"
             data-testid="audit-export-link"
-            className="text-sm text-blue-600 underline"
+            className="text-sm text-primary underline"
           >
             Export CSV
           </Link>
@@ -344,7 +344,7 @@ export default async function AuditSearchPage({
       {hasFilters && !queryError ? (
         <AuditResultsTable rows={rows} />
       ) : !hasFilters ? (
-        <p className="text-sm text-neutral-500">
+        <p className="text-sm text-muted-foreground">
           Set at least one filter and submit to search the audit log.
         </p>
       ) : null}

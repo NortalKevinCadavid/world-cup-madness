@@ -45,7 +45,7 @@ export default function AdminDeniedPage() {
       className="min-h-screen flex flex-col items-start gap-4 p-8 max-w-2xl mx-auto"
     >
       <h1 className="text-2xl font-semibold">Access Denied</h1>
-      <p className="text-base text-neutral-700">
+      <p className="text-base text-muted-foreground">
         You don&apos;t have administrator access for this application. If you
         believe this is an error, contact the tournament organizer.
       </p>

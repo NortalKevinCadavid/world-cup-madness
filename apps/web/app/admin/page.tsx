@@ -161,10 +161,10 @@ export default async function AdminDashboard() {
       className="max-w-5xl mx-auto px-6 py-8 flex flex-col gap-6"
     >
       <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold text-neutral-900">
+        <h1 className="text-2xl font-semibold text-foreground">
           World Cup Madness — Admin
         </h1>
-        <p className="text-sm text-neutral-600">
+        <p className="text-sm text-muted-foreground">
           Tournament administration console. Every action is captured in the
           audit log.
         </p>
@@ -198,24 +198,24 @@ export default async function AdminDashboard() {
 
       <section
         data-testid="admin-dashboard-section-pending-review"
-        className="rounded-lg border border-neutral-200 bg-white p-6"
+        className="rounded-lg border border-border bg-card p-6"
       >
-        <h2 className="text-lg font-semibold text-neutral-900">
+        <h2 className="text-lg font-semibold text-foreground">
           Open pending review
         </h2>
-        <p className="mt-1 text-xs text-neutral-500">
+        <p className="mt-1 text-xs text-muted-foreground">
           Matches whose provider score conflicts with a prior value and is
           awaiting admin resolution (Slice 002 surface).
         </p>
         <p
           data-testid="admin-dashboard-pending-review-count"
-          className="mt-3 text-3xl font-semibold tabular-nums text-neutral-900"
+          className="mt-3 text-3xl font-semibold tabular-nums text-foreground"
         >
           {pendingReviewCount}
         </p>
         <a
           href="/admin/pending-review"
-          className="mt-2 inline-block text-sm text-blue-700 underline"
+          className="mt-2 inline-block text-sm text-primary underline"
         >
           View pending review queue
         </a>
@@ -223,33 +223,33 @@ export default async function AdminDashboard() {
 
       <section
         data-testid="admin-dashboard-section-recent-overrides"
-        className="rounded-lg border border-neutral-200 bg-white p-6"
+        className="rounded-lg border border-border bg-card p-6"
       >
-        <h2 className="text-lg font-semibold text-neutral-900">
+        <h2 className="text-lg font-semibold text-foreground">
           Recent admin actions
         </h2>
-        <p className="mt-1 text-xs text-neutral-500">
+        <p className="mt-1 text-xs text-muted-foreground">
           Last 10 entries in the admin audit log (newest first).
         </p>
         {recentOverrides.length === 0 ? (
-          <p className="mt-3 text-sm text-neutral-600">No admin actions yet.</p>
+          <p className="mt-3 text-sm text-muted-foreground">No admin actions yet.</p>
         ) : (
           <ul className="mt-3 flex flex-col gap-2">
             {recentOverrides.map((row) => (
               <li
                 key={row.id}
                 data-testid="admin-audit-row"
-                className="text-sm text-neutral-800"
+                className="text-sm text-foreground"
               >
-                <span className="font-mono text-xs text-neutral-700">
+                <span className="font-mono text-xs text-muted-foreground">
                   {row.action}
                 </span>
                 {row.reason ? (
-                  <span className="ml-2 text-neutral-600">{row.reason}</span>
+                  <span className="ml-2 text-muted-foreground">{row.reason}</span>
                 ) : null}
                 <a
                   href={`/admin/audit/${row.id}`}
-                  className="ml-2 text-xs text-blue-700 underline"
+                  className="ml-2 text-xs text-primary underline"
                 >
                   view
                 </a>
@@ -259,7 +259,7 @@ export default async function AdminDashboard() {
         )}
         <a
           href="/admin/audit"
-          className="mt-3 inline-block text-sm text-blue-700 underline"
+          className="mt-3 inline-block text-sm text-primary underline"
         >
           View full audit log
         </a>
@@ -267,40 +267,40 @@ export default async function AdminDashboard() {
 
       <section
         data-testid="admin-dashboard-section-last-recalc"
-        className="rounded-lg border border-neutral-200 bg-white p-6"
+        className="rounded-lg border border-border bg-card p-6"
       >
-        <h2 className="text-lg font-semibold text-neutral-900">
+        <h2 className="text-lg font-semibold text-foreground">
           Last recalculation
         </h2>
         {lastRecalc ? (
           <dl className="mt-3 grid grid-cols-[max-content,1fr] gap-x-4 gap-y-1 text-sm">
-            <dt className="text-neutral-500">Run ID</dt>
-            <dd className="font-mono text-xs text-neutral-800">
+            <dt className="text-muted-foreground">Run ID</dt>
+            <dd className="font-mono text-xs text-foreground">
               {lastRecalc.id}
             </dd>
-            <dt className="text-neutral-500">Scope</dt>
-            <dd className="text-neutral-800">{lastRecalc.scope}</dd>
-            <dt className="text-neutral-500">Status</dt>
-            <dd className="text-neutral-800">{lastRecalc.status}</dd>
-            <dt className="text-neutral-500">Started</dt>
-            <dd className="text-neutral-800">{lastRecalc.started_at}</dd>
-            <dt className="text-neutral-500">Completed</dt>
-            <dd className="text-neutral-800">
+            <dt className="text-muted-foreground">Scope</dt>
+            <dd className="text-foreground">{lastRecalc.scope}</dd>
+            <dt className="text-muted-foreground">Status</dt>
+            <dd className="text-foreground">{lastRecalc.status}</dd>
+            <dt className="text-muted-foreground">Started</dt>
+            <dd className="text-foreground">{lastRecalc.started_at}</dd>
+            <dt className="text-muted-foreground">Completed</dt>
+            <dd className="text-foreground">
               {lastRecalc.completed_at ?? '—'}
             </dd>
-            <dt className="text-neutral-500">Affected rows</dt>
-            <dd className="text-neutral-800">
+            <dt className="text-muted-foreground">Affected rows</dt>
+            <dd className="text-foreground">
               {lastRecalc.affected_record_count ?? '—'}
             </dd>
           </dl>
         ) : (
-          <p className="mt-3 text-sm text-neutral-600">
+          <p className="mt-3 text-sm text-muted-foreground">
             No recalculation runs have completed yet.
           </p>
         )}
         <a
           href="/admin/recalc"
-          className="mt-3 inline-block text-sm text-blue-700 underline"
+          className="mt-3 inline-block text-sm text-primary underline"
         >
           Trigger or watch recalculations
         </a>
@@ -308,18 +308,18 @@ export default async function AdminDashboard() {
 
       <section
         data-testid="admin-dashboard-section-pending-recalc"
-        className="rounded-lg border border-neutral-200 bg-white p-6"
+        className="rounded-lg border border-border bg-card p-6"
       >
-        <h2 className="text-lg font-semibold text-neutral-900">
+        <h2 className="text-lg font-semibold text-foreground">
           In-flight recalculations
         </h2>
-        <p className="mt-1 text-xs text-neutral-500">
+        <p className="mt-1 text-xs text-muted-foreground">
           Number of `score_calculation_runs` rows currently in
           <code className="ml-1 font-mono">status = &apos;running&apos;</code>.
         </p>
         <p
           data-testid="admin-dashboard-running-count"
-          className="mt-3 text-3xl font-semibold tabular-nums text-neutral-900"
+          className="mt-3 text-3xl font-semibold tabular-nums text-foreground"
         >
           {runningCount}
         </p>
@@ -327,17 +327,17 @@ export default async function AdminDashboard() {
 
       <section
         data-testid="admin-dashboard-section-current-admins"
-        className="rounded-lg border border-neutral-200 bg-white p-6"
+        className="rounded-lg border border-border bg-card p-6"
       >
-        <h2 className="text-lg font-semibold text-neutral-900">
+        <h2 className="text-lg font-semibold text-foreground">
           Active admins
         </h2>
-        <p className="mt-1 text-xs text-neutral-500">
+        <p className="mt-1 text-xs text-muted-foreground">
           Count of `admin_roles` rows whose `revoked_at` is NULL.
         </p>
         <p
           data-testid="admin-dashboard-admin-count"
-          className="mt-3 text-3xl font-semibold tabular-nums text-neutral-900"
+          className="mt-3 text-3xl font-semibold tabular-nums text-foreground"
         >
           {currentAdminCount}
         </p>

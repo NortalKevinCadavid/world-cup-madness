@@ -99,18 +99,18 @@ export function AdminSubmitPredictionForm({
     <form
       data-testid="admin-submit-prediction-form"
       onSubmit={handleSubmit}
-      className="rounded-lg border border-neutral-200 bg-white p-6 flex flex-col gap-4"
+      className="rounded-lg border border-border bg-card p-6 flex flex-col gap-4"
     >
-      <h2 className="text-lg font-semibold text-neutral-900">
+      <h2 className="text-lg font-semibold text-foreground">
         Submit prediction on behalf
       </h2>
-      <p className="text-xs text-neutral-500">
+      <p className="text-xs text-muted-foreground">
         Every admin-submitted prediction is captured in the audit log with
         actor, target, previous &amp; new value, reason, and source citation.
       </p>
 
       <label className="flex flex-col gap-1 text-sm">
-        <span className="font-medium text-neutral-800">Match id</span>
+        <span className="font-medium text-foreground">Match id</span>
         <input
           name="match_id"
           type="text"
@@ -119,14 +119,14 @@ export function AdminSubmitPredictionForm({
           disabled={pending}
           required
           aria-invalid={errorField === 'match_id' || undefined}
-          className="rounded border border-neutral-300 px-2 py-1.5 font-mono text-xs focus:border-blue-500 focus:outline-none disabled:bg-neutral-100"
+          className="rounded border border-border px-2 py-1.5 font-mono text-xs focus:border-blue-500 focus:outline-none disabled:bg-muted"
           placeholder="00000000-0000-0000-0000-000000000000"
         />
       </label>
 
       <div className="grid grid-cols-2 gap-4">
         <label className="flex flex-col gap-1 text-sm">
-          <span className="font-medium text-neutral-800">Home score</span>
+          <span className="font-medium text-foreground">Home score</span>
           <input
             name="home_score"
             type="number"
@@ -137,11 +137,11 @@ export function AdminSubmitPredictionForm({
             onChange={(e) => setHome(Number.parseInt(e.target.value, 10) || 0)}
             disabled={pending}
             required
-            className="rounded border border-neutral-300 px-2 py-1.5 tabular-nums focus:border-blue-500 focus:outline-none disabled:bg-neutral-100"
+            className="rounded border border-border px-2 py-1.5 tabular-nums focus:border-blue-500 focus:outline-none disabled:bg-muted"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm">
-          <span className="font-medium text-neutral-800">Away score</span>
+          <span className="font-medium text-foreground">Away score</span>
           <input
             name="away_score"
             type="number"
@@ -152,14 +152,14 @@ export function AdminSubmitPredictionForm({
             onChange={(e) => setAway(Number.parseInt(e.target.value, 10) || 0)}
             disabled={pending}
             required
-            className="rounded border border-neutral-300 px-2 py-1.5 tabular-nums focus:border-blue-500 focus:outline-none disabled:bg-neutral-100"
+            className="rounded border border-border px-2 py-1.5 tabular-nums focus:border-blue-500 focus:outline-none disabled:bg-muted"
           />
         </label>
       </div>
 
       <label className="flex flex-col gap-1 text-sm">
-        <span className="font-medium text-neutral-800">
-          Reason <span className="text-red-600">*</span>
+        <span className="font-medium text-foreground">
+          Reason <span className="text-destructive">*</span>
         </span>
         <textarea
           name="reason"
@@ -168,7 +168,7 @@ export function AdminSubmitPredictionForm({
           onChange={(e) => setReason(e.target.value)}
           disabled={pending}
           aria-invalid={errorField === 'reason' || undefined}
-          className="rounded border border-neutral-300 px-2 py-1.5 focus:border-blue-500 focus:outline-none disabled:bg-neutral-100"
+          className="rounded border border-border px-2 py-1.5 focus:border-blue-500 focus:outline-none disabled:bg-muted"
           placeholder="e.g. submitted on behalf — participant unavailable during open window"
         />
         {errorField === 'reason' && errorMessage ? (
@@ -176,7 +176,7 @@ export function AdminSubmitPredictionForm({
             data-testid="field-error-reason"
             role="alert"
             aria-live="polite"
-            className="text-sm text-red-600"
+            className="text-sm text-destructive"
           >
             {errorMessage}
           </span>
@@ -184,8 +184,8 @@ export function AdminSubmitPredictionForm({
       </label>
 
       <label className="flex flex-col gap-1 text-sm">
-        <span className="font-medium text-neutral-800">
-          Source citation <span className="text-red-600">*</span>
+        <span className="font-medium text-foreground">
+          Source citation <span className="text-destructive">*</span>
         </span>
         <input
           name="source_citation"
@@ -194,7 +194,7 @@ export function AdminSubmitPredictionForm({
           onChange={(e) => setSource(e.target.value)}
           disabled={pending}
           aria-invalid={errorField === 'source_citation' || undefined}
-          className="rounded border border-neutral-300 px-2 py-1.5 focus:border-blue-500 focus:outline-none disabled:bg-neutral-100"
+          className="rounded border border-border px-2 py-1.5 focus:border-blue-500 focus:outline-none disabled:bg-muted"
           placeholder="https://internal.example/ticket/..."
         />
         {errorField === 'source_citation' && errorMessage ? (
@@ -202,7 +202,7 @@ export function AdminSubmitPredictionForm({
             data-testid="field-error-source_citation"
             role="alert"
             aria-live="polite"
-            className="text-sm text-red-600"
+            className="text-sm text-destructive"
           >
             {errorMessage}
           </span>
@@ -214,7 +214,7 @@ export function AdminSubmitPredictionForm({
           data-testid="admin-submit-prediction-form-error"
           role="alert"
           aria-live="polite"
-          className="rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+          className="rounded border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive"
         >
           {errorMessage}
         </div>
@@ -225,7 +225,7 @@ export function AdminSubmitPredictionForm({
           data-testid="admin-submit-prediction-form-success"
           role="status"
           aria-live="polite"
-          className="rounded border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700"
+          className="rounded border border-win/40 bg-win/10 px-3 py-2 text-sm text-win"
         >
           {success}
         </div>
@@ -236,7 +236,7 @@ export function AdminSubmitPredictionForm({
           type="submit"
           disabled={pending}
           data-testid="admin-submit-prediction-submit"
-          className="rounded border border-blue-700 bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded border border-blue-700 bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50"
         >
           {pending ? 'Submitting…' : 'Submit prediction'}
         </button>

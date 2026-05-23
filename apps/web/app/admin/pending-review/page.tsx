@@ -91,23 +91,23 @@ export default async function AdminPendingReviewPage() {
       className="max-w-5xl mx-auto px-6 py-8 flex flex-col gap-6"
     >
       <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold text-neutral-900">
+        <h1 className="text-2xl font-semibold text-foreground">
           Pending review queue
         </h1>
-        <p className="text-xs font-mono text-neutral-500">
+        <p className="text-xs font-mono text-muted-foreground">
           /admin/pending-review
         </p>
-        <p className="text-sm text-neutral-600">
+        <p className="text-sm text-muted-foreground">
           Slice 002 match observations that conflict with a prior value and are
           awaiting admin resolution. Resolutions are captured in the audit log.
         </p>
       </header>
 
       {rows.length === 0 ? (
-        <section className="rounded-lg border border-neutral-200 bg-white p-6">
+        <section className="rounded-lg border border-border bg-card p-6">
           <p
             data-testid="admin-pending-review-empty"
-            className="text-sm text-neutral-700"
+            className="text-sm text-muted-foreground"
           >
             No pending review rows.
           </p>
@@ -118,23 +118,23 @@ export default async function AdminPendingReviewPage() {
             <li
               key={row.id}
               data-testid="admin-pending-review-row"
-              className="rounded-lg border border-neutral-200 bg-white p-6"
+              className="rounded-lg border border-border bg-card p-6"
             >
               <div className="flex flex-col gap-1 text-sm">
-                <p className="text-neutral-900 font-medium">
+                <p className="text-foreground font-medium">
                   Review {row.id.slice(0, 8)}… for match {row.match_id.slice(0, 8)}…
                 </p>
-                <p className="font-mono text-xs text-neutral-600">
+                <p className="font-mono text-xs text-muted-foreground">
                   observed_at = {row.observed_at ?? '—'}
                 </p>
-                <p className="text-xs text-neutral-700">
+                <p className="text-xs text-muted-foreground">
                   reason: {row.reason ?? '—'}
                 </p>
-                <details className="mt-1 text-xs text-neutral-700">
+                <details className="mt-1 text-xs text-muted-foreground">
                   <summary className="cursor-pointer">
                     Provider observation vs current value
                   </summary>
-                  <pre className="mt-2 overflow-auto rounded bg-neutral-50 p-2 text-[11px]">
+                  <pre className="mt-2 overflow-auto rounded bg-muted/30 p-2 text-[11px]">
                     {JSON.stringify(
                       {
                         provider_observation: row.provider_observation,
@@ -147,7 +147,7 @@ export default async function AdminPendingReviewPage() {
                 </details>
                 <a
                   href={`/admin/matches/${row.match_id}`}
-                  className="mt-1 text-xs text-blue-700 underline"
+                  className="mt-1 text-xs text-primary underline"
                 >
                   Open match detail
                 </a>
