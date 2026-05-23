@@ -1,26 +1,58 @@
 import 'server-only';
 
-import Link from 'next/link';
+import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { createServerClient, type CookieOptions } from '@supabase/ssr';
 
 import { EligibilityError } from '../../lib/auth/requireEligible';
 import { getCurrentParticipant } from '../../lib/auth/getCurrentParticipant';
 import type { Participant } from '../../lib/types/participant';
+import { TopNav } from '../components/TopNav';
 
 /**
- * Participant-area layout — Slice 002 (T021).
- *
- * Server component. Runs `getCurrentParticipant()` (which calls
- * `requireEligible()` under React's `cache`) before rendering any
- * participant-scoped child. On any `EligibilityError` the layout redirects
- * to `/auth/denied`; the denial page itself owns the messaging so this
- * layout never reveals *why* the caller was denied (mirrors Slice 001's
- * dashboard pattern).
- *
- * The layout also renders a minimal nav header so every page in this
- * route group shares the "World Cup Madness | <name>" branding plus
- * pointers back to `/dashboard` and `/matches`.
+ * Participant-area layout — wraps every page in the `(participant)`
+ * route group with the eligibility gate and the shared top navigation.
+ * The layout runs `getCurrentParticipant()` first and redirects to
+ * `/auth/denied` on any `EligibilityError`. Once we have a participant,
+ * we ask Postgres whether they're also an admin (so the nav can show
+ * the Admin link to admins only).
  */
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
+function createReadOnlyClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !anonKey) {
+    throw new Error('Supabase environment variables are not configured.');
+  }
+  const cookieStore = cookies();
+  return createServerClient(url, anonKey, {
+    cookies: {
+      getAll() {
+        return cookieStore.getAll();
+      },
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      setAll(_cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
+        // Read-only.
+      },
+    },
+  });
+}
+
+async function isCallerAdmin(participantAuthUserId: string): Promise<boolean> {
+  try {
+    const supabase = createReadOnlyClient();
+    const { data, error } = await supabase.rpc('is_admin', {
+      p_user_id: participantAuthUserId,
+    });
+    if (error) return false;
+    return data === true;
+  } catch {
+    return false;
+  }
+}
+
 export default async function ParticipantLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
@@ -34,44 +66,11 @@ export default async function ParticipantLayout({
     throw err;
   }
 
+  const isAdmin = await isCallerAdmin(participant.auth_user_id);
+
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="border-b border-neutral-200 bg-white">
-        <nav
-          aria-label="Primary"
-          className="max-w-6xl mx-auto flex items-center justify-between px-6 py-3"
-        >
-          <div className="flex items-center gap-3 text-sm">
-            <span className="font-semibold text-neutral-900">
-              World Cup Madness
-            </span>
-            <span className="text-neutral-300" aria-hidden>
-              |
-            </span>
-            <span className="text-neutral-600">
-              {participant.display_name}
-            </span>
-          </div>
-          <ul className="flex items-center gap-4 text-sm">
-            <li>
-              <Link
-                href="/matches"
-                className="text-neutral-700 hover:text-neutral-900 hover:underline"
-              >
-                Matches
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/dashboard"
-                className="text-neutral-700 hover:text-neutral-900 hover:underline"
-              >
-                Dashboard
-              </Link>
-            </li>
-          </ul>
-        </nav>
-      </header>
+    <div className="min-h-screen flex flex-col bg-neutral-50">
+      <TopNav participant={participant} isAdmin={isAdmin} />
       <div className="flex-1">{children}</div>
     </div>
   );

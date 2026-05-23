@@ -8,6 +8,7 @@ import {
   AdminAccessDeniedError,
   requireAdmin,
 } from '../../lib/auth/requireAdmin';
+import { TopNav } from '../components/TopNav';
 
 /**
  * `/admin/*` root layout — server-rendered admin shell.
@@ -133,8 +134,9 @@ export default async function AdminLayout({
     redirect('/admin/denied');
   }
 
+  let participant;
   try {
-    await requireAdmin(client);
+    participant = await requireAdmin(client);
   } catch (err) {
     if (err instanceof AdminAccessDeniedError) {
       // Audit emission policy:
@@ -151,5 +153,10 @@ export default async function AdminLayout({
     throw err;
   }
 
-  return <div className="admin-shell">{children}</div>;
+  return (
+    <div className="admin-shell min-h-screen flex flex-col bg-neutral-50">
+      <TopNav participant={participant} isAdmin={true} activeSection="admin" />
+      <div className="flex-1">{children}</div>
+    </div>
+  );
 }
