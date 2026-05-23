@@ -116,7 +116,55 @@ Slice 001 owner, or whoever next opens a fixture/infra cleanup chore. This is **
 
 ## Status
 
-**Open** — pending implementation.
+**Path A implemented 2026-05-23** — slice 005 tests now reach their actual assertions. Three downstream issues surfaced; documented below as separate follow-ups.
+
+### Action log (Path A)
+
+- ✅ `apps/web/tests/playwright/fixtures/oidc.ts` rewritten to drive real Keycloak (commit `261c5c9`). Public API surface preserved across all 127 consumers; only seeded users (alpha/bravo/charlie/admin1/newuser) are supported via `claims.email` lookup. Non-seeded emails throw a precise error pointing at this doc.
+- ✅ `apps/web/playwright.config.ts` now loads `.env.local` via `dotenv` (Playwright doesn't inherit Next.js's auto-load convention). `dotenv` added as a devDependency.
+- ✅ `mintRefreshedAccessToken` throws with a precise error and a fixme suggestion. One known caller in the suite.
+- ✅ `resetStub` reduced to a no-op (browser-context isolation handles cleanup).
+- ✅ `SUPABASE_SERVICE_ROLE_KEY` populated in `apps/web/.env.local` from `pnpm supabase status -o env`. (`.env.local` is gitignored — the key is local-only.)
+
+### Downstream issues surfaced (NOT in the original follow-up scope)
+
+Re-running the slice 005 suite with the rewritten fixture + service-role key revealed three issues that the prior pre-flight failure was masking:
+
+1. **`score_calculation_runs.trigger` NOT NULL drift** — `slice-005-leaderboard.spec.ts`'s `insertSyntheticRun` helper inserts without a `trigger` column value. The column became NOT NULL in a subsequent migration; the test wasn't updated. Affects multiple AS3-AS5 tests in `slice-005-leaderboard.spec.ts`.
+
+2. **`score-trigger` Edge Function returns HTTP 401** — `slice-005-breakdown.spec.ts`'s `runFullScoringSequence` calls `supabase/functions/score-trigger` and gets 401. Likely needs an env var (probably `SCORE_TRIGGER_SHARED_SECRET` or similar) populated in Playwright's env. The Supabase status output may or may not expose it; the slice 005 quickstart should be consulted.
+
+3. **`APIRequestContext` doesn't carry session cookies** — `slice-001-login-approved.spec.ts`'s `fetchMe(request)` helper uses the standalone `request` fixture, which doesn't share cookies with the page. After my Keycloak-driven sign-in, the session lives on `page.context()` only. The test needs to either (a) use `page.request` instead of the standalone `request`, or (b) extract the session cookies post-sign-in and re-apply them to the API context.
+
+Each of these is a separate slice 005 / slice 001 follow-up. None block Path A's primary deliverable (unblocking the fixture pre-flight). They were latent before, just hidden behind the discovery-probe 404.
+
+### Test runs after Path A landed
+
+| Spec | Result | Failure mode (if any) |
+|------|--------|------------------------|
+| `slice-005-breakdown-after-rename.spec.ts` | ✅ Passed (4.2 s) | — |
+| `slice-005-leaderboard.spec.ts` | ❌ Failed | Issue #1 above (`trigger` column) |
+| `slice-005-breakdown.spec.ts` | ❌ Failed | Issue #2 above (Edge Function 401) |
+| `slice-001-login-approved.spec.ts` | ❌ Failed | Issue #3 above (cookie isolation) |
+
+### Limitations of Path A
+
+The non-seeded-email scenarios still need Path C (run mock-oauth2-server alongside Keycloak):
+
+- `outsider@example.com` — US2 AS-1 domain rejection
+- `freshie@nortal.com` — US1 fresh-user provisioning
+- `alpha-aka@nortal.com` — US3 email-drift
+- `no-name@nortal.com` — missing-claim edge case
+
+These tests now throw a precise error pointing here. They should be marked `.fixme()` with a link to this doc until Path C lands.
+
+### Recommended next steps
+
+1. **Triage Issue #1** — schema drift fix in `slice-005-leaderboard.spec.ts::insertSyntheticRun`. Single-line addition once the correct `trigger` value is known. Probably `'manual'` or `'test'`; check the enum's CHECK constraint.
+2. **Triage Issue #2** — find the Edge Function's required env var (likely `SUPABASE_SCORE_TRIGGER_SECRET` or similar) and add to `.env.local`. Or restructure the test to skip the Edge-Function-via-HTTP path when running locally.
+3. **Triage Issue #3** — change `fetchMe(request)` → `fetchMe(page.request)` in `slice-001-login-approved.spec.ts` and any sibling specs with the same pattern.
+4. **Add `.fixme()`** to the four non-seeded-email tests listed above.
+5. **Path C** — if/when slice 001 edge cases are prioritized, restore mock-oauth2-server as a second sidecar on a different port (e.g., 8091) and split the fixture into `signInWithKeycloak` (seeded users) + `signInWithInjectedClaims` (mock-oauth2-server).
 
 ## Cross-references
 
