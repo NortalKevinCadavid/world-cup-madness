@@ -158,7 +158,7 @@ test.describe("US1 — eligible employee signs in", () => {
       expect(landedOn).toMatch(/\/dashboard(\?|$|#|\/)/);
 
       // Then — /api/me returns the freshly-created participant.
-      const body = await fetchMe(request);
+      const body = await fetchMe(page.request);
       const p = body.participant;
 
       expect(p.email).toBe(FRESHIE.email);
@@ -197,7 +197,7 @@ test.describe("US1 — eligible employee signs in", () => {
         },
       });
 
-      const firstRead = await fetchMe(request);
+      const firstRead = await fetchMe(page.request);
       const idBefore = firstRead.participant.id;
       const lastLoginBefore = Date.parse(firstRead.participant.last_login_at);
 
@@ -230,7 +230,7 @@ test.describe("US1 — eligible employee signs in", () => {
         },
       });
 
-      const secondRead = await fetchMe(request);
+      const secondRead = await fetchMe(page.request);
       const idAfter = secondRead.participant.id;
       const lastLoginAfter = Date.parse(secondRead.participant.last_login_at);
 
@@ -266,14 +266,16 @@ test.describe("US1 — eligible employee signs in", () => {
         },
       });
 
-      // First call — eligible.
-      const r1 = await request.get("/api/me");
+      // First call — eligible. Use page.request so the session cookies
+      // set by signInWithIdentity above are carried; the standalone
+      // `request` fixture has no session.
+      const r1 = await page.request.get("/api/me");
       expect(r1.status(), "first /api/me call must be 200 for eligible alpha").toBe(200);
 
       // Second call — eligibility MUST be re-verified server-side and
       // MUST also return 200 (no caching that would short-circuit the
       // per-request predicate call — FR-002).
-      const r2 = await request.get("/api/me");
+      const r2 = await page.request.get("/api/me");
       expect(r2.status(), "second /api/me call must independently re-verify and return 200").toBe(200);
 
       const body2 = (await r2.json()) as ParticipantMeResponse;

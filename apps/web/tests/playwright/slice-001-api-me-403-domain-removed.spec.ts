@@ -82,7 +82,7 @@ test.describe(
 
         // Sanity — the session can fetch /api/me successfully BEFORE the
         // domain is removed. Asserts the test setup is correctly wired.
-        const sanity = await request.get("/api/me");
+        const sanity = await page.request.get("/api/me");
         expect(
           sanity.status(),
           "alpha's pre-removal /api/me call must be 200 (sanity check)",
@@ -98,7 +98,7 @@ test.describe(
           "eligibility.approved_domains",
           [],
           async () => {
-            const response = await request.get("/api/me");
+            const response = await page.request.get("/api/me");
 
             // Then 1 — status 403.
             expect(
@@ -144,7 +144,7 @@ test.describe(
         // the test cleanup actually restored eligibility. If it fails the
         // helper restore is broken and CI will catch it before this
         // poisons sibling tests.
-        const recovered = await request.get("/api/me");
+        const recovered = await page.request.get("/api/me");
         expect(
           recovered.status(),
           "post-restore /api/me must return 200 again (helper sanity)",

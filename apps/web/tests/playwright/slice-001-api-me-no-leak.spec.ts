@@ -90,7 +90,7 @@ test.describe(
           "eligibility.approved_domains",
           [],
           async () => {
-            const response = await request.get("/api/me");
+            const response = await page.request.get("/api/me");
             expect(response.status()).toBe(403);
 
             const bodyJson = (await response.json()) as unknown;

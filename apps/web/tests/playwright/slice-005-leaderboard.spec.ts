@@ -425,10 +425,28 @@ async function insertSyntheticMatchRow(args: {
   runId: string;
 }): Promise<void> {
   const client = getServiceClient();
+  // The score_records_match_official_required CHECK constraint requires
+  // official_home AND official_away to be NOT NULL when target_kind='match'
+  // AND reason_code != 'none'. The synthetic rows here exist purely to
+  // drive the leaderboard's (points, reason_code, count) aggregation, so
+  // the SPECIFIC numeric values do not matter — only that they exist.
+  // Use 1-0 as a deterministic sentinel; mirror it on the predicted side
+  // for 'exact' rows so the row's (predicted = official) invariant holds
+  // for any downstream consumer that double-checks (leaderboard_v itself
+  // does not — see contracts/leaderboard.read.md § Aggregation).
+  const isExact = args.reasonCode === "exact";
   const { error } = await client.from("score_records").insert({
     participant_id: args.participantId,
     target_kind: "match",
     target_id: args.targetId,
+    // NOTE: match_id (FK → matches.id) is deliberately left NULL. The
+    // synthetic target_id UUIDs (FINISHED_MATCHES) don't all correspond to
+    // real matches.id rows, and the match_id column is nullable. Per the
+    // contracts, leaderboard_v aggregates via target_id, not match_id.
+    predicted_home: isExact ? 1 : 0,
+    predicted_away: isExact ? 0 : 1,
+    official_home: 1,
+    official_away: 0,
     points: args.points,
     reason_code: args.reasonCode,
     calculation_version: args.calculationVersion,
@@ -478,19 +496,47 @@ async function insertSyntheticFinalRow(args: {
  * Service-role: insert one score_calculation_runs row at the bumped version.
  * The score_records FK to score_calculation_runs.run_id requires this to
  * exist before any synthetic score_records insert succeeds.
+ *
+ * Schema requirements (verified 2026-05-23):
+ *   - trigger                       NOT NULL ∈ {match_finish, award_confirmed,
+ *                                                admin_recalc, config_change}
+ *   - triggered_by                  NOT NULL — must be a real participants.id
+ *   - When status='succeeded' the
+ *     score_calculation_runs_succeeded_completeness check requires:
+ *       - completed_at                NOT NULL
+ *       - affected_record_count       NOT NULL AND >= 0
+ *       - calculation_version_written NOT NULL
+ *
+ * The synthetic-test purpose maps semantically to 'admin_recalc'; the
+ * actor is alpha (per PARTICIPANTS.alpha) since the synthetic rows are
+ * test-data that any participant could have triggered.
+ *
+ * `calculationVersion` is the value the caller intends for the
+ * synthetic score_records they're about to insert — must match.
+ * `affectedRecordCount` defaults to 0 because callers insert the
+ * synthetic score_records AFTER this helper returns; the test only
+ * needs the run row to exist for the FK. Real-run accounting is not
+ * exercised by AS3/4/5/empty-state.
  */
-async function insertSyntheticRun(runId: string): Promise<void> {
+async function insertSyntheticRun(
+  runId: string,
+  calculationVersion: number,
+  affectedRecordCount = 0,
+): Promise<void> {
   const client = getServiceClient();
   const now = new Date().toISOString();
   const { error } = await client.from("score_calculation_runs").insert({
     id: runId,
     scope: "all",
     target_id: null,
-    triggered_by: null,
+    trigger: "admin_recalc",
+    triggered_by: PARTICIPANTS.alpha,
     status: "succeeded",
     reason: "T022 synthetic tie scenario",
     started_at: now,
     completed_at: now,
+    calculation_version_written: calculationVersion,
+    affected_record_count: affectedRecordCount,
   });
   if (error) {
     throw new Error(`insertSyntheticRun(${runId}): ${error.message}`);
@@ -820,7 +866,7 @@ test.describe("US3 — Leaderboard @slice-005 @us3", () => {
       // To keep totals identical, we also write an additional (incorrect, 0)
       // row for delta so both have 2 match rows and totals tie at 10.
 
-      await insertSyntheticRun(runId);
+      await insertSyntheticRun(runId, syntheticVersion);
 
       // delta:  exact=10 + incorrect=0 → total=10, exact=1, outcome=0
       await insertSyntheticMatchRow({
@@ -927,7 +973,7 @@ test.describe("US3 — Leaderboard @slice-005 @us3", () => {
       const syntheticVersion = baseVersion + 1;
       const runId = crypto.randomUUID();
 
-      await insertSyntheticRun(runId);
+      await insertSyntheticRun(runId, syntheticVersion);
 
       // Both participants: identical match-side aggregates.
       //   1× exact=10 + 1× incorrect=0 → total_match=10, exact=1, outcome=0.
@@ -1101,7 +1147,7 @@ test.describe("US3 — Leaderboard @slice-005 @us3", () => {
       const syntheticVersion = baseVersion + 1;
       const runId = crypto.randomUUID();
 
-      await insertSyntheticRun(runId);
+      await insertSyntheticRun(runId, syntheticVersion);
 
       // alpha: 3 exact rows → total=30, exact=3, outcome=0.
       for (let i = 0; i < 3; i++) {

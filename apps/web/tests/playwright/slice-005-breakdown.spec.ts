@@ -187,6 +187,16 @@ const SCORE_TRIGGER_ENDPOINT =
 const INTERNAL_AUTH_SECRET =
   process.env.SCORE_TRIGGER_INTERNAL_AUTH_SECRET ?? "";
 
+// Supabase Edge Runtime gateway requires `Authorization: Bearer <jwt>` to
+// reach ANY /functions/v1/* path. Even when the function itself uses the
+// X-Internal-Auth bypass for authorization, the gateway must be satisfied
+// first. The anon key is sufficient — it's a valid JWT and the gateway
+// does not inspect its role.
+const SUPABASE_ANON_KEY_FOR_GATEWAY =
+  process.env.SUPABASE_ANON_KEY ??
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
+  "";
+
 // --------------------------------------------------------------------------
 // Local contract types — mirror scoring-trigger.edge-fn.md +
 // personal-breakdown.read.md WITHOUT importing any app code so the spec
@@ -250,6 +260,11 @@ async function callScoreTrigger(
   const response = await request.post(SCORE_TRIGGER_ENDPOINT, {
     headers: {
       "Content-Type": "application/json",
+      // Gateway gate — anon key is enough; the role doesn't matter here.
+      ...(SUPABASE_ANON_KEY_FOR_GATEWAY
+        ? { Authorization: `Bearer ${SUPABASE_ANON_KEY_FOR_GATEWAY}` }
+        : {}),
+      // Function-level auth — the bypass that puts authPath='internal'.
       "X-Internal-Auth": INTERNAL_AUTH_SECRET,
     },
     data: body,

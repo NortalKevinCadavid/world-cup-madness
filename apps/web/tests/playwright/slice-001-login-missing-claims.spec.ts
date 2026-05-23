@@ -126,7 +126,7 @@ test.describe("US1 — missing or invalid IdP claims @slice-001 @us1 @edge", () 
     // {decision: "reject"}). 403 would also be acceptable per the
     // contract's no-info-leak posture, but 401 is the canonical signal
     // for "no authenticated session" here.
-    const meResp = await request.get("/api/me");
+    const meResp = await page.request.get("/api/me");
     expect([401, 403]).toContain(meResp.status());
 
     // Assert — no `participants` row provisioned for this sub. Browser
@@ -179,7 +179,7 @@ test.describe("US1 — missing or invalid IdP claims @slice-001 @us1 @edge", () 
       page.getByRole("heading", { name: /access denied|cannot sign in/i }),
     ).toBeVisible();
 
-    const meResp = await request.get("/api/me");
+    const meResp = await page.request.get("/api/me");
     expect([401, 403]).toContain(meResp.status());
 
     // FIXME(G-4) — audit_log row assertion blocked by admin-only RLS;
@@ -221,7 +221,7 @@ test.describe("US1 — missing or invalid IdP claims @slice-001 @us1 @edge", () 
         page.getByRole("heading", { name: /access denied|cannot sign in/i }),
       ).toBeVisible();
 
-      const meResp = await request.get("/api/me");
+      const meResp = await page.request.get("/api/me");
       expect([401, 403]).toContain(meResp.status());
 
       // FIXME(G-4) — audit_log row assertion blocked by admin-only RLS.
@@ -261,7 +261,7 @@ test.describe("US1 — missing or invalid IdP claims @slice-001 @us1 @edge", () 
       // fires; the callback page surfaces a generic denial with no
       // sensitive reason leak.
       await expect(page).toHaveURL(new RegExp(`${DENIED_PATH}`));
-      const meResp = await request.get("/api/me");
+      const meResp = await page.request.get("/api/me");
       expect([401, 403]).toContain(meResp.status());
     },
   );
