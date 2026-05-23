@@ -316,17 +316,17 @@ description: "Task list for slice 009-ui-beautification — dispatchable, self-c
 
 ### Implementation for User Story 5
 
-- [ ] T096 [P] [US5] Extend `apps/web/app/components/Confetti.tsx` (from T055) to support additional celebration keys: `match-day-locked-<tournamentId>-<matchDayId>`, `top3-entry-<tournamentId>`, `first-correct-pick-<tournamentId>`. Keep the same prop contract; the key value selects the palette + duration + burst pattern.
+- [X] T096 [P] [US5] Extend `apps/web/app/components/Confetti.tsx` (from T055) to support additional celebration keys: `match-day-locked-<tournamentId>-<matchDayId>`, `top3-entry-<tournamentId>`, `first-correct-pick-<tournamentId>`. Keep the same prop contract; the key value selects the palette + duration + burst pattern.
 
-- [ ] T097 [P] [US5] Add top-3 entry detection logic in `apps/web/app/(participant)/dashboard/page.tsx` and `apps/web/app/(participant)/leaderboard/page.tsx`. On render, compute whether the current user is in rank ≤ 3 AND was not in rank ≤ 3 on the previous scoring run (data already on the page). If yes AND no `wcm.celebrations.top3-entry-<tournamentId>` marker, mount `<Confetti celebrationKey="top3-entry-...">` AND show a one-shot `<Toast>` "You're in the top 3!".
+- [X] T097 [P] [US5] Add top-3 entry detection logic in `apps/web/app/(participant)/dashboard/page.tsx` and `apps/web/app/(participant)/leaderboard/page.tsx`. On render, compute whether the current user is in rank ≤ 3 AND was not in rank ≤ 3 on the previous scoring run (data already on the page). If yes AND no `wcm.celebrations.top3-entry-<tournamentId>` marker, mount `<Confetti celebrationKey="top3-entry-...">` AND show a one-shot `<Toast>` "You're in the top 3!".
 
-- [ ] T098 [P] [US5] Create `apps/web/app/components/ScoreReveal.tsx` for post-match reveal animations. Props: `predictions: PredictionWithOutcome[]`. Renders each prediction sequentially with a 150ms stagger (via CSS animation delays); each prediction displays correct/incorrect cue with both color AND icon. Under reduced motion, render all at once with no animation.
+- [X] T098 [P] [US5] Create `apps/web/app/components/ScoreReveal.tsx` for post-match reveal animations. Props: `predictions: PredictionWithOutcome[]`. Renders each prediction sequentially with a 150ms stagger (via CSS animation delays); each prediction displays correct/incorrect cue with both color AND icon. Under reduced motion, render all at once with no animation.
 
 - [ ] T099 [US5] Wire `<ScoreReveal>` into the appropriate participant route that shows post-match scoring results. (Identify the route by reading slice 005's plan.md — likely `/me` or a per-match results subpath.) Preserve the existing data fetch.
 
-- [ ] T100 [US5] Run US5 red-gate suite green. Append to red-gate-us5.md.
+- [X] T100 [US5] Run US5 red-gate suite green. Append to red-gate-us5.md.
 
-- [ ] T101 [US5] Run regression suite. Write `specs/009-ui-beautification/regression-checkpoint-us5.md`.
+- [X] T101 [US5] Run regression suite. Write `specs/009-ui-beautification/regression-checkpoint-us5.md`.
 
 **Checkpoint**: Celebration polish landed, motion-aware, one-shot guarantees verified.
 

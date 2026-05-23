@@ -26,6 +26,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/app/components/ui/popover";
+import { Confetti } from "@/app/components/Confetti";
 import { cn } from "@/lib/utils";
 
 export type LeaderboardEntry = {
@@ -71,8 +72,16 @@ export function LeaderboardClient({ rows, currentParticipantId }: Props) {
     myRowRef.current?.focus({ preventScroll: true });
   }
 
+  // US5 — fire a one-shot top-3 celebration the first time the current user
+  // sees themselves at rank <= 3. Deduped via `wcm.celebrations.top3-<id>`
+  // so it never replays on subsequent visits, even across reloads.
+  const inTopThree = myRow !== null && myRow.rank <= 3;
+
   return (
     <div className="space-y-3">
+      {inTopThree && myRow ? (
+        <Confetti celebrationKey={`top3-${myRow.participant_id}`} />
+      ) : null}
       {myRow ? (
         <div className="sticky top-16 z-20 flex flex-wrap items-center justify-between gap-2 rounded-md border border-accent/40 bg-accent/10 px-3 py-2 text-sm">
           <span className="text-foreground">
