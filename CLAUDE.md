@@ -46,5 +46,5 @@ Start there before making any product or design decisions.
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read the current plan:
-`specs/001-eligibility-login/plan.md`
+`specs/009-ui-beautification/plan.md`
 <!-- SPECKIT END -->
