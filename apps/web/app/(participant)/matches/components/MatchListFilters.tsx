@@ -96,13 +96,13 @@ export function MatchListFilters({ currentFilters }: MatchListFiltersProps) {
       onSubmit={(e) => e.preventDefault()}
     >
       <div className="flex flex-col gap-1">
-        <label htmlFor="filter-stage" className="text-xs font-medium text-neutral-700">
+        <label htmlFor="filter-stage" className="text-xs font-medium text-muted-foreground">
           Stage
         </label>
         <select
           id="filter-stage"
           name="stage"
-          className="rounded-md border border-neutral-300 bg-white px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-500"
+          className="rounded-md border border-border bg-card px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           value={current.stage}
           onChange={(e) => pushParam('stage', e.target.value)}
         >
@@ -116,13 +116,13 @@ export function MatchListFilters({ currentFilters }: MatchListFiltersProps) {
       </div>
 
       <div className="flex flex-col gap-1">
-        <label htmlFor="filter-group" className="text-xs font-medium text-neutral-700">
+        <label htmlFor="filter-group" className="text-xs font-medium text-muted-foreground">
           Group
         </label>
         <select
           id="filter-group"
           name="group"
-          className="rounded-md border border-neutral-300 bg-white px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-500"
+          className="rounded-md border border-border bg-card px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           value={current.group}
           onChange={(e) => pushParam('group', e.target.value)}
         >
@@ -136,13 +136,13 @@ export function MatchListFilters({ currentFilters }: MatchListFiltersProps) {
       </div>
 
       <div className="flex flex-col gap-1">
-        <label htmlFor="filter-status" className="text-xs font-medium text-neutral-700">
+        <label htmlFor="filter-status" className="text-xs font-medium text-muted-foreground">
           Status
         </label>
         <select
           id="filter-status"
           name="status"
-          className="rounded-md border border-neutral-300 bg-white px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-500"
+          className="rounded-md border border-border bg-card px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           value={current.status}
           onChange={(e) => pushParam('status', e.target.value)}
         >
@@ -156,7 +156,7 @@ export function MatchListFilters({ currentFilters }: MatchListFiltersProps) {
       </div>
 
       <div className="flex flex-col gap-1">
-        <label htmlFor="filter-team-id" className="text-xs font-medium text-neutral-700">
+        <label htmlFor="filter-team-id" className="text-xs font-medium text-muted-foreground">
           Team ID
         </label>
         <input
@@ -165,7 +165,7 @@ export function MatchListFilters({ currentFilters }: MatchListFiltersProps) {
           type="text"
           inputMode="text"
           placeholder="UUID"
-          className="rounded-md border border-neutral-300 bg-white px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-500"
+          className="rounded-md border border-border bg-card px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           defaultValue={current.team_id}
           onBlur={(e) => {
             const v = e.target.value.trim();
@@ -175,14 +175,14 @@ export function MatchListFilters({ currentFilters }: MatchListFiltersProps) {
       </div>
 
       <div className="flex flex-col gap-1">
-        <label htmlFor="filter-from" className="text-xs font-medium text-neutral-700">
+        <label htmlFor="filter-from" className="text-xs font-medium text-muted-foreground">
           From (UTC)
         </label>
         <input
           id="filter-from"
           name="from"
           type="datetime-local"
-          className="rounded-md border border-neutral-300 bg-white px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-500"
+          className="rounded-md border border-border bg-card px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           defaultValue={toLocalInput(current.from)}
           onBlur={(e) => {
             const v = fromLocalInput(e.target.value);
@@ -192,14 +192,14 @@ export function MatchListFilters({ currentFilters }: MatchListFiltersProps) {
       </div>
 
       <div className="flex flex-col gap-1">
-        <label htmlFor="filter-to" className="text-xs font-medium text-neutral-700">
+        <label htmlFor="filter-to" className="text-xs font-medium text-muted-foreground">
           To (UTC)
         </label>
         <input
           id="filter-to"
           name="to"
           type="datetime-local"
-          className="rounded-md border border-neutral-300 bg-white px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-500"
+          className="rounded-md border border-border bg-card px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           defaultValue={toLocalInput(current.to)}
           onBlur={(e) => {
             const v = fromLocalInput(e.target.value);

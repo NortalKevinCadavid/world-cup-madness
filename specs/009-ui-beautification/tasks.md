@@ -196,17 +196,17 @@ description: "Task list for slice 009-ui-beautification — dispatchable, self-c
 
 - [X] T056 [P] [US2] Redesign `apps/web/app/(participant)/dashboard/page.tsx` (the new participant dashboard introduced by the pending git state). Layout per spec US2 AS-1: ranks card with movement indicator, deadline countdown card, primary CTA "Make your picks" if open predictions exist, leaderboard preview card (top 5 with current user highlighted). Use `<Card>`, `<Skeleton>` for loading, `<EmptyState>` for "no predictions open", `<ErrorState>` for fetch errors. Mobile-first: stack cards vertically below 768px, grid above.
 
-- [ ] T057 [P] [US2] Redesign `apps/web/app/(participant)/matches/` route(s). For each match list and match-detail page: use `<MatchCard>` in `view` or `edit` mode. Predictions are listed in the order defined by slice 002. Lock-in handler calls the existing server action / API route from slice 003 unchanged — DO NOT modify the API; only the UI. On lock success: optimistic-update the card to locked state, render a `<Toast>` confirmation, and conditionally mount `<Confetti celebrationKey="...">` if all picks of the match-day are now locked.
+- [X] T057 [P] [US2] Redesign `apps/web/app/(participant)/matches/` route(s). For each match list and match-detail page: use `<MatchCard>` in `view` or `edit` mode. Predictions are listed in the order defined by slice 002. Lock-in handler calls the existing server action / API route from slice 003 unchanged — DO NOT modify the API; only the UI. On lock success: optimistic-update the card to locked state, render a `<Toast>` confirmation, and conditionally mount `<Confetti celebrationKey="...">` if all picks of the match-day are now locked.
 
 - [ ] T058 [P] [US2] Redesign the bracket route `apps/web/app/(participant)/matches/bracket/page.tsx` (create if it doesn't exist; the bracket is part of US2 per spec). 48 teams shown grouped by their group stage. Knockout-round scaffold shown below the groups. On mobile, the knockout scaffold is rendered inside a `data-scroll-region` element with horizontal pan affordance (`<ScrollArea>` from shadcn if available, else a styled overflow container with an explicit hint).
 
-- [ ] T059 [P] [US2] Redesign `apps/web/app/(participant)/me/page.tsx`. Show: participant display name, email (read-only), domain, region, the user's pick history with `<MatchCard mode="view">`, the user's accuracy stats (if computed by slice 005). Use the new components. Loading/empty/error states.
+- [X] T059 [P] [US2] Redesign `apps/web/app/(participant)/me/page.tsx`. Show: participant display name, email (read-only), domain, region, the user's pick history with `<MatchCard mode="view">`, the user's accuracy stats (if computed by slice 005). Use the new components. Loading/empty/error states.
 
-- [ ] T060 [P] [US2] Redesign `apps/web/app/(participant)/layout.tsx`. Apply the new top nav (already updated in T035). Wrap content in a `<main>` with appropriate padding. Ensure the dark mode background extends edge-to-edge.
+- [X] T060 [P] [US2] Redesign `apps/web/app/(participant)/layout.tsx`. Apply the new top nav (already updated in T035). Wrap content in a `<main>` with appropriate padding. Ensure the dark mode background extends edge-to-edge.
 
 - [X] T061 [P] [US2] Redesign `apps/web/app/auth/` pages (sign-in, denied) — the user-facing auth surfaces. Use the festive aesthetic. Keep all functional behavior from slice 001 intact (eligibility predicates, redirect targets). Sign-in page becomes a polished landing with a single `<Button size="lg">` "Sign in with Microsoft". Denied page uses `<ErrorState>` with explanation per slice 001's spec.
 
-- [ ] T062 [US2] Run the full US2 red-gate suite green. Iterate. Append green output to `specs/009-ui-beautification/red-gate-us2.md`.
+- [X] T062 [US2] Run the full US2 red-gate suite green. Iterate. Append green output to `specs/009-ui-beautification/red-gate-us2.md`.
 
 - [X] T063 [US2] Run the bundle-budget check: `npm run measure-bundle`. Document delta.
 

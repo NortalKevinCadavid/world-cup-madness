@@ -118,15 +118,15 @@ export default async function LeaderboardPage() {
       className="max-w-5xl mx-auto px-6 py-8 flex flex-col gap-6"
     >
       <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold text-neutral-900">Leaderboard</h1>
-        <p className="text-sm text-neutral-600">
+        <h1 className="text-2xl font-semibold text-foreground">Leaderboard</h1>
+        <p className="text-sm text-muted-foreground">
           Standings refresh automatically as matches finish. Ties break by
           exact-result count, then outcome-only count, then final-predictions
           points.
         </p>
         <p
           data-testid="calculation-version-indicator"
-          className="text-xs text-neutral-500"
+          className="text-xs text-muted-foreground"
         >
           Calculation v{calculation_version}
         </p>
@@ -136,16 +136,16 @@ export default async function LeaderboardPage() {
         <div
           data-testid="leaderboard-empty"
           role="status"
-          className="rounded border border-neutral-200 bg-neutral-50 p-4 text-sm text-neutral-700"
+          className="rounded border border-border bg-muted/30 p-4 text-sm text-muted-foreground"
         >
           The leaderboard will populate once matches finish. Until then, all
           participants are tied at zero.
         </div>
       ) : null}
 
-      <div className="overflow-x-auto rounded-lg border border-neutral-200 bg-white">
+      <div className="overflow-x-auto rounded-lg border border-border bg-card">
         <table className="w-full text-sm">
-          <thead className="bg-neutral-50 text-left text-xs font-semibold uppercase tracking-wide text-neutral-600">
+          <thead className="bg-muted/30 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             <tr>
               <th scope="col" className="px-4 py-2">
                 Rank
@@ -167,45 +167,45 @@ export default async function LeaderboardPage() {
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-neutral-100">
+          <tbody className="divide-y divide-border/50">
             {leaderboard.map((row) => (
               <tr
                 key={row.participant_id}
                 data-testid="leaderboard-row"
                 data-rank={row.rank}
                 data-participant-id={row.participant_id}
-                className="hover:bg-neutral-50"
+                className="hover:bg-muted/30"
               >
-                <td data-field="rank" className="px-4 py-2 font-medium text-neutral-900">
+                <td data-field="rank" className="px-4 py-2 font-medium text-foreground">
                   {row.rank}
                 </td>
                 <td
                   data-field="display_name"
-                  className="px-4 py-2 text-neutral-800"
+                  className="px-4 py-2 text-foreground"
                 >
                   {row.display_name}
                 </td>
                 <td
                   data-field="total_points"
-                  className="px-4 py-2 text-right tabular-nums text-neutral-900"
+                  className="px-4 py-2 text-right tabular-nums text-foreground"
                 >
                   {row.total_points}
                 </td>
                 <td
                   data-field="exact_count"
-                  className="px-4 py-2 text-right tabular-nums text-neutral-700"
+                  className="px-4 py-2 text-right tabular-nums text-muted-foreground"
                 >
                   {row.exact_count}
                 </td>
                 <td
                   data-field="outcome_count"
-                  className="px-4 py-2 text-right tabular-nums text-neutral-700"
+                  className="px-4 py-2 text-right tabular-nums text-muted-foreground"
                 >
                   {row.outcome_count}
                 </td>
                 <td
                   data-field="final_points"
-                  className="px-4 py-2 text-right tabular-nums text-neutral-700"
+                  className="px-4 py-2 text-right tabular-nums text-muted-foreground"
                 >
                   {row.final_points}
                 </td>

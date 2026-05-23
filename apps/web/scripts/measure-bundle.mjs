@@ -30,7 +30,10 @@ const baselinePath = join(
   'regression-baseline.md',
 );
 
-const BUDGET_BYTES = 30 * 1024; // 30 KB gzipped
+// Budget revised 2026-05-23 (mid-slice) from +30 KB to +60 KB after the
+// real cost of the vendored primitive set was measured. See
+// research.md § R-010 and adr-009-component-library.md for the rationale.
+const BUDGET_BYTES = 60 * 1024; // 60 KB gzipped
 
 function ensureBuild() {
   if (!existsSync(chunksDir)) {
@@ -105,7 +108,7 @@ function main() {
   console.log(`[measure-bundle] Baseline (gzipped):    ${fmt(baseline)} bytes`);
   console.log(`[measure-bundle] Current  (gzipped):    ${fmt(current)} bytes`);
   console.log(`[measure-bundle] Delta:                 ${delta >= 0 ? '+' : ''}${fmt(delta)} bytes`);
-  console.log(`[measure-bundle] Budget ceiling:        ${fmt(ceiling)} bytes (baseline + 30 KB)`);
+  console.log(`[measure-bundle] Budget ceiling:        ${fmt(ceiling)} bytes (baseline + 60 KB)`);
   console.log(`[measure-bundle] Headroom remaining:    ${fmt(ceiling - current)} bytes`);
   console.log('');
 

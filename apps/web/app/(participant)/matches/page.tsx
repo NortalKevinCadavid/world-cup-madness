@@ -84,13 +84,18 @@ const STATUS_LABEL: Record<MatchStatus, string> = {
   cancelled: 'Cancelled',
 };
 
+// Slice 009 — restyled with semantic tokens. Mapping:
+//   scheduled  → muted (neutral)
+//   in_progress → open (festive accent — match is live, predictions still need watching)
+//   finished   → scored (sky/blue — final result is in)
+//   cancelled  → destructive
+//   postponed  → muted with destructive-tinted text
 const STATUS_PILL_CLASS: Record<MatchStatus, string> = {
-  scheduled:
-    'bg-neutral-100 text-neutral-700 ring-1 ring-inset ring-neutral-300',
-  in_progress: 'bg-amber-100 text-amber-800 ring-1 ring-inset ring-amber-300',
-  finished: 'bg-green-100 text-green-800 ring-1 ring-inset ring-green-300',
-  cancelled: 'bg-red-100 text-red-800 ring-1 ring-inset ring-red-300',
-  postponed: 'bg-slate-100 text-slate-800 ring-1 ring-inset ring-slate-300',
+  scheduled: 'bg-muted text-muted-foreground ring-1 ring-inset ring-border',
+  in_progress: 'bg-open/15 text-open ring-1 ring-inset ring-open/40',
+  finished: 'bg-scored/15 text-scored ring-1 ring-inset ring-scored/40',
+  cancelled: 'bg-destructive/15 text-destructive ring-1 ring-inset ring-destructive/40',
+  postponed: 'bg-muted text-muted-foreground ring-1 ring-inset ring-border',
 };
 
 const VALID_STAGES: ReadonlySet<MatchStage> = new Set(STAGE_ORDER);
@@ -295,10 +300,12 @@ export default async function MatchesPage({ searchParams }: PageProps) {
   const stageBuckets = groupMatches(page.matches);
 
   return (
-    <main className="max-w-6xl mx-auto px-6 py-8 flex flex-col gap-6">
-      <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold text-neutral-900">Matches</h1>
-        <p className="text-sm text-neutral-600">
+    <main className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8">
+      <header className="flex flex-col gap-2">
+        <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
+          Matches
+        </h1>
+        <p className="text-sm text-muted-foreground">
           FIFA World Cup 2026 fixtures, grouped by stage. Kickoff times are
           localized to your browser; the canonical schedule remains in UTC.
         </p>
@@ -306,13 +313,13 @@ export default async function MatchesPage({ searchParams }: PageProps) {
 
       <section
         aria-label="Filters"
-        className="rounded-lg border border-neutral-200 bg-white p-4"
+        className="rounded-lg border border-border bg-card p-4 shadow-sm"
       >
         <MatchListFilters currentFilters={filters} />
       </section>
 
       {stageBuckets.length === 0 ? (
-        <p className="rounded-md border border-dashed border-neutral-300 bg-neutral-50 px-4 py-8 text-center text-sm text-neutral-600">
+        <p className="rounded-md border border-dashed border-border bg-card/50 px-4 py-8 text-center text-sm text-muted-foreground">
           No matches for the current filters.
         </p>
       ) : (
@@ -325,7 +332,7 @@ export default async function MatchesPage({ searchParams }: PageProps) {
             >
               <h2
                 id={`stage-${bucket.stage}`}
-                className="text-lg font-semibold text-neutral-900"
+                className="font-display text-lg font-semibold text-foreground"
               >
                 {STAGE_LABEL[bucket.stage]}
               </h2>
@@ -336,7 +343,7 @@ export default async function MatchesPage({ searchParams }: PageProps) {
                 return (
                   <div key={groupKey} className="flex flex-col gap-2">
                     {showSubheading ? (
-                      <h3 className="text-sm font-medium text-neutral-700">
+                      <h3 className="font-display text-sm font-semibold text-muted-foreground">
                         Group {groupKey}
                       </h3>
                     ) : null}
@@ -354,7 +361,7 @@ export default async function MatchesPage({ searchParams }: PageProps) {
         </div>
       )}
 
-      <footer className="border-t border-neutral-200 pt-4">
+      <footer className="border-t border-border pt-4">
         <PaginationControls
           page={page.page}
           page_size={page.page_size}
@@ -381,55 +388,55 @@ interface MatchTableProps {
 
 function MatchTable({ rows, locale, predictionsByMatch, now }: MatchTableProps) {
   return (
-    <div className="overflow-x-auto rounded-lg border border-neutral-200">
-      <table className="min-w-full divide-y divide-neutral-200 text-sm">
-        <thead className="bg-neutral-50">
+    <div className="overflow-x-auto rounded-lg border border-border bg-card shadow-sm">
+      <table className="min-w-full divide-y divide-border text-sm">
+        <thead className="bg-muted/50">
           <tr>
             <th
               scope="col"
-              className="px-3 py-2 text-left font-medium text-neutral-700"
+              className="px-3 py-2 text-left font-medium text-muted-foreground"
             >
               Home
             </th>
             <th
               scope="col"
-              className="px-3 py-2 text-center font-medium text-neutral-700"
+              className="px-3 py-2 text-center font-medium text-muted-foreground"
             >
               Score
             </th>
             <th
               scope="col"
-              className="px-3 py-2 text-left font-medium text-neutral-700"
+              className="px-3 py-2 text-left font-medium text-muted-foreground"
             >
               Away
             </th>
             <th
               scope="col"
-              className="px-3 py-2 text-left font-medium text-neutral-700"
+              className="px-3 py-2 text-left font-medium text-muted-foreground"
             >
               Kickoff
             </th>
             <th
               scope="col"
-              className="px-3 py-2 text-left font-medium text-neutral-700"
+              className="px-3 py-2 text-left font-medium text-muted-foreground"
             >
               Venue
             </th>
             <th
               scope="col"
-              className="px-3 py-2 text-left font-medium text-neutral-700"
+              className="px-3 py-2 text-left font-medium text-muted-foreground"
             >
               Status
             </th>
             <th
               scope="col"
-              className="px-3 py-2 text-left font-medium text-neutral-700"
+              className="px-3 py-2 text-left font-medium text-muted-foreground"
             >
               Your pick
             </th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-neutral-200 bg-white">
+        <tbody className="divide-y divide-border bg-card">
           {rows.map((row) => {
             // Slice 003 / T033 — prefer the server-computed lock_state (added
             // to /api/matches by T031 / migration 0038) over the local client
@@ -455,26 +462,26 @@ function MatchTable({ rows, locale, predictionsByMatch, now }: MatchTableProps) 
               <tr
                 key={row.id}
                 data-match-id={row.id}
-                className="hover:bg-neutral-50"
+                className="hover:bg-muted/30"
               >
                 <td className="px-3 py-2">
                   <TeamCell team={row.home_team} />
                 </td>
-                <td className="px-3 py-2 text-center font-mono text-neutral-900">
+                <td className="px-3 py-2 text-center font-mono text-foreground">
                   {row.status === 'finished' && row.match_result
                     ? formatScore(row.match_result)
-                    : <span className="text-neutral-300" aria-hidden>—</span>}
+                    : <span className="text-muted-foreground/40" aria-hidden>—</span>}
                 </td>
                 <td className="px-3 py-2">
                   <TeamCell team={row.away_team} />
                 </td>
-                <td className="px-3 py-2 text-neutral-700">
+                <td className="px-3 py-2 text-muted-foreground">
                   <time dateTime={row.kickoff_utc}>
                     {formatKickoff(row.kickoff_utc, locale)}
                   </time>
                 </td>
-                <td className="px-3 py-2 text-neutral-700">
-                  {row.venue ?? <span className="text-neutral-400">—</span>}
+                <td className="px-3 py-2 text-muted-foreground">
+                  {row.venue ?? <span className="text-muted-foreground/60">—</span>}
                 </td>
                 <td className="px-3 py-2">
                   <StatusPill status={row.status} />
@@ -507,16 +514,16 @@ function TeamCell({ team }: { team: Match['home_team'] }) {
           aria-hidden
           width={20}
           height={14}
-          className="h-3.5 w-5 rounded-sm border border-neutral-200 object-cover"
+          className="h-3.5 w-5 rounded-sm border border-border object-cover"
         />
       ) : (
         <span
           aria-hidden
-          className="inline-block h-3.5 w-5 rounded-sm border border-dashed border-neutral-300 bg-neutral-50"
+          className="inline-block h-3.5 w-5 rounded-sm border border-dashed border-border bg-muted/30"
         />
       )}
-      <span className="font-medium text-neutral-900">{team.short_code}</span>
-      <span className="text-neutral-500">{team.name}</span>
+      <span className="font-medium text-foreground">{team.short_code}</span>
+      <span className="text-muted-foreground">{team.name}</span>
     </div>
   );
 }

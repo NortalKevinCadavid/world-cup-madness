@@ -242,13 +242,13 @@ export function FinalsForm({
           <section
             key={slot.kind}
             data-testid={`slot-${slot.kind}`}
-            className="flex flex-col gap-2 rounded-lg border border-neutral-200 bg-white p-4"
+            className="flex flex-col gap-2 rounded-lg border border-border bg-card p-4"
           >
             <header className="flex flex-col gap-0.5">
-              <h2 className="text-sm font-semibold text-neutral-900">
+              <h2 className="text-sm font-semibold text-foreground">
                 {slot.label}
               </h2>
-              <p className="text-xs text-neutral-500">{slot.description}</p>
+              <p className="text-xs text-muted-foreground">{slot.description}</p>
             </header>
 
             <div className="flex flex-wrap items-center gap-3">
@@ -284,7 +284,7 @@ export function FinalsForm({
                 onClick={() => submitSlot(slot.kind)}
                 disabled={submitDisabled}
                 data-testid={`submit-${slot.kind}`}
-                className="rounded border border-blue-700 bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded border border-blue-700 bg-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {rowPending ? 'Submitting…' : 'Submit'}
               </button>
@@ -295,7 +295,7 @@ export function FinalsForm({
                 data-testid={`error-${slot.kind}`}
                 role="alert"
                 aria-live="polite"
-                className="text-sm text-red-600"
+                className="text-sm text-destructive"
               >
                 {row.error}
               </div>

@@ -82,7 +82,7 @@ export function PredictionForm({
           <span className="font-semibold">
             {existingPrediction.predicted_home}-{existingPrediction.predicted_away}
           </span>{' '}
-          <span className="text-amber-600">(locked)</span>
+          <span className="text-locked">(locked)</span>
         </div>
       );
     }
@@ -148,7 +148,7 @@ export function PredictionForm({
           onChange={(e) => setHome(e.target.value)}
           disabled={isPending}
           aria-label="Home score"
-          className="w-12 rounded border border-neutral-300 px-1 py-0.5 text-center focus:outline-none focus:ring-2 focus:ring-neutral-500"
+          className="w-12 rounded border border-border px-1 py-0.5 text-center focus:outline-none focus:ring-2 focus:ring-ring"
         />
       </label>
       <span aria-hidden>-</span>
@@ -163,13 +163,13 @@ export function PredictionForm({
           onChange={(e) => setAway(e.target.value)}
           disabled={isPending}
           aria-label="Away score"
-          className="w-12 rounded border border-neutral-300 px-1 py-0.5 text-center focus:outline-none focus:ring-2 focus:ring-neutral-500"
+          className="w-12 rounded border border-border px-1 py-0.5 text-center focus:outline-none focus:ring-2 focus:ring-ring"
         />
       </label>
       <button
         type="submit"
         disabled={isPending}
-        className="rounded border border-blue-700 bg-blue-600 px-2 py-0.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+        className="rounded border border-blue-700 bg-primary px-2 py-0.5 text-sm font-medium text-white hover:bg-primary disabled:opacity-50"
       >
         {existingPrediction ? 'Update' : 'Submit'}
       </button>
@@ -179,7 +179,7 @@ export function PredictionForm({
         </span>
       ) : null}
       {error ? (
-        <span className="text-xs text-red-600" role="alert" aria-live="polite">
+        <span className="text-xs text-destructive" role="alert" aria-live="polite">
           {error}
         </span>
       ) : null}

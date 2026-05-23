@@ -169,10 +169,10 @@ export default async function FinalsPage() {
       className="max-w-3xl mx-auto px-6 py-8 flex flex-col gap-6"
     >
       <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold text-neutral-900">
+        <h1 className="text-2xl font-semibold text-foreground">
           Final predictions
         </h1>
-        <p className="text-sm text-neutral-600">
+        <p className="text-sm text-muted-foreground">
           Pick the four tournament-wide winners — champion, runner-up, top
           scorer, and best player — before the first match kicks off. Each
           pick is independently editable until the lock boundary.

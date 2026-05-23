@@ -151,16 +151,16 @@ export default async function BreakdownPage() {
       className="max-w-5xl mx-auto px-6 py-8 flex flex-col gap-6"
     >
       <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold text-neutral-900">
+        <h1 className="text-2xl font-semibold text-foreground">
           My Breakdown
         </h1>
-        <p className="text-sm text-neutral-600">
+        <p className="text-sm text-muted-foreground">
           One row per finished match and per scored final-tournament pick.
           The sum below matches your leaderboard total.
         </p>
         <p
           data-testid="breakdown-calc-version"
-          className="text-xs text-neutral-500"
+          className="text-xs text-muted-foreground"
         >
           Calculation v{calculation_version}
         </p>
@@ -170,17 +170,17 @@ export default async function BreakdownPage() {
         <div
           data-testid="breakdown-empty"
           role="status"
-          className="rounded border border-neutral-200 bg-neutral-50 p-4 text-sm text-neutral-700"
+          className="rounded border border-border bg-muted/30 p-4 text-sm text-muted-foreground"
         >
           No rows yet — your breakdown will appear once matches finish.
         </div>
       ) : (
         <>
           <section className="flex flex-col gap-2">
-            <h2 className="text-lg font-semibold text-neutral-900">Matches</h2>
-            <div className="overflow-x-auto rounded-lg border border-neutral-200 bg-white">
+            <h2 className="text-lg font-semibold text-foreground">Matches</h2>
+            <div className="overflow-x-auto rounded-lg border border-border bg-card">
               <table className="w-full text-sm">
-                <thead className="bg-neutral-50 text-left text-xs font-semibold uppercase tracking-wide text-neutral-600">
+                <thead className="bg-muted/30 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   <tr>
                     <th scope="col" className="px-4 py-2">
                       Match
@@ -199,24 +199,24 @@ export default async function BreakdownPage() {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-neutral-100">
+                <tbody className="divide-y divide-border/50">
                   {matchRows.map((row) => (
                     <tr
                       key={`${row.target_kind}-${row.target_id}`}
                       data-testid="breakdown-row"
                       data-target-kind={row.target_kind}
                       data-participant-id={row.participant_id}
-                      className="hover:bg-neutral-50"
+                      className="hover:bg-muted/30"
                     >
                       <td
                         data-field="target_label"
-                        className="px-4 py-2 text-neutral-800"
+                        className="px-4 py-2 text-foreground"
                       >
                         {row.target_label}
                       </td>
                       <td
                         data-field="predicted_display"
-                        className="px-4 py-2 tabular-nums text-neutral-700"
+                        className="px-4 py-2 tabular-nums text-muted-foreground"
                       >
                         {row.predicted_display === ''
                           ? '—'
@@ -224,19 +224,19 @@ export default async function BreakdownPage() {
                       </td>
                       <td
                         data-field="official_display"
-                        className="px-4 py-2 tabular-nums text-neutral-700"
+                        className="px-4 py-2 tabular-nums text-muted-foreground"
                       >
                         {row.official_display ?? '—'}
                       </td>
                       <td
                         data-field="points"
-                        className="px-4 py-2 text-right tabular-nums font-medium text-neutral-900"
+                        className="px-4 py-2 text-right tabular-nums font-medium text-foreground"
                       >
                         {row.points}
                       </td>
                       <td
                         data-field="reason_code"
-                        className="px-4 py-2 text-neutral-700"
+                        className="px-4 py-2 text-muted-foreground"
                         title={formatReason(row.reason_code)}
                       >
                         {row.reason_code}
@@ -249,12 +249,12 @@ export default async function BreakdownPage() {
           </section>
 
           <section className="flex flex-col gap-2">
-            <h2 className="text-lg font-semibold text-neutral-900">
+            <h2 className="text-lg font-semibold text-foreground">
               Final tournament picks
             </h2>
-            <div className="overflow-x-auto rounded-lg border border-neutral-200 bg-white">
+            <div className="overflow-x-auto rounded-lg border border-border bg-card">
               <table className="w-full text-sm">
-                <thead className="bg-neutral-50 text-left text-xs font-semibold uppercase tracking-wide text-neutral-600">
+                <thead className="bg-muted/30 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   <tr>
                     <th scope="col" className="px-4 py-2">
                       Award
@@ -273,24 +273,24 @@ export default async function BreakdownPage() {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-neutral-100">
+                <tbody className="divide-y divide-border/50">
                   {finalRows.map((row) => (
                     <tr
                       key={`${row.target_kind}-${row.target_id}`}
                       data-testid="breakdown-row"
                       data-target-kind={row.target_kind}
                       data-participant-id={row.participant_id}
-                      className="hover:bg-neutral-50"
+                      className="hover:bg-muted/30"
                     >
                       <td
                         data-field="target_label"
-                        className="px-4 py-2 text-neutral-800"
+                        className="px-4 py-2 text-foreground"
                       >
                         {row.target_label}
                       </td>
                       <td
                         data-field="predicted_display"
-                        className="px-4 py-2 text-neutral-700"
+                        className="px-4 py-2 text-muted-foreground"
                       >
                         {row.predicted_display === ''
                           ? '—'
@@ -298,13 +298,13 @@ export default async function BreakdownPage() {
                       </td>
                       <td
                         data-field="official_display"
-                        className="px-4 py-2 text-neutral-700"
+                        className="px-4 py-2 text-muted-foreground"
                       >
                         {row.official_display === null ? (
                           <span
                             data-testid="final-pending-indicator"
                             title="Scoring pending — FIFA announcement awaited"
-                            className="text-neutral-500"
+                            className="text-muted-foreground"
                           >
                             —
                           </span>
@@ -314,13 +314,13 @@ export default async function BreakdownPage() {
                       </td>
                       <td
                         data-field="points"
-                        className="px-4 py-2 text-right tabular-nums font-medium text-neutral-900"
+                        className="px-4 py-2 text-right tabular-nums font-medium text-foreground"
                       >
                         {row.points}
                       </td>
                       <td
                         data-field="reason_code"
-                        className="px-4 py-2 text-neutral-700"
+                        className="px-4 py-2 text-muted-foreground"
                         title={formatReason(row.reason_code)}
                       >
                         {row.reason_code}
@@ -332,16 +332,16 @@ export default async function BreakdownPage() {
             </div>
           </section>
 
-          <footer className="flex items-center justify-between border-t border-neutral-200 pt-4">
+          <footer className="flex items-center justify-between border-t border-border pt-4">
             <p
               data-testid="breakdown-footer-sum"
-              className="text-sm font-semibold text-neutral-900"
+              className="text-sm font-semibold text-foreground"
             >
               {total_points}
             </p>
             <a
               href="/leaderboard"
-              className="text-sm text-blue-600 hover:underline"
+              className="text-sm text-primary hover:underline"
             >
               See leaderboard →
             </a>

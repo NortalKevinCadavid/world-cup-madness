@@ -73,7 +73,7 @@ export function FinalsLockBanner({
         data-lock-state="locked"
         role="status"
         aria-live="polite"
-        className="rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900"
+        className="rounded-md border border-open/40 bg-open/10 px-4 py-3 text-sm text-open"
       >
         <span className="font-semibold">Picks are locked.</span>{' '}
         First match has kicked off.
@@ -92,7 +92,7 @@ export function FinalsLockBanner({
       data-lock-state="editable"
       role="status"
       aria-live="polite"
-      className="rounded-md border border-blue-300 bg-blue-50 px-4 py-3 text-sm text-blue-900"
+      className="rounded-md border border-accent/40 bg-accent/10 px-4 py-3 text-sm text-primary"
     >
       <span className="font-semibold">Final predictions are open.</span>{' '}
       <span data-testid="lock-banner-countdown">{countdownLabel}</span>

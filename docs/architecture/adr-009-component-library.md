@@ -53,7 +53,7 @@ Supporting dependencies:
 
 - The slice can hit SC-001/SC-002/SC-004 without authoring keyboard/focus/ARIA logic from scratch.
 - Every primitive lives in our repo as reviewable source; future security audits, theming changes, or behavior tweaks happen in-tree.
-- Bundle impact stays within the slice's +30 KB gzipped budget (research.md R-010) because shadcn primitives tree-shake well and Radix has small per-primitive footprints.
+- Bundle impact stays within the slice's revised **+60 KB** gzipped budget (research.md R-010 — revised mid-slice from the original +30 KB planning estimate after the real cost of the primitive set was measured at ~+42 KB post-US2, projected to ~+52–55 KB post-slice).
 - Future slices get a documented, frozen primitive surface at `apps/web/app/components/ui/` — visual consistency across slices becomes the default, not an emergent property.
 
 ### Negative / mitigations

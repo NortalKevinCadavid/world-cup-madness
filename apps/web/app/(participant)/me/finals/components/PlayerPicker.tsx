@@ -175,16 +175,16 @@ export function PlayerPicker({
         aria-haspopup="listbox"
         aria-expanded={open}
         data-testid={`${testIdPrefix}-toggle`}
-        className="flex w-full items-center justify-between rounded border border-neutral-300 bg-white px-3 py-1.5 text-left text-sm text-neutral-900 hover:border-neutral-400 disabled:cursor-not-allowed disabled:opacity-50"
+        className="flex w-full items-center justify-between rounded border border-border bg-card px-3 py-1.5 text-left text-sm text-foreground hover:border-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
       >
-        <span className={value ? '' : 'text-neutral-400'}>{buttonLabel}</span>
-        <span aria-hidden className="ml-2 text-neutral-500">
+        <span className={value ? '' : 'text-muted-foreground/60'}>{buttonLabel}</span>
+        <span aria-hidden className="ml-2 text-muted-foreground">
           {open ? '▲' : '▼'}
         </span>
       </button>
 
       {open ? (
-        <div className="absolute z-10 mt-1 w-full rounded-md border border-neutral-200 bg-white shadow-lg">
+        <div className="absolute z-10 mt-1 w-full rounded-md border border-border bg-card shadow-lg">
           <Command
             label="Search players"
             shouldFilter={false}
@@ -196,17 +196,17 @@ export function PlayerPicker({
               value={query}
               onValueChange={setQuery}
               data-testid={`${testIdPrefix}-input`}
-              className="w-full rounded-t-md border-b border-neutral-200 px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-t-md border-b border-border px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-blue-500"
             />
             <CommandList className="max-h-60 overflow-y-auto">
               {loading ? (
-                <CommandLoading className="px-3 py-2 text-sm text-neutral-500">
+                <CommandLoading className="px-3 py-2 text-sm text-muted-foreground">
                   Searching…
                 </CommandLoading>
               ) : null}
               {error ? (
                 <div
-                  className="px-3 py-2 text-sm text-red-600"
+                  className="px-3 py-2 text-sm text-destructive"
                   role="alert"
                   data-testid={`${testIdPrefix}-search-error`}
                 >
@@ -214,7 +214,7 @@ export function PlayerPicker({
                 </div>
               ) : null}
               {!loading && !error && results.length === 0 ? (
-                <CommandEmpty className="px-3 py-2 text-sm text-neutral-500">
+                <CommandEmpty className="px-3 py-2 text-sm text-muted-foreground">
                   {query.trim().length === 0
                     ? 'Type to search…'
                     : 'No players match.'}
@@ -231,11 +231,11 @@ export function PlayerPicker({
                   ]}
                   onSelect={() => handleSelect(player)}
                   data-testid={`player-result-${player.id}`}
-                  className="flex items-center gap-2 px-3 py-1.5 text-sm aria-selected:bg-blue-50 aria-selected:text-blue-900 cursor-pointer"
+                  className="flex items-center gap-2 px-3 py-1.5 text-sm aria-selected:bg-accent/10 aria-selected:text-primary cursor-pointer"
                 >
-                  <span className="text-neutral-900">{player.full_name}</span>
+                  <span className="text-foreground">{player.full_name}</span>
                   {player.team_short_code ? (
-                    <span className="font-mono text-xs text-neutral-500">
+                    <span className="font-mono text-xs text-muted-foreground">
                       ({player.team_short_code})
                     </span>
                   ) : null}

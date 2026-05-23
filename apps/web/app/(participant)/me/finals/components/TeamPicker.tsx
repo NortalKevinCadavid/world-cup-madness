@@ -120,18 +120,18 @@ export function TeamPicker({
         aria-haspopup="listbox"
         aria-expanded={open}
         data-testid={`${testIdPrefix}-toggle`}
-        className="flex w-full items-center justify-between rounded border border-neutral-300 bg-white px-3 py-1.5 text-left text-sm text-neutral-900 hover:border-neutral-400 disabled:cursor-not-allowed disabled:opacity-50"
+        className="flex w-full items-center justify-between rounded border border-border bg-card px-3 py-1.5 text-left text-sm text-foreground hover:border-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
       >
-        <span className={selected ? '' : 'text-neutral-400'}>
+        <span className={selected ? '' : 'text-muted-foreground/60'}>
           {buttonLabel}
         </span>
-        <span aria-hidden className="ml-2 text-neutral-500">
+        <span aria-hidden className="ml-2 text-muted-foreground">
           {open ? '▲' : '▼'}
         </span>
       </button>
 
       {open ? (
-        <div className="absolute z-10 mt-1 w-full rounded-md border border-neutral-200 bg-white shadow-lg">
+        <div className="absolute z-10 mt-1 w-full rounded-md border border-border bg-card shadow-lg">
           <Command
             label="Filter teams"
             className="flex flex-col"
@@ -143,10 +143,10 @@ export function TeamPicker({
               placeholder="Search by name or code…"
               autoFocus
               data-testid={`${testIdPrefix}-input`}
-              className="w-full rounded-t-md border-b border-neutral-200 px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-t-md border-b border-border px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-blue-500"
             />
             <CommandList className="max-h-60 overflow-y-auto">
-              <CommandEmpty className="px-3 py-2 text-sm text-neutral-500">
+              <CommandEmpty className="px-3 py-2 text-sm text-muted-foreground">
                 No teams match.
               </CommandEmpty>
               {teams.map((team) => (
@@ -159,12 +159,12 @@ export function TeamPicker({
                   keywords={[team.name, team.short_code]}
                   onSelect={() => handleSelect(team.id)}
                   data-testid={`${testIdPrefix}-option-${team.id}`}
-                  className="flex items-center gap-2 px-3 py-1.5 text-sm aria-selected:bg-blue-50 aria-selected:text-blue-900 cursor-pointer"
+                  className="flex items-center gap-2 px-3 py-1.5 text-sm aria-selected:bg-accent/10 aria-selected:text-primary cursor-pointer"
                 >
-                  <span className="inline-block w-10 font-mono text-xs text-neutral-700">
+                  <span className="inline-block w-10 font-mono text-xs text-muted-foreground">
                     {team.short_code}
                   </span>
-                  <span className="text-neutral-900">{team.name}</span>
+                  <span className="text-foreground">{team.name}</span>
                 </CommandItem>
               ))}
             </CommandList>

@@ -62,23 +62,23 @@ export function PaginationControls({
         type="button"
         disabled={!canPrev}
         onClick={() => gotoPage(page - 1)}
-        className="rounded-md border border-neutral-300 bg-white px-3 py-1.5 font-medium text-neutral-700 hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-40"
+        className="rounded-md border border-border bg-card px-3 py-1.5 font-medium text-muted-foreground hover:bg-muted/30 disabled:cursor-not-allowed disabled:opacity-40"
       >
         Previous
       </button>
       <span
         aria-live="polite"
-        className="text-neutral-600"
+        className="text-muted-foreground"
       >
-        Page <span className="font-medium text-neutral-900">{page}</span> of{' '}
-        <span className="font-medium text-neutral-900">{totalPages}</span>
-        <span className="ml-2 text-neutral-400">({total} matches)</span>
+        Page <span className="font-medium text-foreground">{page}</span> of{' '}
+        <span className="font-medium text-foreground">{totalPages}</span>
+        <span className="ml-2 text-muted-foreground/60">({total} matches)</span>
       </span>
       <button
         type="button"
         disabled={!canNext}
         onClick={() => gotoPage(page + 1)}
-        className="rounded-md border border-neutral-300 bg-white px-3 py-1.5 font-medium text-neutral-700 hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-40"
+        className="rounded-md border border-border bg-card px-3 py-1.5 font-medium text-muted-foreground hover:bg-muted/30 disabled:cursor-not-allowed disabled:opacity-40"
       >
         Next
       </button>
