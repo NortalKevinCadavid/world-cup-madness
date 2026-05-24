@@ -126,17 +126,23 @@ Slice 001 owner, or whoever next opens a fixture/infra cleanup chore. This is **
 - ✅ `resetStub` reduced to a no-op (browser-context isolation handles cleanup).
 - ✅ `SUPABASE_SERVICE_ROLE_KEY` populated in `apps/web/.env.local` from `pnpm supabase status -o env`. (`.env.local` is gitignored — the key is local-only.)
 
-### Downstream issues surfaced (NOT in the original follow-up scope)
+### Downstream issues surfaced (addressed by commit `ae57d86` + env wiring)
 
-Re-running the slice 005 suite with the rewritten fixture + service-role key revealed three issues that the prior pre-flight failure was masking:
+Re-running the slice 005 suite revealed three issues the OIDC pre-flight had been masking. All three are now addressed.
 
-1. **`score_calculation_runs.trigger` NOT NULL drift** — `slice-005-leaderboard.spec.ts`'s `insertSyntheticRun` helper inserts without a `trigger` column value. The column became NOT NULL in a subsequent migration; the test wasn't updated. Affects multiple AS3-AS5 tests in `slice-005-leaderboard.spec.ts`.
+1. **`score_calculation_runs` + `score_records` schema drift in test helpers** ✅ FIXED — `insertSyntheticRun` now writes `trigger`, `triggered_by`, `affected_record_count`, `calculation_version_written`. `insertSyntheticMatchRow` now writes `official_home`/`official_away` (CHECK-required for `target_kind='match'`). Tests STILL fail downstream because `supabase db reset` doesn't load `slice-005-fixture.sql` — recorded as new issue #4 below.
 
-2. **`score-trigger` Edge Function returns HTTP 401** — `slice-005-breakdown.spec.ts`'s `runFullScoringSequence` calls `supabase/functions/score-trigger` and gets 401. Likely needs an env var (probably `SCORE_TRIGGER_SHARED_SECRET` or similar) populated in Playwright's env. The Supabase status output may or may not expose it; the slice 005 quickstart should be consulted.
+2. **`score-trigger` Edge Function 401** ✅ FIXED — two layers:
+   - Gateway: added `Authorization: Bearer <anon-key>` to `callScoreTrigger` (also required replacing the placeholder anon-key in `.env.local` with the real local-stack JWT).
+   - Function-internal: `SCORE_TRIGGER_INTERNAL_AUTH_SECRET` now wired to BOTH `supabase/functions/.env` (Edge Runtime container env) and `apps/web/.env.local` (test reads it via dotenv). Required `pnpm supabase stop && start` to pick up the new env. Edge Runtime container env verified: `docker inspect supabase_edge_runtime_world-cup-madness ... | grep SCORE_TRIGGER` shows the secret. Tests now reach the function's scoring logic — exposing new issue #5 below.
 
-3. **`APIRequestContext` doesn't carry session cookies** — `slice-001-login-approved.spec.ts`'s `fetchMe(request)` helper uses the standalone `request` fixture, which doesn't share cookies with the page. After my Keycloak-driven sign-in, the session lives on `page.context()` only. The test needs to either (a) use `page.request` instead of the standalone `request`, or (b) extract the session cookies post-sign-in and re-apply them to the API context.
+3. **`APIRequestContext` cookie isolation** ✅ FIXED — `request.get(...)` → `page.request.get(...)` across 11 call sites in 4 slice 001 specs. Verified: `slice-001-login-approved.spec.ts -g "Scenario 3a"` passes in 6.3 s.
 
-Each of these is a separate slice 005 / slice 001 follow-up. None block Path A's primary deliverable (unblocking the fixture pre-flight). They were latent before, just hidden behind the discovery-probe 404.
+### NEW issues found while fixing the original three (file as additional follow-ups)
+
+4. **`supabase db reset` doesn't load `slice-005-fixture.sql`** — the CLI seeds `slice-001-fixture.sql` through `slice-004-fixture.sql` (per its `--seed` config) but NOT slice 005's. Tests that reference `FINISHED_MATCHES = ['eeee0050-0000-0000-0000-000000000001', ...]` fail because those match rows don't exist. **Fix scope**: add `slice-005-fixture.sql` to `supabase/config.toml`'s `[db.seed]` block (or rename to match the auto-discovered pattern). Filed as `specs/005-scoring-leaderboard/follow-up-fixture-not-loaded.md` (TBD by next worker).
+
+5. **`score-trigger` Edge Function passes `triggered_by: null` on the internal-auth path** — `supabase/functions/score-trigger/index.ts` (or the SP at migration slot 0052 it calls) writes `NULL` into `score_calculation_runs.triggered_by` when invoked via X-Internal-Auth bypass (because `auth.uid()` is NULL for service-role calls). The function's D-T013-B comment block notes "the triggered_by column allows NULL per slot 0050's schema" — but a later migration made it NOT NULL. Current error: `SCORING_FAILED: null value in column "triggered_by" of relation "score_calculation_runs" violates not-null constraint`. **Fix scope**: either restore `triggered_by` to nullable, OR have the function pick a system/admin participant id (e.g. admin1) when the call is internal-auth-bypassed. Filed as `specs/005-scoring-leaderboard/follow-up-edge-fn-triggered-by-null.md` (TBD).
 
 ### Test runs after Path A landed
 
