@@ -205,6 +205,7 @@ export default async function BreakdownPage() {
                       key={`${row.target_kind}-${row.target_id}`}
                       data-testid="breakdown-row"
                       data-target-kind={row.target_kind}
+                      data-target-id={row.target_id}
                       data-participant-id={row.participant_id}
                       className="hover:bg-muted/30"
                     >
@@ -279,6 +280,7 @@ export default async function BreakdownPage() {
                       key={`${row.target_kind}-${row.target_id}`}
                       data-testid="breakdown-row"
                       data-target-kind={row.target_kind}
+                      data-target-id={row.target_id}
                       data-participant-id={row.participant_id}
                       className="hover:bg-muted/30"
                     >

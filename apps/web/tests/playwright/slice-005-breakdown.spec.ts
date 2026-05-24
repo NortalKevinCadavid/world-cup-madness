@@ -230,6 +230,8 @@ interface ScoreTriggerResponse {
  */
 interface BreakdownRowDom {
   target_kind: "match" | "final" | string;
+  /** Slice 005 follow-up #6 — present on every row via the page's data-target-id attribute. */
+  target_id: string;
   participant_id: string;
   predicted_display: string;
   official_display: string | null;
@@ -386,6 +388,7 @@ async function readBreakdownRows(
         })();
         return {
           target_kind: row.getAttribute("data-target-kind") ?? "",
+          target_id: row.getAttribute("data-target-id") ?? "",
           participant_id:
             row.getAttribute("data-participant-id") ?? "",
           predicted_display: get("predicted_display"),
@@ -474,11 +477,26 @@ test.describe("US4 — Personal Breakdown @slice-005 @us4", () => {
       });
 
       const allRows = await readBreakdownRows(page);
-      const matchRows = allRows.filter((r) => r.target_kind === "match");
+      // personal_breakdown_v's match_rows CTE does `caller CROSS JOIN matches
+      // WHERE m.status = 'finished'` — it yields one row per finished match
+      // in the ENTIRE DB, regardless of source slice. The slice-002 fixture
+      // also seeds a finished match (bbbb0000-0000-0000-0000-000000000001)
+      // that alpha never predicted; the contract surfaces that as a
+      // points=0 / reason_code='none' / predicted_display='' row (the view's
+      // documented no-prediction baseline). The slice 005 truth table is
+      // about M1/M2/M3 specifically, so we filter to those UUIDs before
+      // asserting on count and per-row shape.
+      //
+      // See specs/005-scoring-leaderboard/follow-up-breakdown-test-foreign-finished-match.md.
+      const SLICE_005_MATCH_IDS = new Set<string>([M1, M2, M3]);
+      const matchRows = allRows.filter(
+        (r) =>
+          r.target_kind === "match" && SLICE_005_MATCH_IDS.has(r.target_id),
+      );
 
       expect(
         matchRows.length,
-        "alpha's breakdown MUST contain exactly 3 rows with target_kind='match' (one per finished match in the slice-005 fixture: M1, M2, M3)",
+        "alpha's breakdown MUST contain exactly 3 rows with target_kind='match' for slice-005's M1/M2/M3 (other slices' finished matches are filtered out by SLICE_005_MATCH_IDS)",
       ).toBe(3);
 
       // Every match row MUST belong to alpha (RLS invariant).
@@ -665,15 +683,28 @@ test.describe("US4 — Personal Breakdown @slice-005 @us4", () => {
 
       const allRows = await readBreakdownRows(page);
 
+      // Filter to slice-005's surfaces. Match rows from other slices'
+      // fixtures (e.g., slice-002's bbbb0000-...001) appear in the view
+      // by design — see specs/005-scoring-leaderboard/follow-up-breakdown-test-foreign-finished-match.md.
+      // Final rows are not subject to the same CROSS JOIN, so no UUID filter
+      // is needed on them.
+      const SLICE_005_MATCH_IDS_AS3 = new Set<string>([M1, M2, M3]);
+      const slice005Rows = allRows.filter(
+        (r) =>
+          r.target_kind === "final" ||
+          (r.target_kind === "match" &&
+            SLICE_005_MATCH_IDS_AS3.has(r.target_id)),
+      );
+
       expect(
-        allRows.length,
-        "alpha's breakdown MUST contain exactly 7 rows (3 match + 4 final) per fixture truth table",
+        slice005Rows.length,
+        "alpha's slice-005 breakdown rows MUST be exactly 7 (3 slice-005 match + 4 final) per fixture truth table; other slices' finished matches are filtered out",
       ).toBe(7);
 
-      const breakdownSum = allRows.reduce((acc, r) => acc + r.points, 0);
+      const breakdownSum = slice005Rows.reduce((acc, r) => acc + r.points, 0);
       expect(
         breakdownSum,
-        "SUM(breakdown.points) for alpha MUST equal exactly 90 per fixture truth table (30 match + 60 final)",
+        "SUM(slice-005 breakdown.points) for alpha MUST equal exactly 90 per fixture truth table (30 match + 60 final)",
       ).toBe(90);
 
       // If the page renders a footer-sum cell, it MUST report the same value

@@ -126,4 +126,17 @@ Slice 005 owner.
 
 ## Status
 
-**Open** — pending implementation.
+**Implemented (Option A landed)** — 2026-05-23.
+
+### What shipped
+
+- `apps/web/tests/playwright/slice-005-breakdown.spec.ts` AS1: filter the match-row selection to `SLICE_005_MATCH_IDS = {M1, M2, M3}` before the count + per-row assertions. All five `matchRows` usages in the AS1 block (count, RLS check, per-row points/reason_code/predicted/official, subtotal) now operate on the filtered set.
+- `apps/web/tests/playwright/slice-005-breakdown.spec.ts` AS3 / SC-002: defensive filter to a `slice005Rows` set (final rows + slice-005 match rows). Sum and row count both assert on the filtered set. Final rows aren't subject to the same cross-slice bleed-through (the view's `final_rows` CTE doesn't CROSS JOIN against an unrelated source), so they pass through unfiltered.
+- `apps/web/app/(participant)/me/breakdown/page.tsx`: added `data-target-id={row.target_id}` to both row sites (match table + final table). The contract didn't previously expose this attribute; the test needs it to filter by UUID.
+- `apps/web/tests/playwright/slice-005-breakdown.spec.ts` `readBreakdownRows` helper + `BreakdownRowDom` interface: extended to read the new `data-target-id` attribute.
+
+### What this fix did NOT close
+
+Applying Option A revealed a **deeper slice 005 bug** in the SP/view contract: `current_calculation_version` is `+1` ahead of the records every reader view needs. The SPs at slots 0052/0053/0058 write `score_records.calculation_version = v_target_version`, then bump `tournament_config.current_calculation_version` to `v_target_version + 1`. Both `leaderboard_v` and `personal_breakdown_v` filter at the bumped pointer (`v + 1`) and therefore never see the just-written rows. Empirical: after a successful scoring run, `leaderboard_v` returns 0 points / rank=1 for every participant; the breakdown shows points=0 / reason_code='none' for every match row.
+
+This is a separate, deeper bug filed as `specs/005-scoring-leaderboard/follow-up-current-calculation-version-off-by-one.md`. The truth-table mismatch this doc tracked (foreign finished matches bleeding into the breakdown row count) is closed; the points=0 problem belongs to the new follow-up.
