@@ -88,6 +88,16 @@
 
 BEGIN;
 
+-- Skip the on_auth_user_created trigger's auto-provisioning of participants
+-- rows. Without this, every auth.users INSERT below would also create a
+-- participants row with a freshly-generated UUID, which then collides on
+-- participants_auth_user_id_uk when the explicit INSERT INTO public.participants
+-- block below tries to insert with the deterministic UUIDs (44444444-..., etc.)
+-- this fixture relies on. Slice 001 fixture does the same; see
+-- supabase/migrations/0009_auth_hooks.sql for the bypass-flag definition.
+-- (Added 2026-05-23 — slice 005 follow-up #4.)
+SET LOCAL app.skip_auth_provisioning = 'true';
+
 -- ===========================================================================
 -- 1. auth.users -- 4 new rows (delta, epsilon, zeta, admin1).
 --    alpha/bravo/charlie/zulu/outsider already exist via slice-001-fixture.sql.

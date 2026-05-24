@@ -138,4 +138,47 @@ Slice 005 owner, or whoever next runs a slice 005 regression sweep.
 
 ## Status
 
-**Open** — pending the one-line config.toml edit.
+**Implemented** — 2026-05-23. The fix turned out to be a *two*-line change-set, not one:
+
+1. ✅ `supabase/config.toml` — appended `'./seed/slice-005-fixture.sql'` to the `[db.seed]` `sql_paths` array.
+
+2. ✅ `supabase/seed/slice-005-fixture.sql` — added `SET LOCAL app.skip_auth_provisioning = 'true';` immediately after the `BEGIN;` at line 89. Slice 001's fixture already sets this flag; slice 005's didn't. Without it, the `on_auth_user_created` trigger (defined in migration `0009_auth_hooks.sql`) fires on each `INSERT INTO auth.users` and auto-creates a `participants` row with a freshly-generated UUID — which then collides with the explicit `INSERT INTO public.participants` block in slice 005's fixture on the `participants_auth_user_id_uk` unique constraint.
+
+   The `0009_auth_hooks.sql` migration's leading comment explicitly documents the bypass flag:
+
+   > Fixture-loading bypass: seeds set `SET LOCAL app.skip_auth_provisioning='true'`
+   > so they can insert deterministic auth.users + participants pairs without
+   > the trigger creating a competing participants row with a fresh uuid.
+
+   Slice 005's fixture missed this; the issue stayed hidden because the fixture was never auto-loaded.
+
+### Empirical verification
+
+After both edits + `pnpm supabase db reset`:
+
+```
+Seeding data from supabase/seed/slice-001-fixture.sql...
+Seeding data from supabase/seed/slice-002-fixture.sql...
+Seeding data from supabase/seed/slice-003-fixture.sql...
+Seeding data from supabase/seed/slice-004-fixture.sql...
+Seeding data from supabase/seed/slice-005-fixture.sql...      ← now loads
+NOTICE (00000): invoke_score_trigger: app.score_trigger_url / ...
+Finished supabase db reset on branch 009-ui-beautification.
+```
+
+DB state after reset:
+
+```sh
+docker exec supabase_db_world-cup-madness psql -U postgres -t \
+  -c "SELECT id, status FROM public.matches WHERE id::text LIKE 'eeee0050%' ORDER BY id"
+#  eeee0050-0000-0000-0000-000000000001 | finished
+#  eeee0050-0000-0000-0000-000000000002 | finished
+#  eeee0050-0000-0000-0000-000000000003 | finished
+#  eeee0050-0000-0000-0000-000000000004 | scheduled
+
+docker exec supabase_db_world-cup-madness psql -U postgres -t \
+  -c "SELECT count(*) FROM public.participants"
+#  8        ← 4 from slice-001 (alpha/bravo/charlie/zulu) + 4 from slice-005 (delta/epsilon/zeta/admin1)
+```
+
+Score_records remains at 0, which is correct: the fixture's header comment is explicit that "This fixture DOES NOT INSERT into score_records or score_calculation_runs — those rows are produced exclusively at runtime by score_match (T013) and score_finals (T019)."
