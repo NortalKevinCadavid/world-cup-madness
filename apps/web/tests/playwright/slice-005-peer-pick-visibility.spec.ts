@@ -280,46 +280,53 @@ async function buildCookieHeader(context: BrowserContext): Promise<string> {
 }
 
 /**
- * Extracts the Supabase access-token JWT from the page's localStorage. The
- * Supabase JS client persists the session under a `sb-<project-ref>-auth-token`
- * key as a JSON-encoded array/object containing `access_token`. Used by the
- * direct-REST tests to call /rest/v1/peer_pick_v with a participant-scoped
- * bearer that mimics what a malicious client outside the UI would send.
+ * Extract the Supabase access-token JWT from the signed-in browser context.
  *
- * Returns `null` if no Supabase session is present in localStorage (which is
- * itself a failure mode for tests that require sign-in).
+ * @supabase/ssr 0.5+ (post slice-001 Keycloak migration) stores the session
+ * in cookies named `sb-<ref>-auth-token.<index>` (split across multiple
+ * chunks when large). Each chunk's value begins with `base64-` followed by
+ * a base64-encoded JSON fragment; concatenating the chunks (in numeric
+ * order) and stripping the prefix yields the full JSON
+ * `{access_token, refresh_token, user, …}`.
+ *
+ * (Previously this helper read from `window.localStorage` under the
+ *  navikt/mock-oauth2-server flow, but the post-Keycloak Supabase auth
+ *  chain stores the session in cookies, not localStorage — see
+ *  slice-005-match-scoring.spec.ts § extractAccessTokenFromBrowserContext
+ *  for the matching cookie-based extractor that unblocked the
+ *  match-scoring direct-REST tests in the same follow-up cascade.)
+ *
+ * Returns `null` if no Supabase session is found (failure mode for tests
+ * that require sign-in).
  */
 async function extractParticipantJwt(
-  page: import("@playwright/test").Page,
+  context: BrowserContext,
 ): Promise<string | null> {
-  return page.evaluate(() => {
-    const keys = Object.keys(window.localStorage).filter((k) =>
-      k.startsWith("sb-"),
-    );
-    for (const k of keys) {
-      const raw = window.localStorage.getItem(k);
-      if (!raw) continue;
-      try {
-        const parsed = JSON.parse(raw) as unknown;
-        // Two known shapes: (1) { access_token, refresh_token, ... }
-        // (2) [access_token, refresh_token, ...] (older supabase-js).
-        if (
-          parsed &&
-          typeof parsed === "object" &&
-          !Array.isArray(parsed) &&
-          typeof (parsed as { access_token?: unknown }).access_token === "string"
-        ) {
-          return (parsed as { access_token: string }).access_token;
-        }
-        if (Array.isArray(parsed) && typeof parsed[0] === "string") {
-          return parsed[0];
-        }
-      } catch {
-        // ignore non-JSON entries (PKCE verifier blobs, etc.)
-      }
+  const cookies = await context.cookies();
+  const sessionChunks = cookies
+    .filter((c) => /^sb-.+-auth-token(\.\d+)?$/.test(c.name))
+    .sort((a, b) => {
+      const ai = Number.parseInt(a.name.split(".").pop() ?? "0", 10);
+      const bi = Number.parseInt(b.name.split(".").pop() ?? "0", 10);
+      return ai - bi;
+    });
+  if (sessionChunks.length === 0) return null;
+  let combined = sessionChunks.map((c) => c.value).join("");
+  if (combined.startsWith("base64-")) combined = combined.slice("base64-".length);
+  let parsed: { access_token?: string } | null = null;
+  try {
+    const decoded = Buffer.from(combined, "base64").toString("utf8");
+    parsed = JSON.parse(decoded) as { access_token?: string };
+  } catch {
+    try {
+      parsed = JSON.parse(decodeURIComponent(combined)) as {
+        access_token?: string;
+      };
+    } catch {
+      return null;
     }
-    return null;
-  });
+  }
+  return parsed?.access_token ?? null;
 }
 
 /**
@@ -589,11 +596,20 @@ test.describe("US3 — Peer-Pick Visibility @slice-005 @us3", () => {
     // TEST 1 — Pre-lock: kickoff = now + 60:01 → empty picks array.
     // --------------------------------------------------------------------
     test(
-      "Test 1 — Given M_TEST kickoff = now + 60:01 (1 s outside the 60-min lock window) and alpha/bravo/charlie predictions exist, When alpha GETs /api/peer-pick/<M_TEST>, Then response is 200 + body.picks is exactly [] @slice-005 @us3",
+      "Test 1 — Given M_TEST kickoff = now + 65:00 (5 min outside the 60-min lock window) and alpha/bravo/charlie predictions exist, When alpha GETs /api/peer-pick/<M_TEST>, Then response is 200 + body.picks is exactly [] @slice-005 @us3",
       async ({ page, request, context }) => {
-        // 60 min + 1 s in the future → lock predicate `now() >= kickoff − 60min`
-        // is FALSE → peer_pick_v returns zero rows → route returns picks=[].
-        const kickoff = new Date(Date.now() + 60 * 60 * 1000 + 1000);
+        // 65 min in the future → lock predicate `now() >= kickoff − 60min` is
+        // FALSE (now() is still ~5 min short of the lock-fires instant) →
+        // peer_pick_v returns zero rows → route returns picks=[].
+        //
+        // (Pre-2026-05-23 follow-up cascade the buffer was a tight 1 s, which
+        //  only "worked" because predictions RLS was the de-facto gate —
+        //  see follow-up-peer-views-rls-design-gap.md. After migration 0082
+        //  the view's lock predicate is the real gate and the buffer must be
+        //  long enough to survive test setup latency (Keycloak round-trip +
+        //  PostgREST query). 5 min is loose enough for ~all CI variance;
+        //  Test 2 owns the strict-equality boundary assertion.)
+        const kickoff = new Date(Date.now() + 65 * 60 * 1000);
         await setupSyntheticMatch(kickoff);
 
         await signInWithIdentity(page, {
@@ -735,9 +751,10 @@ test.describe("US3 — Peer-Pick Visibility @slice-005 @us3", () => {
     // empty result the route handler returns — the route is just a thin
     // pass-through.
     test(
-      "Test 4 — Given M_TEST is pre-lock (kickoff = now + 60:01) and alpha is signed in, When alpha calls /rest/v1/peer_pick_v?match_id=eq.<M_TEST> DIRECTLY with their participant JWT, Then response is 200 + body is exactly [] (RLS at the view, not the route, SC-009) @slice-005 @us3",
-      async ({ page, request }) => {
-        const kickoff = new Date(Date.now() + 60 * 60 * 1000 + 1000);
+      "Test 4 — Given M_TEST is pre-lock (kickoff = now + 65:00) and alpha is signed in, When alpha calls /rest/v1/peer_pick_v?match_id=eq.<M_TEST> DIRECTLY with their participant JWT, Then response is 200 + body is exactly [] (RLS at the view, not the route, SC-009) @slice-005 @us3",
+      async ({ page, request, context }) => {
+        // 5-min pre-lock buffer — see Test 1 comment.
+        const kickoff = new Date(Date.now() + 65 * 60 * 1000);
         await setupSyntheticMatch(kickoff);
 
         await signInWithIdentity(page, {
@@ -749,10 +766,10 @@ test.describe("US3 — Peer-Pick Visibility @slice-005 @us3", () => {
           },
         });
 
-        const jwt = await extractParticipantJwt(page);
+        const jwt = await extractParticipantJwt(context);
         expect(
           jwt,
-          "alpha's participant JWT MUST be extractable from localStorage after sign-in (preflight for direct-REST test)",
+          "alpha's participant JWT MUST be extractable from sb-*-auth-token cookies after sign-in (preflight for direct-REST test)",
         ).not.toBeNull();
 
         const { status, rawBody, parsed } = await getPeerPickDirect(
@@ -784,9 +801,10 @@ test.describe("US3 — Peer-Pick Visibility @slice-005 @us3", () => {
     // participant but is also subject to the lock predicate. Test asserts
     // the strict "no admin bypass" reading: admin sees zero rows pre-lock.
     test(
-      "Test 5 — Given M_TEST is pre-lock and admin1 is signed in, When admin1 calls /rest/v1/peer_pick_v?match_id=eq.<M_TEST> DIRECTLY with their participant JWT, Then response is 200 + body is exactly [] (contract documents no admin bypass on peer_pick_v; admin reads through a separate admin surface — D-T023-1) @slice-005 @us3",
-      async ({ page, request }) => {
-        const kickoff = new Date(Date.now() + 60 * 60 * 1000 + 1000);
+      "Test 5 — Given M_TEST is pre-lock (kickoff = now + 65:00) and admin1 is signed in, When admin1 calls /rest/v1/peer_pick_v?match_id=eq.<M_TEST> DIRECTLY with their participant JWT, Then response is 200 + body is exactly [] (contract documents no admin bypass on peer_pick_v; admin reads through a separate admin surface — D-T023-1) @slice-005 @us3",
+      async ({ page, request, context }) => {
+        // 5-min pre-lock buffer — see Test 1 comment.
+        const kickoff = new Date(Date.now() + 65 * 60 * 1000);
         await setupSyntheticMatch(kickoff);
 
         await signInWithIdentity(page, {
@@ -798,10 +816,10 @@ test.describe("US3 — Peer-Pick Visibility @slice-005 @us3", () => {
           },
         });
 
-        const jwt = await extractParticipantJwt(page);
+        const jwt = await extractParticipantJwt(context);
         expect(
           jwt,
-          "admin1's JWT MUST be extractable from localStorage after sign-in",
+          "admin1's JWT MUST be extractable from sb-*-auth-token cookies after sign-in",
         ).not.toBeNull();
 
         const { status, rawBody, parsed } = await getPeerPickDirect(
