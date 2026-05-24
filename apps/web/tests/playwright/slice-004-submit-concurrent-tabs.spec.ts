@@ -167,14 +167,21 @@ test.describe(
           },
         });
 
+        // Forward signed-in cookies — see slice 001 cookie-forwarding follow-up.
+        const cookies = await page.context().cookies();
+        const cookieHeader = cookies.map((c) => `${c.name}=${c.value}`).join("; ");
+        const authHeaders = { Cookie: cookieHeader };
+
         // Fire both POSTs as close to simultaneously as the event loop
         // permits. The SP's advisory lock per (participant, item_kind)
         // serializes them inside Postgres.
         const [responseA, responseB] = await Promise.all([
           request.post("/api/final-predictions", {
+            headers: authHeaders,
             data: { item_kind: "champion", target_team_id: POL_TEAM_ID },
           }),
           request.post("/api/final-predictions", {
+            headers: authHeaders,
             data: { item_kind: "champion", target_team_id: JPN_TEAM_ID },
           }),
         ]);
@@ -211,7 +218,9 @@ test.describe(
 
         // The FR-010 / SC-004 invariant: GET shows EXACTLY ONE active
         // champion row regardless of which submission won.
-        const list = await request.get("/api/me/final-predictions");
+        const list = await request.get("/api/me/final-predictions", {
+          headers: authHeaders,
+        });
         expect(list.status(), "GET /api/me/final-predictions MUST be 200").toBe(
           200,
         );

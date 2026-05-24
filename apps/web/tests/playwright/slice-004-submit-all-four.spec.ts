@@ -134,8 +134,14 @@ test.describe(
           },
         });
 
+        // Forward signed-in cookies — see slice 001 cookie-forwarding follow-up.
+        const cookies = await page.context().cookies();
+        const cookieHeader = cookies.map((c) => `${c.name}=${c.value}`).join("; ");
+        const authHeaders = { Cookie: cookieHeader };
+
         // ---- 1. champion -> POL ----------------------------------------
         const champion = await request.post("/api/final-predictions", {
+          headers: authHeaders,
           data: { item_kind: "champion", target_team_id: POL_TEAM_ID },
         });
         expect(
@@ -152,6 +158,7 @@ test.describe(
 
         // ---- 2. runner_up -> JPN (must differ from champion per FR-007) -
         const runnerUp = await request.post("/api/final-predictions", {
+          headers: authHeaders,
           data: { item_kind: "runner_up", target_team_id: JPN_TEAM_ID },
         });
         expect(
@@ -168,6 +175,7 @@ test.describe(
 
         // ---- 3. top_scorer -> Messi -----------------------------------
         const topScorer = await request.post("/api/final-predictions", {
+          headers: authHeaders,
           data: {
             item_kind: "top_scorer",
             target_player_id: MESSI_PLAYER_ID,
@@ -187,6 +195,7 @@ test.describe(
 
         // ---- 4. best_player -> Yamal ----------------------------------
         const bestPlayer = await request.post("/api/final-predictions", {
+          headers: authHeaders,
           data: {
             item_kind: "best_player",
             target_player_id: YAMAL_PLAYER_ID,
@@ -205,7 +214,9 @@ test.describe(
         });
 
         // ---- 5. GET /api/me/final-predictions — exactly 4 active rows -
-        const list = await request.get("/api/me/final-predictions");
+        const list = await request.get("/api/me/final-predictions", {
+          headers: authHeaders,
+        });
         expect(
           list.status(),
           "GET /api/me/final-predictions for charlie MUST be 200",

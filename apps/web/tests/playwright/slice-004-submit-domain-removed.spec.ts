@@ -82,11 +82,16 @@ test.describe(
           },
         });
 
+        // Forward signed-in cookies — see slice 001 cookie-forwarding follow-up.
+        const cookies = await page.context().cookies();
+        const cookieHeader = cookies.map((c) => `${c.name}=${c.value}`).join("; ");
+
         await withTemporaryConfig(
           "eligibility.approved_domains",
           [],
           async () => {
             const response = await request.post("/api/final-predictions", {
+              headers: { Cookie: cookieHeader },
               data: {
                 item_kind: "champion",
                 target_team_id: POL_TEAM_ID,

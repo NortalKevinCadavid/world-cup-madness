@@ -135,7 +135,11 @@ test.describe(
 
     test(
       "POST best_player with a removed player MUST be 404 INVALID_TARGET player_removed @slice-004 @us1",
-      async ({ request }) => {
+      async ({ page, request }) => {
+        // Forward signed-in cookies — see slice 001 cookie-forwarding follow-up.
+        const cookies = await page.context().cookies();
+        const cookieHeader = cookies.map((c) => `${c.name}=${c.value}`).join("; ");
+
         const client = getServiceClient();
 
         // Pre-state count: Charlie has exactly 1 active best_player row
@@ -151,6 +155,7 @@ test.describe(
         }
 
         const response = await request.post("/api/final-predictions", {
+          headers: { Cookie: cookieHeader },
           data: {
             item_kind: "best_player",
             target_player_id: PEDRI_PLAYER_ID,

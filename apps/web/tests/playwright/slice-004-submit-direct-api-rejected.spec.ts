@@ -151,8 +151,13 @@ test.describe(
           },
         });
 
+        // Forward signed-in cookies — see slice 001 cookie-forwarding follow-up.
+        const cookies = await page.context().cookies();
+        const cookieHeader = cookies.map((c) => `${c.name}=${c.value}`).join("; ");
+
         for (const submitCase of SUBMIT_CASES) {
           const response = await request.post("/api/final-predictions", {
+            headers: { Cookie: cookieHeader },
             data: submitCase.body,
           });
 

@@ -123,7 +123,13 @@ test.describe(
           },
         });
 
+        // Forward signed-in cookies — see slice 001 cookie-forwarding follow-up.
+        const cookies = await page.context().cookies();
+        const cookieHeader = cookies.map((c) => `${c.name}=${c.value}`).join("; ");
+        const authHeaders = { Cookie: cookieHeader };
+
         const submit = await request.post("/api/final-predictions", {
+          headers: authHeaders,
           data: { item_kind: "champion", target_team_id: POL_TEAM_ID },
         });
 
@@ -157,7 +163,9 @@ test.describe(
         const newId = submitBody.final_prediction.id;
 
         // Now GET /api/me/final-predictions and confirm the new row appears.
-        const list = await request.get("/api/me/final-predictions");
+        const list = await request.get("/api/me/final-predictions", {
+          headers: authHeaders,
+        });
         expect(
           list.status(),
           "GET /api/me/final-predictions for charlie MUST be 200",
