@@ -164,4 +164,67 @@ Slice 005 owner.
 
 ## Status
 
-**Open** — pending implementation.
+**Implemented** — 2026-05-23.
+
+### What shipped
+
+The fix is a single new migration: `supabase/migrations/0079_score_runs_triggered_by_fallback.sql` (~140 lines). It implements **Option A** as recommended in this doc but with a refinement: rather than `CREATE OR REPLACE` on the three SP migrations (1,338 lines of code, high transcription risk), it uses a **BEFORE INSERT trigger** on `score_calculation_runs` that canonicalizes `triggered_by` for every writer — past, present, and future.
+
+The migration does three things:
+
+1. **Seeds the system identity** — `auth.users` + `public.participants` rows at the reserved zero UUID `00000000-0000-0000-0000-000000000000`. `status='deactivated'` so the eligibility predicate filters it from leaderboards and API surfaces. `email='system@wcm.internal'` on a non-approved domain ensures no eligibility predicate ever returns TRUE for this identity. Both INSERTs use `ON CONFLICT (id) DO NOTHING` for idempotency.
+
+2. **Adds a resolver helper** `public.resolve_score_run_triggered_by(uuid)` that:
+   - Returns the input unchanged if it's already a valid `participants.id` (slot 0070 admin-recalc path).
+   - Returns the matching `participants.id` if the input is an `auth.users.id` with a participant row (slot 0052/0053/0058 user-JWT path — `auth.uid()` is the `auth_user_id`).
+   - Returns the system participant ID otherwise (slot 0052/0053/0058 X-Internal-Auth bypass path where `auth.uid()` is NULL).
+
+3. **Wires a BEFORE INSERT trigger** on `score_calculation_runs` that calls the resolver on every row. Idempotent for callers that already pass valid participant IDs.
+
+### Why the trigger approach instead of `CREATE OR REPLACE` on the SPs
+
+The three SP migrations total 1,338 lines (`0052_score_match_fn.sql`: 397, `0053_score_finals_fn.sql`: 463, `0058_score_all_fn.sql`: 478). Re-creating them verbatim with a one-line patch each carries significant transcription risk. The trigger approach is small (one helper + one trigger function + one CREATE TRIGGER), covers every writer to `score_calculation_runs` uniformly, AND fixes the latent user-JWT bug (slot 0052/0053/0058 wrote `auth.uid()` = `auth_user_id`, which would FK-violate against `participants.id` — never runtime-verified per slot 0052's own comment).
+
+### Empirical verification
+
+After `pnpm supabase db reset` to apply the new migration:
+
+```sh
+docker exec supabase_db_world-cup-madness psql -U postgres -t \
+  -c "SELECT id, email, status FROM public.participants WHERE id::text LIKE '00000000-%'"
+#  00000000-0000-0000-0000-000000000000 | system@wcm.internal | deactivated
+
+docker exec supabase_db_world-cup-madness psql -U postgres -t \
+  -c "SELECT trigger_name FROM information_schema.triggers
+       WHERE event_object_table='score_calculation_runs'"
+#  score_calc_runs_canonicalize_triggered_by
+```
+
+End-to-end test (with `pnpm exec playwright test slice-005-breakdown -g "AS1"`):
+
+- **Before fix**: HTTP 500 with `SCORING_FAILED: null value in column "triggered_by"`.
+- **After fix**: HTTP 200 from the score-trigger Edge Function. SPs at slots 0052/0053/0058 successfully insert into `score_calculation_runs`. score_records are written. `/me/breakdown` renders the breakdown table for alpha.
+
+The test now fails on a downstream assertion (`Expected: 3, Received: 4` — slice 005 expected exactly 3 finished-match breakdown rows, but the fixture's M4 row is showing up). That's a separate slice 005 truth-table vs fixture-shape question — unrelated to the `triggered_by` bug this follow-up tracked.
+
+### Production posture
+
+- The X-Internal-Auth bypass remains OFF in production (per the slice 005 plan: "production deployments should leave it unset once slice 006's admin_roles + production is_admin function ship"). So the immediate bug doesn't affect production today.
+- The trigger fix DOES change behavior on the user-JWT path: previously the SP wrote `auth.uid()` (an `auth.users.id`) into `triggered_by`, which would FK-violate against `participants.id`. The trigger now correctly maps to `participants.id`. This is a bug fix — any existing production data with `triggered_by` containing an `auth.users.id` would have been broken (un-FK-resolvable). If such data exists, it needs a one-shot data migration, but the working theory is that no user-JWT call ever reached the SP in production (the public path goes through the admin recalc SP at slot 0070 which already does the lookup correctly).
+- The system participant is locked to `status='deactivated'` and an unverifiable domain — never appears on any participant-facing surface.
+
+### Local dev-env note
+
+`pnpm supabase stop && start` will blank Supabase Auth's Keycloak provider config UNLESS `SUPABASE_AUTH_OIDC_*` env vars are exported in the shell when start runs. `apps/web/.env.local` has them but they don't auto-export. Run:
+
+```sh
+set -a && source apps/web/.env.local && set +a
+pnpm supabase start
+```
+
+…or wrap that into a `scripts/supabase-start.sh`. This was discovered during today's fix verification.
+
+### Cross-references
+
+- `supabase/migrations/0079_score_runs_triggered_by_fallback.sql` — the fix
+- `specs/001-eligibility-login/follow-up-oidc-stub-keycloak-vs-mock-oauth2.md` § "NEW issues found" #5 (this issue's filing point)
