@@ -121,8 +121,12 @@ async function insertConfigChangeAuditRow(): Promise<InsertedAuditRow> {
 }
 
 async function deleteAuditRow(id: string): Promise<void> {
+  // audit_log has UPDATE+DELETE REVOKEd from service_role (migration 0076's
+  // tamper-resistance lock); we call the SECURITY DEFINER RPC shipped by
+  // migration 0083 instead, gated on the local-dev seed flag. See
+  // specs/007-audit-trail/follow-up-test-audit-log-cleanup-permission.md.
   const client = getServiceClient();
-  const { error } = await client.from("audit_log").delete().eq("id", id);
+  const { error } = await client.rpc("__test_delete_audit_rows", { p_ids: [id] });
   if (error) {
     throw new Error(`deleteAuditRow(${id}): ${error.message}`);
   }
