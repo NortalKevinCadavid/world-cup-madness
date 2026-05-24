@@ -247,13 +247,40 @@ pnpm exec playwright test tests/playwright/slice-005-final-scoring.spec.ts \
 
 ### What remains open after this fix
 
-`slice-005-match-scoring.spec.ts` uses a **different auth model** (admin JWT via cookie, NOT X-Internal-Auth bypass). Its `callScoreTrigger` builds a `Cookie:` header from the signed-in admin's browser context, but does NOT send an `Authorization: Bearer …` header. The Supabase Edge Runtime gateway rejects with `Missing authorization header` before the function code ever sees the cookie.
+~~`slice-005-match-scoring.spec.ts` uses a different auth model…~~
 
-This is a different fix path than what worked for breakdown + final-scoring. Either:
-- The match-scoring helper extracts the admin's JWT from the cookie and forwards it as `Authorization: Bearer <admin-jwt>`, OR
-- The test is restructured to use the X-Internal-Auth bypass (consistent with the other slice 005 specs), at the cost of no longer exercising the admin-JWT path.
+**RESOLVED 2026-05-23** — chose the "extract JWT from cookie + forward as Authorization" path, preserving the admin-JWT auth model the slice 005 author intended.
 
-Not in scope for the off-by-one fix; recommended to file as a separate follow-up if the admin-JWT path is to be preserved.
+Implementation:
+- Added `extractAccessTokenFromBrowserContext` helper that reads the `sb-<ref>-auth-token.<index>` cookies (Supabase SSR 0.5+ splits the session JSON across multiple base64-encoded chunks), concatenates them, strips the `base64-` prefix, decodes, and returns `parsed.access_token`. Defensive against the older URL-encoded JSON format too.
+- `callScoreTrigger` in `slice-005-match-scoring.spec.ts` now sends `Authorization: Bearer <access_token>` alongside the existing `Cookie:` header. The Edge Runtime gateway sees the Bearer token and lets the request through; the function's own `auth.getUser()` reads the same JWT and identifies the caller as admin1; the `is_admin(admin1.id)` predicate returns TRUE and the SP runs under admin authority — preserving the test's intended admin-JWT auth path semantics.
+- Added serial mode to the describe block (same `score_records_uk` race protection as breakdown + final-scoring).
+- Fixed AS7's "exactly 6 rows" assertion to "exactly 7 rows" — `PARTICIPANTS` now includes admin1, who the slice-005 fixture seeds as `status='active'`. The SP correctly writes a score_record for admin1 alongside the 6 personas; the test's earlier hardcoded `6` was a stale assumption about who's eligible.
+
+**Verification**: `slice-005-match-scoring.spec.ts` runs 7/7 green in 13.5 s.
+
+### Cross-file concurrency note
+
+Each slice 005 spec file (breakdown, match-scoring, final-scoring) is internally serial via `test.describe.configure({ mode: "serial" })`, but Playwright still spawns one worker per file under the default `fullyParallel: true` config. When run together, those workers race on `tournament_config.current_calculation_version` and trip `score_records_uk` on concurrent INSERTs.
+
+Two ways to run the slice 005 suite cleanly together:
+
+```sh
+# Option 1: limit to one worker for these tests
+pnpm exec playwright test tests/playwright/slice-005-breakdown.spec.ts \
+  tests/playwright/slice-005-match-scoring.spec.ts \
+  tests/playwright/slice-005-final-scoring.spec.ts \
+  --project=chromium --workers=1
+
+# Option 2: run each file independently
+pnpm exec playwright test tests/playwright/slice-005-breakdown.spec.ts --project=chromium
+pnpm exec playwright test tests/playwright/slice-005-match-scoring.spec.ts --project=chromium
+pnpm exec playwright test tests/playwright/slice-005-final-scoring.spec.ts --project=chromium
+```
+
+**Verified end-to-end on 2026-05-23**: combined run with `--workers=1` produces **17 passed (29.3 s)** across the three files.
+
+A cleaner long-term fix (out of scope here) would be a project-level Playwright configuration that tags slice-005 DB-mutating tests as serial across files, e.g. via a custom project entry with `workers: 1` scoped to a `@slice-005-db-mutating` tag.
 
 ### Tests confirmed unaffected by the version-semantics shift
 

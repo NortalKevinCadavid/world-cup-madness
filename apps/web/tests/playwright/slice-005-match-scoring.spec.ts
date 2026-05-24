@@ -108,6 +108,14 @@ const PARTICIPANTS = {
   delta: "44444444-4444-4444-4444-444444444444",
   epsilon: "55555555-5555-5555-5555-555555555555",
   zeta: "66666666-6666-6666-6666-666666666666",
+  // admin1 is ALSO seeded by slice-005-fixture.sql as status='active'
+  // (the fixture doesn't distinguish admin from regular participants —
+  // admin role is owned by slice 006's admin_roles table). The scoring
+  // SP at slot 0052 writes a score_record for every eligible active
+  // participant, which includes admin1. AS7's idempotency assertion
+  // therefore needs to include admin1 in the expected participant set.
+  // (Added 2026-05-23 — slice 005 follow-up cascade.)
+  admin1: "77777777-7777-7777-7777-777777777777",
 } as const;
 
 // admin1's participant_id from slice-005-fixture.sql § 2 (lines 247-258).
@@ -187,6 +195,61 @@ async function buildCookieHeader(
   return cookies
     .map((c) => `${c.name}=${c.value}`)
     .join("; ");
+}
+
+/**
+ * Extract the Supabase access-token JWT from the signed-in browser context.
+ *
+ * @supabase/ssr 0.5+ stores the session in cookies named
+ * `sb-<ref>-auth-token.<index>` (split across multiple chunks when large).
+ * Each chunk's value begins with `base64-` followed by a base64-encoded
+ * JSON fragment; concatenating the chunks (in numeric order) and stripping
+ * the prefix yields the full JSON `{access_token, refresh_token, user, …}`.
+ *
+ * We extract the access_token so callers can forward it as
+ * `Authorization: Bearer <jwt>` to the Supabase Edge Runtime gateway
+ * (which requires SOME Bearer token before any /functions/v1/* request
+ * reaches the function code). The function's own `auth.getUser()` then
+ * resolves the JWT to admin1's auth.users row, the is_admin check
+ * passes, and the SP runs under admin authorization — preserving the
+ * test's intended admin-JWT auth model.
+ *
+ * Returns null if no Supabase session cookie is found (the caller should
+ * fall back to throwing a clear error, since the test cannot exercise the
+ * admin path without a valid session).
+ *
+ * (Added 2026-05-23 — slice 005 follow-up cascade. The original helper
+ *  only built a Cookie header, but the Supabase Edge Runtime gateway
+ *  rejects cookie-only requests with "Missing authorization header".)
+ */
+async function extractAccessTokenFromBrowserContext(
+  context: import("@playwright/test").BrowserContext,
+): Promise<string | null> {
+  const cookies = await context.cookies();
+  const sessionChunks = cookies
+    .filter((c) => /^sb-.+-auth-token(\.\d+)?$/.test(c.name))
+    .sort((a, b) => {
+      const ai = Number.parseInt(a.name.split(".").pop() ?? "0", 10);
+      const bi = Number.parseInt(b.name.split(".").pop() ?? "0", 10);
+      return ai - bi;
+    });
+  if (sessionChunks.length === 0) return null;
+  let combined = sessionChunks.map((c) => c.value).join("");
+  if (combined.startsWith("base64-")) combined = combined.slice("base64-".length);
+  let parsed: { access_token?: string } | null = null;
+  try {
+    const decoded = Buffer.from(combined, "base64").toString("utf8");
+    parsed = JSON.parse(decoded) as { access_token?: string };
+  } catch {
+    // Some Supabase versions store the JSON URL-encoded without the
+    // base64- prefix; fall back to raw decode.
+    try {
+      parsed = JSON.parse(decodeURIComponent(combined)) as { access_token?: string };
+    } catch {
+      return null;
+    }
+  }
+  return parsed?.access_token ?? null;
 }
 
 /**
@@ -347,9 +410,18 @@ async function callScoreTrigger(
   parsed: ScoreTriggerResponse | null;
 }> {
   const cookieHeader = await buildCookieHeader(context);
+  // Extract the admin's JWT from the Supabase session cookie and forward
+  // it as Authorization: Bearer <jwt>. The Edge Runtime gateway demands
+  // an Authorization header before any /functions/v1/* request reaches
+  // the function; once it does, the function's own auth.getUser() reads
+  // this same JWT to identify the caller as admin1 and the is_admin
+  // check passes. Cookie is retained for completeness (defense in depth
+  // for any downstream resolver that prefers cookies).
+  const accessToken = await extractAccessTokenFromBrowserContext(context);
   const response = await request.post(SCORE_TRIGGER_ENDPOINT, {
     headers: {
       "Content-Type": "application/json",
+      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
       ...(cookieHeader ? { Cookie: cookieHeader } : {}),
     },
     data: body,
@@ -369,6 +441,13 @@ async function callScoreTrigger(
 // --------------------------------------------------------------------------
 
 test.describe("US1 — Match Scoring @slice-005 @us1", () => {
+  // Run serially within the file. fullyParallel: true would otherwise
+  // spawn one worker per test, racing on
+  // tournament_config.current_calculation_version and tripping
+  // score_records_uk on the concurrent INSERTs. Same pattern as the
+  // breakdown + final-scoring specs. (Added 2026-05-23.)
+  test.describe.configure({ mode: "serial" });
+
   // Each test's scoring trigger + service-role round-trips take a bit longer
   // than the default Playwright budget.
   test.setTimeout(60_000);
@@ -811,12 +890,12 @@ test.describe("US1 — Match Scoring @slice-005 @us1", () => {
       }
       expect(
         count,
-        "After two calls with the SAME run_id, score_records MUST contain exactly 6 rows for (M1, R1) — one per fixture participant, no duplicates (SC-007)",
-      ).toBe(6);
+        "After two calls with the SAME run_id, score_records MUST contain exactly 7 rows for (M1, R1) — one per active fixture participant (alpha/bravo/charlie/delta/epsilon/zeta/admin1), no duplicates (SC-007)",
+      ).toBe(7);
 
-      // And: the 6 participants are exactly the 6 fixture participants.
+      // And: the 7 participants are exactly the 7 active fixture participants.
       const participantIds = new Set((data ?? []).map((r) => r.participant_id));
-      expect(participantIds.size).toBe(6);
+      expect(participantIds.size).toBe(7);
       for (const pid of Object.values(PARTICIPANTS)) {
         expect(
           participantIds.has(pid),
