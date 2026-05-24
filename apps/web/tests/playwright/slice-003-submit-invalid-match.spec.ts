@@ -66,8 +66,12 @@ test.describe(
 
     test(
       "POST with a syntactically-valid but non-existent match_id MUST be 404 MATCH_NOT_FOUND @slice-003 @us1",
-      async ({ request }) => {
+      async ({ page, request }) => {
+        // Forward signed-in cookies — see slice 001 cookie-forwarding follow-up.
+        const cookies = await page.context().cookies();
+        const cookieHeader = cookies.map((c) => `${c.name}=${c.value}`).join("; ");
         const response = await request.post("/api/predictions", {
+          headers: { Cookie: cookieHeader },
           data: { match_id: ABSENT_MATCH_UUID, home: 2, away: 1 },
         });
 

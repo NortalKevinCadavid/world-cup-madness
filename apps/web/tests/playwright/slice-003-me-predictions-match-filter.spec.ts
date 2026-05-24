@@ -81,10 +81,16 @@ test.describe(
 
     test(
       "?match_id=<M3> returns 1 entry; ?match_id=<M2> returns 0 entries @slice-003 @us1",
-      async ({ request }) => {
+      async ({ page, request }) => {
+        // Forward signed-in cookies — see slice 001 cookie-forwarding follow-up.
+        const cookies = await page.context().cookies();
+        const cookieHeader = cookies.map((c) => `${c.name}=${c.value}`).join("; ");
+        const headers = { Cookie: cookieHeader };
+
         // Branch A — alpha's active M3 pick MUST be returned exactly once.
         const hit = await request.get(
           `/api/me/predictions?match_id=${M3_ARG_CAN_ID}`,
+          { headers },
         );
         expect(hit.status(), "filter by M3 MUST be 200").toBe(200);
 
@@ -105,6 +111,7 @@ test.describe(
         // pick. The contract says "{ predictions: [] }" for this branch.
         const miss = await request.get(
           `/api/me/predictions?match_id=${M2_CAN_POL_ID}`,
+          { headers },
         );
         expect(
           miss.status(),

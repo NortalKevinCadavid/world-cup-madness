@@ -97,7 +97,13 @@ test.describe(
           },
         });
 
-        const response = await request.get("/api/me/predictions");
+        // Forward signed-in cookies — see slice 001 cookie-forwarding follow-up.
+        const cookies = await page.context().cookies();
+        const cookieHeader = cookies.map((c) => `${c.name}=${c.value}`).join("; ");
+
+        const response = await request.get("/api/me/predictions", {
+          headers: { Cookie: cookieHeader },
+        });
         expect(
           response.status(),
           "GET /api/me/predictions for an eligible session MUST be 200 (contract § 200)",

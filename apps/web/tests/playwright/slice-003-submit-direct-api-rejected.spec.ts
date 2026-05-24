@@ -72,9 +72,14 @@ test.describe(
 
     test(
       "direct POST for a locked (finished) match MUST be 409 PREDICTION_LOCKED — UI gating is not the gate @slice-003 @us1",
-      async ({ request }) => {
+      async ({ page, request }) => {
+        // Forward signed-in cookies — see slice 001 cookie-forwarding follow-up.
+        const cookies = await page.context().cookies();
+        const cookieHeader = cookies.map((c) => `${c.name}=${c.value}`).join("; ");
+
         // No UI traversal — fire the POST directly against the route.
         const response = await request.post("/api/predictions", {
+          headers: { Cookie: cookieHeader },
           data: { match_id: M1_ARG_MEX_ID, home: 1, away: 1 },
         });
 

@@ -67,8 +67,12 @@ test.describe(
 
     test(
       "home=-1 is rejected with 400 BAD_REQUEST (route-handler zod) @slice-003 @us1",
-      async ({ request }) => {
+      async ({ page, request }) => {
+        // Forward signed-in cookies — see slice 001 cookie-forwarding follow-up.
+        const cookies = await page.context().cookies();
+        const cookieHeader = cookies.map((c) => `${c.name}=${c.value}`).join("; ");
         const response = await request.post("/api/predictions", {
+          headers: { Cookie: cookieHeader },
           data: { match_id: M6_USA_JPN_ID, home: -1, away: 0 },
         });
 
@@ -96,8 +100,12 @@ test.describe(
 
     test(
       "home=21 is rejected with 422 INVALID_SCORE (SP-side, above score_upper_bound=20) @slice-003 @us1",
-      async ({ request }) => {
+      async ({ page, request }) => {
+        // Forward signed-in cookies — see slice 001 cookie-forwarding follow-up.
+        const cookies = await page.context().cookies();
+        const cookieHeader = cookies.map((c) => `${c.name}=${c.value}`).join("; ");
         const response = await request.post("/api/predictions", {
+          headers: { Cookie: cookieHeader },
           data: { match_id: M6_USA_JPN_ID, home: 21, away: 0 },
         });
 

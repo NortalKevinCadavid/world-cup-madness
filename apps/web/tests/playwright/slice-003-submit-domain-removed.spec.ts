@@ -70,11 +70,16 @@ test.describe(
           },
         });
 
+        // Forward signed-in cookies — see slice 001 cookie-forwarding follow-up.
+        const cookies = await page.context().cookies();
+        const cookieHeader = cookies.map((c) => `${c.name}=${c.value}`).join("; ");
+
         await withTemporaryConfig(
           "eligibility.approved_domains",
           [],
           async () => {
             const response = await request.post("/api/predictions", {
+              headers: { Cookie: cookieHeader },
               data: { match_id: M6_USA_JPN_ID, home: 2, away: 1 },
             });
 

@@ -95,8 +95,13 @@ test.describe(
 
     test(
       "alpha sees exactly 3 active fixture predictions; the superseded row and other participants' rows are excluded @slice-003 @us1",
-      async ({ request }) => {
-        const response = await request.get("/api/me/predictions");
+      async ({ page, request }) => {
+        // Forward signed-in cookies — see slice 001 cookie-forwarding follow-up.
+        const cookies = await page.context().cookies();
+        const cookieHeader = cookies.map((c) => `${c.name}=${c.value}`).join("; ");
+        const response = await request.get("/api/me/predictions", {
+          headers: { Cookie: cookieHeader },
+        });
         expect(response.status(), "GET /api/me/predictions MUST be 200").toBe(
           200,
         );

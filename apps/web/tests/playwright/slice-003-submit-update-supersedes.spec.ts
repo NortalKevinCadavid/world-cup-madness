@@ -120,8 +120,14 @@ test.describe(
           },
         });
 
+        // Forward signed-in cookies — see slice 001 cookie-forwarding follow-up.
+        const cookies = await page.context().cookies();
+        const cookieHeader = cookies.map((c) => `${c.name}=${c.value}`).join("; ");
+        const authHeaders = { Cookie: cookieHeader };
+
         // ---- 1. CREATE: POST 1-0 → 200 ----------------------------------
         const first = await request.post("/api/predictions", {
+          headers: authHeaders,
           data: { match_id: M6_USA_JPN_ID, home: 1, away: 0 },
         });
         expect(
@@ -139,6 +145,7 @@ test.describe(
 
         // ---- 2. UPDATE: POST 2-1 → 200, new id ---------------------------
         const second = await request.post("/api/predictions", {
+          headers: authHeaders,
           data: { match_id: M6_USA_JPN_ID, home: 2, away: 1 },
         });
         expect(

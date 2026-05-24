@@ -116,7 +116,13 @@ test.describe(
           },
         });
 
+        // Forward signed-in cookies — see slice 001 cookie-forwarding follow-up.
+        const cookies = await page.context().cookies();
+        const cookieHeader = cookies.map((c) => `${c.name}=${c.value}`).join("; ");
+        const authHeaders = { Cookie: cookieHeader };
+
         const submit = await request.post("/api/predictions", {
+          headers: authHeaders,
           data: { match_id: M6_USA_JPN_ID, home: 2, away: 1 },
         });
 
@@ -150,7 +156,9 @@ test.describe(
         const newId = submitBody.prediction.id;
 
         // Now GET /api/me/predictions and confirm the new row appears.
-        const list = await request.get("/api/me/predictions");
+        const list = await request.get("/api/me/predictions", {
+          headers: authHeaders,
+        });
         expect(
           list.status(),
           "GET /api/me/predictions for alpha MUST be 200",

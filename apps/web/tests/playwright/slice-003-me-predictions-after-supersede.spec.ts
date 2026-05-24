@@ -123,8 +123,14 @@ test.describe(
           },
         });
 
+        // Forward signed-in cookies — see slice 001 cookie-forwarding follow-up.
+        const cookies = await page.context().cookies();
+        const cookieHeader = cookies.map((c) => `${c.name}=${c.value}`).join("; ");
+        const authHeaders = { Cookie: cookieHeader };
+
         // ---- 1. CREATE (1-0) ---------------------------------------------
         const create = await request.post("/api/predictions", {
+          headers: authHeaders,
           data: { match_id: M6_USA_JPN_ID, home: 1, away: 0 },
         });
         expect(create.status(), "first POST (CREATE) MUST be 200").toBe(200);
@@ -133,6 +139,7 @@ test.describe(
 
         // ---- 2. UPDATE (2-1) — supersedes the 1-0 row --------------------
         const update = await request.post("/api/predictions", {
+          headers: authHeaders,
           data: { match_id: M6_USA_JPN_ID, home: 2, away: 1 },
         });
         expect(
@@ -149,6 +156,7 @@ test.describe(
         // ---- 3a. GET with ?match_id=M6 — exactly the active 2-1 row -----
         const filtered = await request.get(
           `/api/me/predictions?match_id=${M6_USA_JPN_ID}`,
+          { headers: authHeaders },
         );
         expect(
           filtered.status(),
@@ -181,7 +189,9 @@ test.describe(
         ).not.toBe(supersededId);
 
         // ---- 3b. GET without filter — M6 entry appears exactly once -----
-        const all = await request.get("/api/me/predictions");
+        const all = await request.get("/api/me/predictions", {
+          headers: authHeaders,
+        });
         expect(all.status(), "GET /api/me/predictions MUST be 200").toBe(200);
         const allBody = (await all.json()) as MePredictionsResponse;
         expect(allBody).toMatchObject({ predictions: expect.any(Array) });
