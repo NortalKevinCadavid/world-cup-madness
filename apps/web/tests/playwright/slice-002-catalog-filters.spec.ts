@@ -36,7 +36,7 @@
 // RED until T016 (the `/api/matches` route handler) lands.
 // --------------------------------------------------------------------------
 
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 
 import {
   assertOidcStubReachable,
@@ -44,6 +44,16 @@ import {
   signInWithIdentity,
 } from "./fixtures/oidc";
 import { getServiceClient } from "./helpers/service-role";
+
+/**
+ * Build a `Cookie:` header from the signed-in page's cookie jar so bare
+ * `request` calls inherit the Supabase session set by signInWithIdentity.
+ * See specs/001-eligibility-login/follow-up-test-cookie-forwarding-after-keycloak.md.
+ */
+async function buildCookieHeader(page: Page): Promise<{ Cookie: string }> {
+  const cookies = await page.context().cookies();
+  return { Cookie: cookies.map((c) => `${c.name}=${c.value}`).join("; ") };
+}
 
 // --------------------------------------------------------------------------
 // Persona — alpha@nortal.com is the eligible fixture row.
@@ -150,8 +160,10 @@ test.describe("US1 — GET /api/matches filters @slice-002 @us1", () => {
   // ------------------------------------------------------------------------
   test(
     "?stage=group returns all 8 fixture rows (fixture is entirely group-stage) @slice-002 @us1",
-    async ({ request }) => {
-      const response = await request.get("/api/matches?stage=group");
+    async ({ page, request }) => {
+      const response = await request.get("/api/matches?stage=group", {
+        headers: await buildCookieHeader(page),
+      });
       expect(response.status(), "200 for valid stage filter").toBe(200);
 
       const body = (await response.json()) as MatchCatalogResponse;
@@ -168,8 +180,10 @@ test.describe("US1 — GET /api/matches filters @slice-002 @us1", () => {
   // ------------------------------------------------------------------------
   test(
     "?status=finished returns exactly M1 (ARG-MEX) @slice-002 @us1",
-    async ({ request }) => {
-      const response = await request.get("/api/matches?status=finished");
+    async ({ page, request }) => {
+      const response = await request.get("/api/matches?status=finished", {
+        headers: await buildCookieHeader(page),
+      });
       expect(response.status(), "200 for valid status filter").toBe(200);
 
       const body = (await response.json()) as MatchCatalogResponse;
@@ -189,8 +203,10 @@ test.describe("US1 — GET /api/matches filters @slice-002 @us1", () => {
   // ------------------------------------------------------------------------
   test(
     "?status=in_progress returns exactly M2 (CAN-POL) @slice-002 @us1",
-    async ({ request }) => {
-      const response = await request.get("/api/matches?status=in_progress");
+    async ({ page, request }) => {
+      const response = await request.get("/api/matches?status=in_progress", {
+        headers: await buildCookieHeader(page),
+      });
       expect(response.status(), "200 for valid status filter").toBe(200);
 
       const body = (await response.json()) as MatchCatalogResponse;
@@ -210,11 +226,12 @@ test.describe("US1 — GET /api/matches filters @slice-002 @us1", () => {
   // ------------------------------------------------------------------------
   test(
     "?team_id=<ARG> returns the 2 matches Argentina appears in @slice-002 @us1",
-    async ({ request }) => {
+    async ({ page, request }) => {
       const argTeamId = await resolveTeamIdByShortCode("ARG");
 
       const response = await request.get(
         `/api/matches?team_id=${encodeURIComponent(argTeamId)}`,
+        { headers: await buildCookieHeader(page) },
       );
       expect(response.status(), "200 for valid team_id filter").toBe(200);
 
@@ -243,12 +260,13 @@ test.describe("US1 — GET /api/matches filters @slice-002 @us1", () => {
   // ------------------------------------------------------------------------
   test(
     "?from + ?to half-open window returns matches within [from, to) @slice-002 @us1",
-    async ({ request }) => {
+    async ({ page, request }) => {
       const from = "2026-06-13T00:00:00Z";
       const to = "2026-06-18T00:00:00Z";
 
       const response = await request.get(
         `/api/matches?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`,
+        { headers: await buildCookieHeader(page) },
       );
       expect(response.status(), "200 for valid date window").toBe(200);
 
@@ -280,8 +298,10 @@ test.describe("US1 — GET /api/matches filters @slice-002 @us1", () => {
   // ------------------------------------------------------------------------
   test(
     "?group=A returns the 4 Group A matches @slice-002 @us1",
-    async ({ request }) => {
-      const response = await request.get("/api/matches?group=A");
+    async ({ page, request }) => {
+      const response = await request.get("/api/matches?group=A", {
+        headers: await buildCookieHeader(page),
+      });
       expect(response.status(), "200 for valid group filter").toBe(200);
 
       const body = (await response.json()) as MatchCatalogResponse;

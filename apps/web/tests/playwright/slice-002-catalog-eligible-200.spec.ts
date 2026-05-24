@@ -124,7 +124,7 @@ test.describe("US1 — GET /api/matches returns the seeded catalog @slice-002 @u
 
   test(
     "Eligible participant receives all 8 fixture matches with contract body shape @slice-002 @us1",
-    async ({ page, request }) => {
+    async ({ page, request, context }) => {
       // Sign in as alpha — an eligible @nortal.com fixture identity.
       await signInWithIdentity(page, {
         claims: {
@@ -135,7 +135,16 @@ test.describe("US1 — GET /api/matches returns the seeded catalog @slice-002 @u
         },
       });
 
-      const response = await request.get("/api/matches");
+      // Forward signed-in cookies to the bare `request` fixture — Keycloak/
+      // PKCE migration (commit 5a74acf) put the Supabase session in cookies
+      // on the page's BrowserContext, and `request` no longer shares storage.
+      // See specs/001-eligibility-login/follow-up-test-cookie-forwarding-after-keycloak.md.
+      const cookies = await context.cookies();
+      const cookieHeader = cookies.map((c) => `${c.name}=${c.value}`).join("; ");
+
+      const response = await request.get("/api/matches", {
+        headers: { Cookie: cookieHeader },
+      });
 
       // Then 1 — status code exactly 200.
       expect(

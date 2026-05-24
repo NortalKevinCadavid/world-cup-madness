@@ -89,8 +89,13 @@ test.describe("US1 — GET /api/matches pagination @slice-002 @us1", () => {
   // ------------------------------------------------------------------------
   test(
     "?page_size=3 returns the first 3 matches with total=8 @slice-002 @us1",
-    async ({ request }) => {
-      const response = await request.get("/api/matches?page_size=3");
+    async ({ page, request }) => {
+      // Forward signed-in cookies — see slice 001 cookie-forwarding follow-up.
+      const cookies = await page.context().cookies();
+      const cookieHeader = cookies.map((c) => `${c.name}=${c.value}`).join("; ");
+      const response = await request.get("/api/matches?page_size=3", {
+        headers: { Cookie: cookieHeader },
+      });
       expect(response.status(), "200 for valid page_size").toBe(200);
 
       const body = (await response.json()) as MatchCatalogResponse;
@@ -113,12 +118,17 @@ test.describe("US1 — GET /api/matches pagination @slice-002 @us1", () => {
   // ------------------------------------------------------------------------
   test(
     "?page_size=3&page=2 returns the next 3 matches with no overlap @slice-002 @us1",
-    async ({ request }) => {
-      const r1 = await request.get("/api/matches?page_size=3&page=1");
+    async ({ page, request }) => {
+      // Forward signed-in cookies — see slice 001 cookie-forwarding follow-up.
+      const cookies = await page.context().cookies();
+      const cookieHeader = cookies.map((c) => `${c.name}=${c.value}`).join("; ");
+      const headers = { Cookie: cookieHeader };
+
+      const r1 = await request.get("/api/matches?page_size=3&page=1", { headers });
       expect(r1.status(), "200 for page=1").toBe(200);
       const body1 = (await r1.json()) as MatchCatalogResponse;
 
-      const r2 = await request.get("/api/matches?page_size=3&page=2");
+      const r2 = await request.get("/api/matches?page_size=3&page=2", { headers });
       expect(r2.status(), "200 for page=2").toBe(200);
       const body2 = (await r2.json()) as MatchCatalogResponse;
 

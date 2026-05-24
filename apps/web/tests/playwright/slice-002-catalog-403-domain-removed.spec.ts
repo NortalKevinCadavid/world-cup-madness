@@ -70,7 +70,7 @@ test.describe(
 
     test(
       "mid-session domain removal flips /api/matches to 403 + DOMAIN_NOT_APPROVED body @slice-002 @us1",
-      async ({ page, request }) => {
+      async ({ page, request, context }) => {
         // Step 1 — sign in as an eligible participant.
         await signInWithIdentity(page, {
           claims: {
@@ -81,10 +81,16 @@ test.describe(
           },
         });
 
+        // Forward signed-in cookies to the bare `request` fixture — see
+        // specs/001-eligibility-login/follow-up-test-cookie-forwarding-after-keycloak.md.
+        const cookies = await context.cookies();
+        const cookieHeader = cookies.map((c) => `${c.name}=${c.value}`).join("; ");
+        const authHeaders = { Cookie: cookieHeader };
+
         // Sanity — the session can fetch /api/matches successfully BEFORE
         // the domain is removed. Asserts the test setup is correctly wired
         // (any non-403 status proves the 403 branch is the actual cause).
-        const sanity = await request.get("/api/matches");
+        const sanity = await request.get("/api/matches", { headers: authHeaders });
         expect(
           sanity.status(),
           "alpha's pre-removal /api/matches call must be 200 (sanity check)",
@@ -98,7 +104,7 @@ test.describe(
           "eligibility.approved_domains",
           [],
           async () => {
-            const response = await request.get("/api/matches");
+            const response = await request.get("/api/matches", { headers: authHeaders });
 
             // Then 1 — status 403.
             expect(
@@ -132,7 +138,7 @@ test.describe(
         // self-check that the test cleanup actually restored eligibility.
         // If it fails the helper restore is broken and CI will catch it
         // before this poisons sibling tests.
-        const recovered = await request.get("/api/matches");
+        const recovered = await request.get("/api/matches", { headers: authHeaders });
         expect(
           recovered.status(),
           "post-restore /api/matches must return 200 again (helper sanity)",

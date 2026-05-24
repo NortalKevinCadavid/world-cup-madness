@@ -123,11 +123,17 @@ test.describe(
           },
         });
 
+        // Forward signed-in cookies — see slice 001 cookie-forwarding follow-up.
+        const cookies = await page.context().cookies();
+        const cookieHeader = cookies.map((c) => `${c.name}=${c.value}`).join("; ");
+
         await withTemporaryConfig(
           "eligibility.approved_domains",
           [],
           async () => {
-            const response = await request.get("/api/matches");
+            const response = await request.get("/api/matches", {
+              headers: { Cookie: cookieHeader },
+            });
             expect(response.status()).toBe(403);
 
             const bodyJson = (await response.json()) as unknown;

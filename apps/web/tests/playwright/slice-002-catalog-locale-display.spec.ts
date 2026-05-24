@@ -200,9 +200,11 @@ async function signInAndOpenCatalog(page: Page): Promise<void> {
  */
 async function fetchMatchesViaApi(
   request: APIRequestContext,
+  cookieHeader: string,
 ): Promise<MatchesResponse> {
   const response = await request.get(
     `/api/matches?status=finished&team_id=aaaa0000-0000-0000-0000-000000000001`,
+    { headers: { Cookie: cookieHeader } },
   );
   expect(
     response.status(),
@@ -305,7 +307,10 @@ test.describe("US1 / SC-004 — locale display", () => {
       // Wire shape MUST stay canonical UTC ISO-8601 with the `Z` suffix
       // regardless of Accept-Language. This is the half of SC-004 that
       // R-009 calls out by name: "canonical UTC stays on the wire."
-      const body = await fetchMatchesViaApi(request);
+      const cookieHeader = (await page.context().cookies())
+        .map((c) => `${c.name}=${c.value}`)
+        .join("; ");
+      const body = await fetchMatchesViaApi(request, cookieHeader);
       const m1 = body.matches.find((m) => m.id === M1.id);
       expect(m1, "M1 must appear in /api/matches?status=finished").toBeDefined();
       expect(
@@ -336,7 +341,10 @@ test.describe("US1 / SC-004 — locale display", () => {
           `${JSON.stringify(expectedNeedle)} (full expected: ${JSON.stringify(expectedFull)})`,
       ).toContainText(expectedNeedle);
 
-      const body = await fetchMatchesViaApi(request);
+      const cookieHeader = (await page.context().cookies())
+        .map((c) => `${c.name}=${c.value}`)
+        .join("; ");
+      const body = await fetchMatchesViaApi(request, cookieHeader);
       const m1 = body.matches.find((m) => m.id === M1.id);
       expect(m1, "M1 must appear in /api/matches?status=finished").toBeDefined();
       expect(
@@ -367,7 +375,10 @@ test.describe("US1 / SC-004 — locale display", () => {
           `${JSON.stringify(expectedNeedle)} (full expected: ${JSON.stringify(expectedFull)})`,
       ).toContainText(expectedNeedle);
 
-      const body = await fetchMatchesViaApi(request);
+      const cookieHeader = (await page.context().cookies())
+        .map((c) => `${c.name}=${c.value}`)
+        .join("; ");
+      const body = await fetchMatchesViaApi(request, cookieHeader);
       const m1 = body.matches.find((m) => m.id === M1.id);
       expect(m1, "M1 must appear in /api/matches?status=finished").toBeDefined();
       expect(
