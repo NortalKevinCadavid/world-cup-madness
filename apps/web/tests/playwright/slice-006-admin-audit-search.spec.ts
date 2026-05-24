@@ -113,12 +113,16 @@ test.describe(
           },
         });
 
+        // Forward signed-in cookies — see slice 001 cookie-forwarding follow-up.
+        const cookies = await page.context().cookies();
+        const cookieHeader = cookies.map((c) => `${c.name}=${c.value}`).join("; ");
+
         // Drive via the API directly first to exercise the shape.
         const url =
           `/api/admin/audit?action=admin.match_result_corrected` +
           `&q=${encodeURIComponent(UNIQUE_TOKEN)}&page=1&page_size=10`;
         const apiResponse = await request.get(url, {
-          headers: { accept: "application/json" },
+          headers: { accept: "application/json", Cookie: cookieHeader },
         });
         expect(
           apiResponse.status(),

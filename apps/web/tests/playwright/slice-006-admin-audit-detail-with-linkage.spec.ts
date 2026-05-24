@@ -150,9 +150,13 @@ test.describe(
           },
         });
 
+        // Forward signed-in cookies — see slice 001 cookie-forwarding follow-up.
+        const cookies = await page.context().cookies();
+        const cookieHeader = cookies.map((c) => `${c.name}=${c.value}`).join("; ");
+
         const apiResponse = await request.get(
           `/api/admin/audit/${seed!.auditId}`,
-          { headers: { accept: "application/json" } },
+          { headers: { accept: "application/json", Cookie: cookieHeader } },
         );
         expect(
           apiResponse.status(),

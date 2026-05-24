@@ -190,10 +190,16 @@ test.describe(
           },
         });
 
-        // Direct API call. Cookies are forwarded automatically by Playwright's
-        // `request` fixture when the URL is same-origin against baseURL (the
-        // request shares the browser context's storage state).
+        // Forward signed-in cookies. (Earlier assumption was that the bare
+        // `request` fixture shared storage state with `page`, but after the
+        // Keycloak/PKCE migration in commit 5a74acf the session lives in
+        // sb-*-auth-token cookies on the page's BrowserContext only — see
+        // specs/001-eligibility-login/follow-up-test-cookie-forwarding-after-keycloak.md.)
+        const cookies = await page.context().cookies();
+        const cookieHeader = cookies.map((c) => `${c.name}=${c.value}`).join("; ");
+
         const response = await request.post("/api/admin/match-results", {
+          headers: { Cookie: cookieHeader },
           data: {
             match_id: M1,
             home_score: 4,
