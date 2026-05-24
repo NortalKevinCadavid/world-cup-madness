@@ -189,7 +189,75 @@ Actually, on reflection, Option C breaks the SC-008 invariant the slice 005 auth
 
 ## Status
 
-**Open** — pending implementation. This is the bottom of the slice 005 follow-up cascade triggered by today's slice 001 OIDC fixture work.
+**Implemented (Option A)** — 2026-05-23.
+
+### What shipped
+
+- **`supabase/migrations/0080_score_fns_off_by_one_fix.sql`** — a single new migration that re-creates the three SPs (`score_match` at slot 0052, `score_finals` at slot 0053, `score_all` at slot 0058) via `CREATE OR REPLACE FUNCTION`. The bodies are extracted verbatim from the original migrations (via a sed/awk pipeline) with two targeted edits per SP:
+  - `v_target_version := v_target_version + 1;` is inserted right after the NULL-check on `v_target_version`. The variable now represents the NEW version this run writes at (= current pointer + 1).
+  - The pointer-bump `UPDATE` is changed from `value = to_jsonb(v_target_version + 1)` to `value = to_jsonb(v_target_version)`. The pointer now matches the version the records were just written at.
+
+  Original migrations 0052/0053/0058 stay unchanged per the immutability convention for already-applied migrations. The new migration sits at slot 0080 (slot 0079 is `score_runs_triggered_by_fallback.sql`).
+
+- **`apps/web/tests/playwright/slice-005-breakdown.spec.ts`** — `runFullScoringSequence` collapsed from 4 sequential SP calls (scope='match' × 3 + scope='finals') to a single `scope='all'` call. Reason: each scope='match' call bumps the version pointer, so the sequential loop wrote M1@v=2, M2@v=3, M3@v=4, finals@v=5 — and the view filtering at the latest pointer only saw the finals records. The slice 005 author's own docstring noted this collapse was intended "When T037 lands" — and T037 (slot 0058 `score_all`) HAS shipped.
+
+- **Serial mode for slice-005-breakdown + slice-005-final-scoring describe blocks** (`test.describe.configure({ mode: "serial" })`). With `fullyParallel: true` at the Playwright config level, tests in these files would otherwise spawn one worker per test, racing on `tournament_config.current_calculation_version` and tripping `score_records_uk` on the concurrent INSERTs. Serial mode within each file keeps the database-mutating tests linear without slowing down other test files.
+
+- **`apps/web/tests/playwright/slice-005-final-scoring.spec.ts` `callScoreTriggerFinals`** — adds `Authorization: Bearer <anon-key>` to satisfy the Supabase Edge Runtime gateway, mirroring the slice-005-breakdown fix from follow-up-oidc-stub-keycloak-vs-mock-oauth2.md downstream issue #2. The X-Internal-Auth bypass header remains authoritative inside the function for skipping the is_admin check.
+
+### Empirical verification
+
+After `pnpm supabase db reset` to apply migration 0080:
+
+```sh
+# Single scope='all' run.
+docker exec supabase_db_world-cup-madness psql -U postgres -c "
+  SELECT 'pointer' AS what, (value)::int AS v FROM public.tournament_config
+   WHERE key='current_calculation_version'
+  UNION ALL
+  SELECT 'records.versions' AS what, calculation_version FROM public.score_records
+  GROUP BY 1, 2"
+#  pointer          | 2
+#  records.versions | 2    ← pointer now matches the records' version
+
+docker exec supabase_db_world-cup-madness psql -U postgres -c "
+  SELECT display_name, total_points, rank FROM public.leaderboard_v ORDER BY rank"
+#  Alpha     | 90 | 1     ← all participants now show real scores
+#  Bravo     | 50 | 2
+#  Charlie   | 40 | 3
+#  Delta     | 30 | 4
+#  Epsilon   | 10 | 5
+#  Admin One |  0 | 6
+#  Zeta      |  0 | 6
+```
+
+### Test runs
+
+```sh
+pnpm exec playwright test tests/playwright/slice-005-breakdown.spec.ts \
+  --project=chromium --reporter=list
+#  4 passed (13.3s)
+#  AS1 (3 match rows, points=10), AS2 (4 final rows), AS3/SC-002 (sum=90), RLS
+
+pnpm exec playwright test tests/playwright/slice-005-final-scoring.spec.ts \
+  --project=chromium --reporter=list
+#  6 passed (1.6s)
+#  AS1, AS2, AS3, AS4, Best-Player-Pending, Flip-pending→confirmed
+```
+
+### What remains open after this fix
+
+`slice-005-match-scoring.spec.ts` uses a **different auth model** (admin JWT via cookie, NOT X-Internal-Auth bypass). Its `callScoreTrigger` builds a `Cookie:` header from the signed-in admin's browser context, but does NOT send an `Authorization: Bearer …` header. The Supabase Edge Runtime gateway rejects with `Missing authorization header` before the function code ever sees the cookie.
+
+This is a different fix path than what worked for breakdown + final-scoring. Either:
+- The match-scoring helper extracts the admin's JWT from the cookie and forwards it as `Authorization: Bearer <admin-jwt>`, OR
+- The test is restructured to use the X-Internal-Auth bypass (consistent with the other slice 005 specs), at the cost of no longer exercising the admin-JWT path.
+
+Not in scope for the off-by-one fix; recommended to file as a separate follow-up if the admin-JWT path is to be preserved.
+
+### Tests confirmed unaffected by the version-semantics shift
+
+The slice 005 author's docstring warned that `T011 A3/A4` in `slice-005-match-scoring.spec.ts` might depend on specific calculation_version values. Inspection (line 727-743) confirms the assertions are RELATIVE (`versionAfterR1 + 1`), not absolute — they encode the "each new run bumps by +1" invariant which my fix PRESERVES. So once the match-scoring gateway-auth issue is resolved, those assertions should pass unchanged.
 
 ## Owner
 

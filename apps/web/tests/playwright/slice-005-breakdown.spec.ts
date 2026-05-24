@@ -282,51 +282,47 @@ async function callScoreTrigger(
 }
 
 /**
- * Drives a full-tournament scoring pass via the sequential workaround:
- * scope='match' for each of M1/M2/M3 followed by scope='finals' once. Until
- * T037 ships scope='all', this is the only way to reproduce the "every
- * row in personal_breakdown_v exists at the latest calculation_version"
- * precondition. Returns the `calculation_version_written` from the LAST
- * run (highest of the four; the precondition for the breakdown page is
- * "fully scored at the latest version").
+ * Drives a full-tournament scoring pass via a SINGLE scope='all' call.
+ *
+ * History (2026-05-23): originally a sequential workaround that fired
+ * scope='match' for each of M1/M2/M3 followed by scope='finals' once.
+ * The slice 005 author noted in the spec docstring that "When T037 lands,
+ * the loop can collapse to a single scope='all' POST without changing
+ * the assertions" — T037 (migration slot 0058 score_all_fn) HAS shipped,
+ * so the collapse happens here.
+ *
+ * Why the collapse is load-bearing for this test: leaderboard_v and
+ * personal_breakdown_v filter score_records at the CURRENT
+ * tournament_config.current_calculation_version. Each separate SP call
+ * bumps that pointer (per the slice 005 design — each run is a distinct
+ * version). The sequential loop wrote M1@v=2, M2@v=3, M3@v=4, finals@v=5
+ * — and the view filtering at v=5 saw ONLY the finals records. A single
+ * scope='all' call writes every row at the same v_target_version so the
+ * view sees everything at the latest pointer.
+ *
+ * See specs/005-scoring-leaderboard/follow-up-current-calculation-version-off-by-one.md
+ * for the underlying SP fix (migration 0080) that prerequires this.
+ *
+ * Returns the `calculation_version_written` from the call.
  */
 async function runFullScoringSequence(
   request: import("@playwright/test").APIRequestContext,
   reasonTag: string,
 ): Promise<number> {
-  let lastVersion = -1;
-  for (const matchId of FINISHED_MATCHES) {
-    const r = await callScoreTrigger(request, {
-      scope: "match",
-      target_id: matchId,
-      reason: `${reasonTag} — scope='match' ${matchId}`,
-      run_id: crypto.randomUUID(),
-    });
-    expect(
-      r.status,
-      `score-trigger scope='match' ${matchId} MUST return 200. Got body: ${r.rawBody}`,
-    ).toBe(200);
-    expect(
-      r.parsed?.calculation_version_written,
-      `score-trigger response MUST include calculation_version_written. Got body: ${r.rawBody}`,
-    ).toBeGreaterThan(0);
-    lastVersion = r.parsed!.calculation_version_written;
-  }
-  const finals = await callScoreTrigger(request, {
-    scope: "finals",
-    reason: `${reasonTag} — scope='finals'`,
+  const r = await callScoreTrigger(request, {
+    scope: "all",
+    reason: `${reasonTag} — scope='all'`,
     run_id: crypto.randomUUID(),
   });
   expect(
-    finals.status,
-    `score-trigger scope='finals' MUST return 200. Got body: ${finals.rawBody}`,
+    r.status,
+    `score-trigger scope='all' MUST return 200. Got body: ${r.rawBody}`,
   ).toBe(200);
   expect(
-    finals.parsed?.calculation_version_written,
-    `score-trigger finals response MUST include calculation_version_written. Got body: ${finals.rawBody}`,
+    r.parsed?.calculation_version_written,
+    `score-trigger scope='all' response MUST include calculation_version_written. Got body: ${r.rawBody}`,
   ).toBeGreaterThan(0);
-  lastVersion = finals.parsed!.calculation_version_written;
-  return lastVersion;
+  return r.parsed!.calculation_version_written;
 }
 
 /**
@@ -425,6 +421,14 @@ async function readLeaderboardTotalFor(
 // --------------------------------------------------------------------------
 
 test.describe("US4 — Personal Breakdown @slice-005 @us4", () => {
+  // Run serially within the file. fullyParallel: true at the
+  // playwright.config.ts level would otherwise spawn one worker per test,
+  // and all four tests call scope='all' against the shared local
+  // database — racing on tournament_config.current_calculation_version
+  // and tripping score_records_uk on the concurrent INSERTs.
+  // (Added 2026-05-23 after the slice 005 follow-up SP fix landed.)
+  test.describe.configure({ mode: "serial" });
+
   // Breakdown rendering + scoring round-trips take a bit longer than the
   // default Playwright budget; mirror the T022 budget for parity.
   test.setTimeout(90_000);

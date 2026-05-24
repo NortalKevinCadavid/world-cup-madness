@@ -185,9 +185,23 @@ async function callScoreTriggerFinals(
   rawBody: string;
   parsed: ScoreTriggerResponse | null;
 }> {
+  // Gateway gate — Supabase Edge Runtime requires Authorization: Bearer <jwt>
+  // before reaching any /functions/v1/* path. Anon key suffices; the gateway
+  // does not inspect role. The function's X-Internal-Auth bypass remains
+  // authoritative for skipping the is_admin check inside.
+  // (Added 2026-05-23 — slice 005 follow-up cascade. See
+  //  specs/001-eligibility-login/follow-up-oidc-stub-keycloak-vs-mock-oauth2.md
+  //  § "NEW issues found" #2.)
+  const SUPABASE_ANON_KEY_FOR_GATEWAY =
+    process.env.SUPABASE_ANON_KEY ??
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
+    "";
   const response = await request.post(SCORE_TRIGGER_ENDPOINT, {
     headers: {
       "Content-Type": "application/json",
+      ...(SUPABASE_ANON_KEY_FOR_GATEWAY
+        ? { Authorization: `Bearer ${SUPABASE_ANON_KEY_FOR_GATEWAY}` }
+        : {}),
       "X-Internal-Auth": INTERNAL_AUTH_SECRET,
     },
     data: body,
@@ -368,6 +382,12 @@ async function confirmBestPlayerAsPedri(): Promise<void> {
 // --------------------------------------------------------------------------
 
 test.describe("US2 — Final-Prediction Scoring @slice-005 @us2", () => {
+  // Run serially within the file. fullyParallel: true would otherwise
+  // spawn one worker per test, racing on tournament_config.current_calculation_version
+  // and tripping score_records_uk on concurrent INSERTs. Same pattern as
+  // slice-005-breakdown.spec.ts. (Added 2026-05-23.)
+  test.describe.configure({ mode: "serial" });
+
   // Each test's scoring trigger + service-role round-trips take a bit longer
   // than the default Playwright budget.
   test.setTimeout(60_000);
