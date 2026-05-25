@@ -113,6 +113,18 @@ const SEEDED_USER_BY_EMAIL: Readonly<Record<string, string>> = {
   "charlie@nortal.com": "charlie",
   "admin1@nortal.com": "admin1",
   "newuser@nortal.com": "newuser",
+  // Added 2026-05-25 — slice 001 fixture-list follow-up. These cover the
+  // outsider / freshly-signed-in / display-name-drift / missing-claim
+  // identity scenarios across slices 001 / 003 / 004 that the earlier
+  // navikt/mock-oauth2-server fixture handled via runtime claim injection.
+  // Keycloak doesn't support runtime injection, so each identity is
+  // pre-provisioned in infra/keycloak/realm-export.json.
+  "outsider@example.com": "outsider",
+  "newcomer@nortal.com": "newcomer",
+  "newcomer-04@nortal.com": "newcomer-04",
+  "freshie@nortal.com": "freshie",
+  "alpha-aka@nortal.com": "alpha-aka",
+  "no-name@nortal.com": "no-name",
 };
 
 const FOLLOWUP_REF =
