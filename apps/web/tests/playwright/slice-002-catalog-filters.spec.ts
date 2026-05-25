@@ -159,7 +159,7 @@ test.describe("US1 — GET /api/matches filters @slice-002 @us1", () => {
   // Filter 1 — ?stage=group → all 8 (fixture is entirely group-stage)
   // ------------------------------------------------------------------------
   test(
-    "?stage=group returns all 8 fixture rows (fixture is entirely group-stage) @slice-002 @us1",
+    "?stage=group returns all 8 slice-002 rows (fixture is entirely group-stage) @slice-002 @us1",
     async ({ page, request }) => {
       const response = await request.get("/api/matches?stage=group", {
         headers: await buildCookieHeader(page),
@@ -167,8 +167,14 @@ test.describe("US1 — GET /api/matches filters @slice-002 @us1", () => {
       expect(response.status(), "200 for valid stage filter").toBe(200);
 
       const body = (await response.json()) as MatchCatalogResponse;
-      expect(body.matches.length).toBe(8);
-      expect(body.total).toBe(8);
+      // Filter to slice-002 namespace — other slices add to the matches
+      // table (e.g., slice-005's eeee0050-* finished matches).
+      const slice002 = body.matches.filter((m) => m.id.startsWith("bbbb0000-"));
+      expect(slice002.length, "slice-002 contributes exactly 8 matches").toBe(8);
+      expect(
+        body.total,
+        "total includes slice-002 (>=8); other slices may add more",
+      ).toBeGreaterThanOrEqual(8);
       for (const m of body.matches) {
         expect(m.stage).toBe("group");
       }
@@ -179,7 +185,7 @@ test.describe("US1 — GET /api/matches filters @slice-002 @us1", () => {
   // Filter 2 — ?status=finished → 1 (M1 ARG-MEX)
   // ------------------------------------------------------------------------
   test(
-    "?status=finished returns exactly M1 (ARG-MEX) @slice-002 @us1",
+    "?status=finished returns M1 (ARG-MEX) among the finished matches @slice-002 @us1",
     async ({ page, request }) => {
       const response = await request.get("/api/matches?status=finished", {
         headers: await buildCookieHeader(page),
@@ -187,10 +193,17 @@ test.describe("US1 — GET /api/matches filters @slice-002 @us1", () => {
       expect(response.status(), "200 for valid status filter").toBe(200);
 
       const body = (await response.json()) as MatchCatalogResponse;
-      expect(body.matches.length, "exactly 1 finished match in fixture").toBe(1);
-      expect(body.total).toBe(1);
+      // Filter to slice-002 namespace — slice-005 adds finished matches too
+      // (eeee0050-*), so the global count is no longer slice-002-specific.
+      const slice002Finished = body.matches.filter((m) =>
+        m.id.startsWith("bbbb0000-"),
+      );
+      expect(
+        slice002Finished.length,
+        "slice-002 contributes exactly 1 finished match (M1 ARG-MEX)",
+      ).toBe(1);
 
-      const m = body.matches[0]!;
+      const m = slice002Finished[0]!;
       expect(m.id).toBe(M1_ARG_MEX);
       expect(m.status).toBe("finished");
       expect(m.home_team.short_code).toBe("ARG");
@@ -202,7 +215,7 @@ test.describe("US1 — GET /api/matches filters @slice-002 @us1", () => {
   // Filter 3 — ?status=in_progress → 1 (M2 CAN-POL)
   // ------------------------------------------------------------------------
   test(
-    "?status=in_progress returns exactly M2 (CAN-POL) @slice-002 @us1",
+    "?status=in_progress returns M2 (CAN-POL) among the in_progress matches @slice-002 @us1",
     async ({ page, request }) => {
       const response = await request.get("/api/matches?status=in_progress", {
         headers: await buildCookieHeader(page),
@@ -210,10 +223,16 @@ test.describe("US1 — GET /api/matches filters @slice-002 @us1", () => {
       expect(response.status(), "200 for valid status filter").toBe(200);
 
       const body = (await response.json()) as MatchCatalogResponse;
-      expect(body.matches.length, "exactly 1 in_progress match in fixture").toBe(1);
-      expect(body.total).toBe(1);
+      // Filter to slice-002 namespace.
+      const slice002InProgress = body.matches.filter((m) =>
+        m.id.startsWith("bbbb0000-"),
+      );
+      expect(
+        slice002InProgress.length,
+        "slice-002 contributes exactly 1 in_progress match (M2 CAN-POL)",
+      ).toBe(1);
 
-      const m = body.matches[0]!;
+      const m = slice002InProgress[0]!;
       expect(m.id).toBe(M2_CAN_POL);
       expect(m.status).toBe("in_progress");
       expect(m.home_team.short_code).toBe("CAN");
@@ -225,7 +244,7 @@ test.describe("US1 — GET /api/matches filters @slice-002 @us1", () => {
   // Filter 4 — ?team_id=<ARG> → 2 (M1 ARG-MEX, M3 ARG-CAN)
   // ------------------------------------------------------------------------
   test(
-    "?team_id=<ARG> returns the 2 matches Argentina appears in @slice-002 @us1",
+    "?team_id=<ARG> returns the 2 slice-002 matches Argentina appears in @slice-002 @us1",
     async ({ page, request }) => {
       const argTeamId = await resolveTeamIdByShortCode("ARG");
 
@@ -236,17 +255,22 @@ test.describe("US1 — GET /api/matches filters @slice-002 @us1", () => {
       expect(response.status(), "200 for valid team_id filter").toBe(200);
 
       const body = (await response.json()) as MatchCatalogResponse;
+      // Filter to slice-002 namespace — team_id is global (shared across
+      // slices via the teams table), so slice-005 ARG matches appear here too.
+      const slice002Arg = body.matches.filter((m) =>
+        m.id.startsWith("bbbb0000-"),
+      );
       expect(
-        body.matches.length,
-        "ARG plays in exactly 2 fixture matches (M1, M3)",
+        slice002Arg.length,
+        "ARG plays in exactly 2 slice-002 fixture matches (M1, M3)",
       ).toBe(2);
-      expect(body.total).toBe(2);
 
-      // Membership assertion — the two returned IDs must be exactly M1 and M3.
-      const returnedIds = body.matches.map((m) => m.id).sort();
+      // Membership assertion — the two slice-002 IDs must be exactly M1 and M3.
+      const returnedIds = slice002Arg.map((m) => m.id).sort();
       expect(returnedIds).toEqual([M1_ARG_MEX, M3_ARG_CAN].sort());
 
-      // Every returned row MUST include ARG on either side (home OR away).
+      // Every returned row in the global response MUST include ARG on either
+      // side (home OR away) — the filter holds across all slices.
       for (const m of body.matches) {
         const arg = m.home_team.short_code === "ARG" || m.away_team.short_code === "ARG";
         expect(arg, `match ${m.id} must involve ARG`).toBe(true);
@@ -272,17 +296,26 @@ test.describe("US1 — GET /api/matches filters @slice-002 @us1", () => {
 
       const body = (await response.json()) as MatchCatalogResponse;
 
+      // Filter to slice-002 namespace — slice-005 may also have matches in
+      // the same date window.
+      const slice002Window = body.matches.filter((m) =>
+        m.id.startsWith("bbbb0000-"),
+      );
+
       // Window covers: M5 (06-13), M6 (06-14), M3 (06-16), M4 (06-17) = 4 rows.
       // Excludes:      M1 (06-11), M2 (06-12) [< from], M7 (06-18) [>= to, exclusive], M8 (06-19).
-      expect(body.matches.length, "exactly 4 fixture matches fall in the window").toBe(4);
-      expect(body.total).toBe(4);
+      expect(
+        slice002Window.length,
+        "exactly 4 slice-002 matches fall in the window",
+      ).toBe(4);
 
-      const returnedIds = body.matches.map((m) => m.id).sort();
+      const returnedIds = slice002Window.map((m) => m.id).sort();
       expect(returnedIds).toEqual(
         [M5_ESP_BRA, M6_USA_JPN, M3_ARG_CAN, M4_MEX_POL].sort(),
       );
 
       // Every returned kickoff MUST satisfy `kickoff_utc >= from && < to`.
+      // This invariant holds across all slices, not just slice-002.
       const fromMs = Date.parse(from);
       const toMs = Date.parse(to);
       for (const m of body.matches) {
@@ -297,7 +330,7 @@ test.describe("US1 — GET /api/matches filters @slice-002 @us1", () => {
   // Filter 6 — ?group=A → 4 (Group A pairings M1–M4)
   // ------------------------------------------------------------------------
   test(
-    "?group=A returns the 4 Group A matches @slice-002 @us1",
+    "?group=A returns the 4 slice-002 Group A matches @slice-002 @us1",
     async ({ page, request }) => {
       const response = await request.get("/api/matches?group=A", {
         headers: await buildCookieHeader(page),
@@ -305,14 +338,22 @@ test.describe("US1 — GET /api/matches filters @slice-002 @us1", () => {
       expect(response.status(), "200 for valid group filter").toBe(200);
 
       const body = (await response.json()) as MatchCatalogResponse;
-      expect(body.matches.length, "Group A has 4 fixture matches").toBe(4);
-      expect(body.total).toBe(4);
+      // Filter to slice-002 namespace — slice-005 also has Group A matches.
+      const slice002GroupA = body.matches.filter((m) =>
+        m.id.startsWith("bbbb0000-"),
+      );
+      expect(
+        slice002GroupA.length,
+        "slice-002 contributes 4 Group A matches",
+      ).toBe(4);
 
-      const returnedIds = body.matches.map((m) => m.id).sort();
+      const returnedIds = slice002GroupA.map((m) => m.id).sort();
       expect(returnedIds).toEqual(
         [M1_ARG_MEX, M2_CAN_POL, M3_ARG_CAN, M4_MEX_POL].sort(),
       );
 
+      // group_id=A invariant holds for every row in the response, not just
+      // slice-002's contribution.
       for (const m of body.matches) {
         expect(m.group_id, `match ${m.id} must be group A`).toBe("A");
       }

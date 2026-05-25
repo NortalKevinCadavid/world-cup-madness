@@ -102,7 +102,13 @@ test.describe("US1 — GET /api/matches pagination @slice-002 @us1", () => {
       expect(body.matches.length, "page_size=3 → exactly 3 rows").toBe(3);
       expect(body.page, "default page is 1").toBe(1);
       expect(body.page_size, "page_size echoes the requested value").toBe(3);
-      expect(body.total, "total MUST equal the fixture row count").toBe(8);
+      // slice-002 contributes 8 matches; other slices may add more (e.g.,
+      // slice-005's eeee0050-* set). The pagination contract only requires
+      // that the global total be >= what's currently in the table.
+      expect(
+        body.total,
+        "total MUST be >= slice-002's 8 fixture rows",
+      ).toBeGreaterThanOrEqual(8);
 
       // Non-decreasing kickoff_utc within the page (default sort).
       for (let i = 1; i < body.matches.length; i++) {
@@ -136,7 +142,14 @@ test.describe("US1 — GET /api/matches pagination @slice-002 @us1", () => {
       expect(body2.matches.length, "page=2 page_size=3 → 3 rows").toBe(3);
       expect(body2.page, "page echoes 2").toBe(2);
       expect(body2.page_size).toBe(3);
-      expect(body2.total, "total stays 8 across pages").toBe(8);
+      expect(
+        body2.total,
+        "total stays consistent across pages (>= 8 from slice-002)",
+      ).toBeGreaterThanOrEqual(8);
+      expect(
+        body2.total,
+        "total MUST be identical between page 1 and page 2",
+      ).toBe(body1.total);
 
       // No row should appear on both page 1 and page 2.
       const ids1 = body1.matches.map((m) => m.id);

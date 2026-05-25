@@ -162,23 +162,33 @@ test.describe("US1 — GET /api/matches returns the seeded catalog @slice-002 @u
         total: expect.any(Number),
       });
 
-      // Then 3 — exactly 8 matches; total === 8 (fixture row count).
+      // Filter to slice-002 fixture matches only — other slices (notably
+      // slice-005 fixture) add matches to the same table, so the global
+      // `total` and `body.matches.length` are no longer slice-002-specific
+      // anchors. The contract test is scoped to slice-002's seeded set:
+      // 8 matches with the `bbbb0000-*` UUID prefix, all stage='group'.
+      const SLICE_002_PREFIX = "bbbb0000-";
+      const slice002Matches = body.matches.filter((m) =>
+        m.id.startsWith(SLICE_002_PREFIX),
+      );
+
+      // Then 3 — slice-002's exact 8 matches are all in the response.
       expect(
-        body.matches.length,
-        "fixture seeds exactly 8 matches",
+        slice002Matches.length,
+        "slice-002 fixture seeds exactly 8 matches (filtered by UUID prefix)",
       ).toBe(8);
       expect(
         body.total,
-        "`total` MUST equal the fixture row count of 8",
-      ).toBe(8);
+        "`total` MUST be at least 8 — slice-002's contribution; other slices may add to it",
+      ).toBeGreaterThanOrEqual(8);
 
       // Then 4 — pagination defaults per contract § Query parameters table.
       expect(body.page, "default page MUST be 1").toBe(1);
       expect(body.page_size, "default page_size MUST be 50").toBe(50);
 
-      // Then 5 + 6 — every row has the contract-required keys, and the
-      // nested team objects are well-formed.
-      for (const m of body.matches) {
+      // Then 5 + 6 — every slice-002 row has the contract-required keys, and
+      // the nested team objects are well-formed.
+      for (const m of slice002Matches) {
         expect(m).toEqual(
           expect.objectContaining({
             id: expect.any(String),
@@ -219,23 +229,28 @@ test.describe("US1 — GET /api/matches returns the seeded catalog @slice-002 @u
       }
 
       // Then 7 — chronological order (default sort = kickoff_utc_asc).
-      for (let i = 1; i < body.matches.length; i++) {
-        const prev = Date.parse(body.matches[i - 1]!.kickoff_utc);
-        const curr = Date.parse(body.matches[i]!.kickoff_utc);
+      // The API sort applies to the full response, so the slice-002 subset is
+      // also in non-decreasing order.
+      for (let i = 1; i < slice002Matches.length; i++) {
+        const prev = Date.parse(slice002Matches[i - 1]!.kickoff_utc);
+        const curr = Date.parse(slice002Matches[i]!.kickoff_utc);
         expect(
           curr,
-          `matches[${i}].kickoff_utc must be >= matches[${i - 1}].kickoff_utc (contract default sort kickoff_utc_asc)`,
+          `slice002Matches[${i}].kickoff_utc must be >= [${i - 1}] (contract default sort kickoff_utc_asc)`,
         ).toBeGreaterThanOrEqual(prev);
       }
 
-      // Then 8 — 7 non-finished matches have match_result === null.
-      const finished = body.matches.filter((m) => m.status === "finished");
-      const nonFinished = body.matches.filter((m) => m.status !== "finished");
+      // Then 8 — 7 of slice-002's 8 matches are non-finished and have
+      // match_result === null. (Only M1 ARG-MEX is finished in the slice-002
+      // fixture.)
+      const slice002NonFinished = slice002Matches.filter(
+        (m) => m.status !== "finished",
+      );
       expect(
-        nonFinished.length,
-        "fixture has exactly 7 non-finished matches",
+        slice002NonFinished.length,
+        "slice-002 fixture has exactly 7 non-finished matches",
       ).toBe(7);
-      for (const m of nonFinished) {
+      for (const m of slice002NonFinished) {
         expect(
           m.match_result,
           `non-finished match ${m.id} (status=${m.status}) MUST have match_result: null`,
@@ -243,8 +258,14 @@ test.describe("US1 — GET /api/matches returns the seeded catalog @slice-002 @u
       }
 
       // Then 9 — M1 (ARG vs MEX, finished) has match_result populated.
-      expect(finished.length, "fixture has exactly 1 finished match (M1)").toBe(1);
-      const m1 = finished[0]!;
+      const slice002Finished = slice002Matches.filter(
+        (m) => m.status === "finished",
+      );
+      expect(
+        slice002Finished.length,
+        "slice-002 fixture has exactly 1 finished match (M1)",
+      ).toBe(1);
+      const m1 = slice002Finished[0]!;
       expect(m1.id, "the finished match MUST be M1 (ARG vs MEX)").toBe(M1_ARG_MEX_ID);
       expect(m1.home_team.short_code).toBe("ARG");
       expect(m1.away_team.short_code).toBe("MEX");
