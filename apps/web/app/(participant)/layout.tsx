@@ -3,6 +3,7 @@ import 'server-only';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
+import { getTranslations } from 'next-intl/server';
 
 import { EligibilityError } from '../../lib/auth/requireEligible';
 import { getCurrentParticipant } from '../../lib/auth/getCurrentParticipant';
@@ -67,6 +68,7 @@ export default async function ParticipantLayout({
   }
 
   const isAdmin = await isCallerAdmin(participant.auth_user_id);
+  const t = await getTranslations('Footer');
 
   return (
     <div className="min-h-screen flex flex-col bg-muted/30">
@@ -74,12 +76,12 @@ export default async function ParticipantLayout({
       <div className="flex-1">{children}</div>
       <footer className="border-t border-border bg-card/50">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 text-xs text-muted-foreground sm:px-6">
-          <span>World Cup Madness — Nortal prediction pool</span>
+          <span>{t('tagline')}</span>
           <a
             href="/design-system"
             className="rounded text-muted-foreground underline-offset-2 transition-colors duration-fast hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card"
           >
-            Design system
+            {t('designSystem')}
           </a>
         </div>
       </footer>

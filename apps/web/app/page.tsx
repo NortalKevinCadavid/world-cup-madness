@@ -1,12 +1,20 @@
 import { Trophy } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
 import { SignInButton } from "./SignInButton";
+import { LanguageSwitcher } from "@/app/components/LanguageSwitcher";
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card";
 import { Badge } from "@/app/components/ui/badge";
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const t = await getTranslations("Landing");
+
   return (
     <main className="relative mx-auto flex min-h-screen max-w-3xl flex-col items-center justify-center gap-6 px-4 py-12 sm:px-6">
+      {/* Top-right language switcher — visible to anonymous visitors before sign-in. */}
+      <div className="absolute right-4 top-4 z-20 sm:right-6 sm:top-6">
+        <LanguageSwitcher />
+      </div>
       {/* Festive backdrop accents — purely decorative, suppressed under reduced motion. */}
       <div
         aria-hidden
@@ -19,21 +27,17 @@ export default function LandingPage() {
           <div className="rounded-full bg-primary/10 p-3 text-primary">
             <Trophy className="size-8" aria-hidden />
           </div>
-          <Badge variant="gold">FIFA World Cup 2026</Badge>
+          <Badge variant="gold">{t("wcBadge")}</Badge>
           <CardTitle className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
-            World Cup Madness
+            {t("title")}
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col items-center gap-4 text-center">
           <p className="max-w-md text-sm text-muted-foreground sm:text-base">
-            Internal Nortal prediction pool. Sign in with your approved Nortal
-            corporate identity to start picking match scores, locking your
-            tournament finals, and chasing the leaderboard.
+            {t("intro")}
           </p>
           <SignInButton />
-          <p className="text-xs text-muted-foreground/80">
-            Access is restricted to approved Nortal corporate identities.
-          </p>
+          <p className="text-xs text-muted-foreground/80">{t("accessNote")}</p>
         </CardContent>
       </Card>
     </main>

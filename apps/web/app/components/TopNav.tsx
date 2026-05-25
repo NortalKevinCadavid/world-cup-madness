@@ -2,11 +2,13 @@ import "server-only";
 
 import Link from "next/link";
 import { Trophy } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
 import type { Participant } from "../../lib/types/participant";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/app/components/ui/badge";
 import { ThemeToggle } from "@/app/components/ThemeToggle";
+import { LanguageSwitcher } from "@/app/components/LanguageSwitcher";
 import { MobileNavSheet } from "@/app/components/MobileNavSheet";
 import { UserMenu } from "@/app/components/UserMenu";
 
@@ -19,22 +21,27 @@ interface TopNavProps {
   activeSection?: Section | null;
 }
 
-const PARTICIPANT_LINKS: { href: string; label: string; section: Section }[] = [
-  { href: "/dashboard", label: "Dashboard", section: "dashboard" },
-  { href: "/matches", label: "Matches", section: "matches" },
-  { href: "/leaderboard", label: "Leaderboard", section: "leaderboard" },
-  { href: "/me/finals", label: "My picks", section: "me" },
-];
-
-export function TopNav({
+export async function TopNav({
   participant,
   isAdmin,
   activeSection = null,
 }: TopNavProps) {
+  const t = await getTranslations("Nav");
+
+  // Labels resolved at render-time per active locale (see apps/web/i18n/request.ts).
+  // PARTICIPANT_LINKS is rebuilt each render rather than module-scoped because
+  // useTranslations is request-bound.
+  const participantLinks: { href: string; label: string; section: Section }[] = [
+    { href: "/dashboard", label: t("dashboard"), section: "dashboard" },
+    { href: "/matches", label: t("matches"), section: "matches" },
+    { href: "/leaderboard", label: t("leaderboard"), section: "leaderboard" },
+    { href: "/me/finals", label: t("myPicks"), section: "me" },
+  ];
+
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
       <nav
-        aria-label="Primary"
+        aria-label={t("primaryAriaLabel")}
         className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 sm:gap-6 sm:px-6"
       >
         <Link
@@ -48,11 +55,11 @@ export function TopNav({
             className="size-5 text-primary motion-safe:transition-transform motion-safe:duration-base"
             aria-hidden
           />
-          <span>World Cup Madness</span>
+          <span>{t("appName")}</span>
         </Link>
 
         <ul className="hidden flex-1 items-center gap-1 text-sm md:flex">
-          {PARTICIPANT_LINKS.map(({ href, label, section }) => (
+          {participantLinks.map(({ href, label, section }) => (
             <li key={href}>
               <Link
                 href={href}
@@ -84,9 +91,9 @@ export function TopNav({
                     : "text-foreground/80 hover:bg-accent hover:text-accent-foreground",
                 )}
               >
-                Admin
+                {t("admin")}
                 <Badge variant="gold" className="hidden lg:inline-flex">
-                  Staff
+                  {t("staffBadge")}
                 </Badge>
               </Link>
             </li>
@@ -94,10 +101,11 @@ export function TopNav({
         </ul>
 
         <div className="ml-auto flex items-center gap-1">
+          <LanguageSwitcher />
           <ThemeToggle />
           <UserMenu participant={participant} />
           <MobileNavSheet
-            links={PARTICIPANT_LINKS}
+            links={participantLinks}
             isAdmin={isAdmin}
             activeSection={activeSection}
           />

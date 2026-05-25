@@ -1,0 +1,30 @@
+{
+  "Nav": {
+    "appName": "World Cup Madness",
+    "dashboard": "Inicio",
+    "matches": "Partidos",
+    "leaderboard": "Clasificación",
+    "myPicks": "Mis pronósticos",
+    "admin": "Admin",
+    "staffBadge": "Personal",
+    "primaryAriaLabel": "Principal"
+  },
+  "Landing": {
+    "wcBadge": "FIFA Copa Mundial 2026",
+    "title": "World Cup Madness",
+    "intro": "Pool interno de pronósticos de Nortal. Inicia sesión con tu identidad corporativa Nortal aprobada para empezar a predecir resultados de partidos, cerrar tus pronósticos finales del torneo y escalar en la clasificación.",
+    "signIn": "Iniciar sesión",
+    "signingIn": "Redirigiendo…",
+    "accessNote": "El acceso está restringido a identidades corporativas Nortal aprobadas."
+  },
+  "Footer": {
+    "tagline": "World Cup Madness — Pool de pronósticos Nortal",
+    "designSystem": "Sistema de diseño"
+  },
+  "LanguageSwitcher": {
+    "label": "Idioma",
+    "en": "English",
+    "es": "Español",
+    "pt": "Português"
+  }
+}

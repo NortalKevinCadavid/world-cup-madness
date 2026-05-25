@@ -1,0 +1,30 @@
+{
+  "Nav": {
+    "appName": "World Cup Madness",
+    "dashboard": "Dashboard",
+    "matches": "Matches",
+    "leaderboard": "Leaderboard",
+    "myPicks": "My picks",
+    "admin": "Admin",
+    "staffBadge": "Staff",
+    "primaryAriaLabel": "Primary"
+  },
+  "Landing": {
+    "wcBadge": "FIFA World Cup 2026",
+    "title": "World Cup Madness",
+    "intro": "Internal Nortal prediction pool. Sign in with your approved Nortal corporate identity to start picking match scores, locking your tournament finals, and chasing the leaderboard.",
+    "signIn": "Sign in",
+    "signingIn": "Redirecting…",
+    "accessNote": "Access is restricted to approved Nortal corporate identities."
+  },
+  "Footer": {
+    "tagline": "World Cup Madness — Nortal prediction pool",
+    "designSystem": "Design system"
+  },
+  "LanguageSwitcher": {
+    "label": "Language",
+    "en": "English",
+    "es": "Español",
+    "pt": "Português"
+  }
+}

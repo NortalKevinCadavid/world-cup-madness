@@ -8,6 +8,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Menu } from "lucide-react";
+import { useTranslations } from "next-intl";
 import {
   Sheet,
   SheetContent,
@@ -29,6 +30,7 @@ type Props = {
 
 export function MobileNavSheet({ links, isAdmin, activeSection }: Props) {
   const [open, setOpen] = useState(false);
+  const t = useTranslations("Nav");
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -37,16 +39,16 @@ export function MobileNavSheet({ links, isAdmin, activeSection }: Props) {
           variant="ghost"
           size="icon"
           className="md:hidden"
-          aria-label="Open navigation menu"
+          aria-label={t("primaryAriaLabel")}
         >
           <Menu className="size-5" aria-hidden />
         </Button>
       </SheetTrigger>
       <SheetContent side="right" className="w-72">
         <SheetHeader>
-          <SheetTitle>Navigation</SheetTitle>
+          <SheetTitle>{t("primaryAriaLabel")}</SheetTitle>
         </SheetHeader>
-        <nav aria-label="Mobile primary" className="mt-6">
+        <nav aria-label={t("primaryAriaLabel")} className="mt-6">
           <ul className="flex flex-col gap-1">
             {links.map(({ href, label, section }) => (
               <li key={href}>
@@ -80,8 +82,8 @@ export function MobileNavSheet({ links, isAdmin, activeSection }: Props) {
                       : "text-foreground/80 hover:bg-accent hover:text-accent-foreground",
                   )}
                 >
-                  Admin
-                  <Badge variant="gold">Staff</Badge>
+                  {t("admin")}
+                  <Badge variant="gold">{t("staffBadge")}</Badge>
                 </Link>
               </li>
             ) : null}

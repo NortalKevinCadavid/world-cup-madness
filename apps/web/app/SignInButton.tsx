@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
 import { LogIn } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/app/components/ui/button';
 
 // Slice 001 D-T021-005: use supabase.auth.signInWithOAuth from the browser so
@@ -17,6 +18,7 @@ const PROVIDER = (process.env.NEXT_PUBLIC_AUTH_PROVIDER ?? 'keycloak') as 'keycl
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
 export function SignInButton() {
+  const t = useTranslations('Landing');
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -49,7 +51,7 @@ export function SignInButton() {
     <div className="flex flex-col items-center gap-2">
       <Button size="lg" type="button" onClick={onClick} disabled={pending}>
         <LogIn className="size-4" aria-hidden />
-        {pending ? 'Redirecting…' : 'Sign in'}
+        {pending ? t('signingIn') : t('signIn')}
       </Button>
       {error ? (
         <p role="alert" className="text-sm text-destructive">

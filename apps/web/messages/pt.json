@@ -1,0 +1,30 @@
+{
+  "Nav": {
+    "appName": "World Cup Madness",
+    "dashboard": "Início",
+    "matches": "Partidas",
+    "leaderboard": "Classificação",
+    "myPicks": "Meus palpites",
+    "admin": "Admin",
+    "staffBadge": "Equipe",
+    "primaryAriaLabel": "Principal"
+  },
+  "Landing": {
+    "wcBadge": "FIFA Copa do Mundo 2026",
+    "title": "World Cup Madness",
+    "intro": "Bolão interno da Nortal. Faça login com sua identidade corporativa Nortal aprovada para começar a palpitar os placares dos jogos, fechar seus palpites das finais do torneio e subir na classificação.",
+    "signIn": "Entrar",
+    "signingIn": "Redirecionando…",
+    "accessNote": "O acesso é restrito a identidades corporativas Nortal aprovadas."
+  },
+  "Footer": {
+    "tagline": "World Cup Madness — Bolão da Nortal",
+    "designSystem": "Sistema de design"
+  },
+  "LanguageSwitcher": {
+    "label": "Idioma",
+    "en": "English",
+    "es": "Español",
+    "pt": "Português"
+  }
+}
