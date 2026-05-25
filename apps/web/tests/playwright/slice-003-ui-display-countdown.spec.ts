@@ -72,7 +72,14 @@ test.describe(
       await expect(m1Row.locator('text=/Locked/i'), "finished row must show 'Locked' badge").toBeVisible();
 
       // M1 ARG-MEX final score 2-0 from slice-002 fixture is visible.
-      await expect(m1Row.locator('text=/2.*0|2-0/'), "finished row must show final score 2-0").toBeVisible();
+      // Use an exact-text locator anchored on the score cell — the broader
+      // regex /2.*0|2-0/ false-positives on "Jun 11, 2026" (slice-009 added
+      // a kickoff_utc <time> element to every row, where "2026" matches
+      // /2.*0/ via regex backtracking).
+      await expect(
+        m1Row.getByRole("cell", { name: "2-0", exact: true }),
+        "finished row must show final score 2-0 in its score cell",
+      ).toBeVisible();
     });
 
     test("M2 (in_progress) shows Locked + charlie's pre-lock prediction", async ({ page }) => {

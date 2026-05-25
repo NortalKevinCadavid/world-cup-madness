@@ -223,10 +223,16 @@ test.describe(
         //   home_score, away_score, reason, source_citation.
         // T016's page MUST surface input names matching the route-handler
         // body shape (which delegates to admin_record_match_result).
-        await page.locator('input[name="home_score"]').fill("2");
-        await page.locator('input[name="away_score"]').fill("2");
-        await page.locator('textarea[name="reason"]').fill(CORRECTION_REASON);
-        await page
+        //
+        // The page now also renders `admin-match-update-form` (status/venue
+        // updates) which has its own input[name="home_score"] /
+        // textarea[name="reason"], so we scope every locator to the
+        // correct-score form by data-testid.
+        const correctForm = page.getByTestId("admin-match-correct-score-form");
+        await correctForm.locator('input[name="home_score"]').fill("2");
+        await correctForm.locator('input[name="away_score"]').fill("2");
+        await correctForm.locator('textarea[name="reason"]').fill(CORRECTION_REASON);
+        await correctForm
           .locator('input[name="source_citation"]')
           .fill(SOURCE_CITATION);
 

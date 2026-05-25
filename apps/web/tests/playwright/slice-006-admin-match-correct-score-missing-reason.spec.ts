@@ -173,10 +173,14 @@ test.describe(
         // Fill scores + source_citation, leave reason BLANK. The textarea is
         // explicitly cleared (not just left untouched) so the test is robust
         // against any default-value the page might pre-populate.
-        await page.locator('input[name="home_score"]').fill("3");
-        await page.locator('input[name="away_score"]').fill("3");
-        await page.locator('textarea[name="reason"]').fill("");
-        await page
+        // Scope to admin-match-correct-score-form — the page also renders
+        // admin-match-update-form (status/venue) which has its own
+        // input[name="home_score"] / textarea[name="reason"].
+        const correctForm = page.getByTestId("admin-match-correct-score-form");
+        await correctForm.locator('input[name="home_score"]').fill("3");
+        await correctForm.locator('input[name="away_score"]').fill("3");
+        await correctForm.locator('textarea[name="reason"]').fill("");
+        await correctForm
           .locator('input[name="source_citation"]')
           .fill(SOURCE_CITATION);
 
