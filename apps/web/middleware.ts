@@ -10,7 +10,17 @@ import { NextResponse, type NextRequest } from 'next/server';
 // supabase.com/docs/guides/auth/server-side/nextjs.
 
 export async function middleware(request: NextRequest) {
-  let response = NextResponse.next({ request });
+  // Propagate the request pathname to a header server components can read.
+  // Next.js 14 sets `next-url` only on RSC client-cache navigations; full-page
+  // navigations and direct test navigations (page.goto) leave it absent. The
+  // admin layout's `isRenderingDeniedPage()` gate relies on knowing the
+  // current path to avoid an infinite requireAdmin → redirect('/admin/denied')
+  // loop on the denied page itself; setting x-pathname here makes that gate
+  // reliable on every navigation kind.
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set('x-pathname', request.nextUrl.pathname);
+
+  let response = NextResponse.next({ request: { headers: requestHeaders } });
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -27,7 +37,8 @@ export async function middleware(request: NextRequest) {
         for (const { name, value } of cookiesToSet) {
           request.cookies.set(name, value);
         }
-        response = NextResponse.next({ request });
+        // Preserve x-pathname when the supabase client rebuilds the response.
+        response = NextResponse.next({ request: { headers: requestHeaders } });
         for (const { name, value, options } of cookiesToSet) {
           response.cookies.set(name, value, options);
         }

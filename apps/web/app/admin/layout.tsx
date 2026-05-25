@@ -87,17 +87,23 @@ function createSessionBoundClient() {
  * denial page MUST be reachable for non-admins (it is exactly where they
  * land after the redirect) without triggering an infinite redirect loop.
  *
- * Next.js 14 sets a `next-url` header on every internal RSC request that
- * carries the current pathname. We fall back to `x-invoke-path` (older
- * App Router internal) and finally to `referer` for defensive coverage.
- * If none are set (rare — direct server render outside a request scope),
- * we conservatively return false and let the gate run; the rendering path
- * for `/admin/denied` will redirect to itself, and Next.js will surface a
- * redirect error rather than loop indefinitely.
+ * The reliable signal is `x-pathname`, set by middleware on EVERY request
+ * (see apps/web/middleware.ts). Earlier versions of this gate tried
+ * Next.js internal headers (`next-url`, `x-invoke-path`, `x-matched-path`)
+ * but those are only set on RSC client-cache navigations, not on the
+ * full-page reload that the redirect() target triggers — which made the
+ * gate silently fall through and produce ERR_TOO_MANY_REDIRECTS for
+ * every non-admin visit to /admin/*.
+ *
+ * The legacy headers are kept as fallbacks for defense-in-depth in case
+ * middleware is bypassed (it shouldn't be — its matcher excludes only
+ * Next.js internals + static assets), but x-pathname is the load-bearing
+ * primary signal.
  */
 function isRenderingDeniedPage(): boolean {
   const h = headers();
   const candidates = [
+    h.get('x-pathname'),
     h.get('next-url'),
     h.get('x-invoke-path'),
     h.get('x-matched-path'),
