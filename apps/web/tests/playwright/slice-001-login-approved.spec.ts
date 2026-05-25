@@ -61,6 +61,7 @@ import {
   resetStub,
   assertOidcStubReachable,
 } from "./fixtures/oidc";
+import { getServiceClient } from "./helpers/service-role";
 
 // --------------------------------------------------------------------------
 // Persona table (kept in sync with `supabase/seed/slice-001-fixture.sql`)
@@ -73,7 +74,11 @@ const FRESHIE = {
   sub: "00000000-0000-0000-0000-000000000099",
   email: "freshie@nortal.com",
   email_verified: true,
-  name: "Freshie",
+  // Keycloak emits `name` as firstName + " " + lastName from the seeded
+  // user. The realm export has firstName=Freshie, lastName=Tester.
+  // (Pre-Keycloak this fixture supported runtime claim injection so the
+  // test could pin name="Freshie" by itself.)
+  name: "Freshie Tester",
 } as const;
 
 // `alpha@nortal.com` — fixture row, ACTIVE, region='EE-North'.
@@ -108,8 +113,14 @@ interface ParticipantMeResponse {
  * Helper — fetches `/api/me` via the page's authenticated session and
  * returns the parsed body. Throws (failing the test) on any non-200.
  */
-async function fetchMe(request: APIRequestContext): Promise<ParticipantMeResponse> {
-  const response = await request.get("/api/me");
+async function fetchMe(
+  request: APIRequestContext,
+  cookieHeader: string,
+): Promise<ParticipantMeResponse> {
+  // Forward signed-in cookies — see slice 001 cookie-forwarding follow-up.
+  const response = await request.get("/api/me", {
+    headers: { Cookie: cookieHeader },
+  });
   expect(response.status(), "GET /api/me should be 200 for an eligible session").toBe(200);
   return (await response.json()) as ParticipantMeResponse;
 }
@@ -127,6 +138,32 @@ test.describe("US1 — eligible employee signs in", () => {
 
   test.afterEach(async () => {
     await resetStub();
+  });
+
+  // Scenario 1 asserts FRESHIE's `first_login_at` is bounded within the
+  // test's wall-clock window. After the Keycloak fixture-user follow-up
+  // pre-provisioned freshie in the realm export, FRESHIE's participants
+  // row gets created on the FIRST run and persists across subsequent test
+  // runs (no `supabase db reset` between Playwright invocations). The
+  // beforeEach below deletes the row + audit trail so each run reads as
+  // genuinely-first-login.
+  test.beforeEach(async () => {
+    const client = getServiceClient();
+    // Delete dependent rows first; FKs are ON DELETE RESTRICT by default.
+    await client
+      .from("audit_log")
+      .delete()
+      .eq("actor", FRESHIE.sub)
+      .then(() => {})
+      .catch(() => {});
+    await client.from("participants").delete().eq("auth_user_id", FRESHIE.sub);
+    await client.from("identity_emails").delete().eq("user_id", FRESHIE.sub);
+    await client.from("identity_event_log").delete().eq("user_id", FRESHIE.sub);
+    // auth.users — schema is reserved; deletion handled by supabase-js
+    // via the auth.admin API (service-role only).
+    await client.auth.admin.deleteUser(FRESHIE.sub).catch(() => {
+      // ignore if user doesn't exist
+    });
   });
 
   // ------------------------------------------------------------------------
