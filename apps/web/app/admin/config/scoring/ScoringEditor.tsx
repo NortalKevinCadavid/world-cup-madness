@@ -637,6 +637,7 @@ export function ScoringEditor({
                 onChange={(e) =>
                   patchNumeric(key, { reason: e.target.value })
                 }
+                data-testid={`scoring-${alias}-reason`}
                 rows={2}
                 required
                 disabled={pending}
@@ -654,6 +655,7 @@ export function ScoringEditor({
                 onChange={(e) =>
                   patchNumeric(key, { sourceCitation: e.target.value })
                 }
+                data-testid={`scoring-${alias}-source-citation`}
                 disabled={pending}
                 className="rounded border border-border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-muted"
               />
@@ -789,6 +791,7 @@ export function ScoringEditor({
             onChange={(e) =>
               patchTieBreaker({ reason: e.target.value })
             }
+            data-testid="tie-breaker-reason"
             rows={2}
             required
             disabled={pending}
@@ -806,6 +809,7 @@ export function ScoringEditor({
             onChange={(e) =>
               patchTieBreaker({ sourceCitation: e.target.value })
             }
+            data-testid="tie-breaker-source-citation"
             disabled={pending}
             className="rounded border border-border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-muted"
           />

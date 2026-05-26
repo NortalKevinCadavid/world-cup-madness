@@ -156,18 +156,17 @@ test.describe('Slice 008 US3 — Scoring values @slice-008 @us3', () => {
     // way the configUpsert RPC requires a non-empty reason.
     // ----------------------------------------------------------------------
     await page.fill('[data-testid="scoring-match-points-exact-input"]', '15');
-
-    const perKeyReason = page.locator(
+    await page.fill(
       '[data-testid="scoring-match-points-exact-reason"]',
+      SCORING_REASON,
     );
-    if (await perKeyReason.isVisible({ timeout: 1_000 }).catch(() => false)) {
-      await perKeyReason.fill(SCORING_REASON);
-    } else {
-      const globalReason = page.locator('[data-testid="scoring-reason"]');
-      if (await globalReason.isVisible({ timeout: 1_000 }).catch(() => false)) {
-        await globalReason.fill(SCORING_REASON);
-      }
-    }
+    // scoring.* is a security-sensitive key class — configUpsert (migration
+    // 0077 step 4 / WCG02) rejects it without a source citation. The field
+    // is labelled "(optional)" in the UI but is required for this key.
+    await page.fill(
+      '[data-testid="scoring-match-points-exact-source-citation"]',
+      'https://intranet.nortal.example/scoring/match-points-exact',
+    );
 
     await page.click('[data-testid="scoring-match-points-exact-save"]');
 

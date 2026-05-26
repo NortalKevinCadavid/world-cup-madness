@@ -56,6 +56,10 @@ const ADMIN1_PARTICIPANT_ID = '77777777-7777-7777-7777-777777777777';
 const TEST_DOMAIN = 'example.nortal.com';
 const ADD_REASON = 'Onboarding new entity';
 const REMOVE_REASON = 'Test removal — onboarding rolled back';
+// eligibility.allowed_domains is security-sensitive — upsert requires a
+// source citation (migration 0077 step 4 / WCG02).
+const ADD_SOURCE_CITATION = 'https://intranet.nortal.example/onboarding/new-entity';
+const REMOVE_SOURCE_CITATION = 'https://intranet.nortal.example/onboarding/rollback';
 const CONFIG_KEY = 'eligibility.allowed_domains';
 
 test.describe('Slice 008 US1 — Approved corporate domains @slice-008 @us1', () => {
@@ -123,6 +127,11 @@ test.describe('Slice 008 US1 — Approved corporate domains @slice-008 @us1', ()
     // ----------------------------------------------------------------------
     await page.fill('[data-testid="domain-add-input"]', TEST_DOMAIN);
     await page.fill('[data-testid="domain-reason"]', ADD_REASON);
+    // eligibility.allowed_domains is a security-sensitive key — the upsert
+    // RPC (migration 0077 step 4) rejects it with WCG02 unless a source
+    // citation is supplied. The UI labels the field "(optional)" but it is
+    // required for this key class. See follow-up-config-toast-non-render.md.
+    await page.fill('[data-testid="domain-source-citation"]', ADD_SOURCE_CITATION);
     await page.click('[data-testid="domain-add-button"]');
 
     // The preview surfaces unconditionally per the configPreview contract.
@@ -130,12 +139,15 @@ test.describe('Slice 008 US1 — Approved corporate domains @slice-008 @us1', ()
     // eligibility) so the safe branch of PreviewWarning is expected. If a
     // future version skips the preview for non-affecting deltas the check
     // below tolerates either path.
-    const previewAfterAdd = page.locator('[data-testid="config-preview-warning"]');
-    if (
-      await previewAfterAdd.isVisible({ timeout: 5_000 }).catch(() => false)
-    ) {
-      await page.click('[data-testid="config-preview-confirm"]');
-    }
+    // NOTE: locator.isVisible() does NOT honor a timeout — it samples the
+    // CURRENT state synchronously. The preview renders only after the async
+    // /api/admin/config/preview round-trip, so isVisible() raced ahead and
+    // returned false, the confirm click was skipped, the upsert never fired,
+    // and the toast never appeared. Use the confirm button's waitFor() to
+    // actually wait for the preview to mount before clicking.
+    const previewConfirm = page.locator('[data-testid="config-preview-confirm"]');
+    await previewConfirm.waitFor({ state: "visible", timeout: 10_000 });
+    await previewConfirm.click();
 
     // ----------------------------------------------------------------------
     // Step 3: Assert toast "Updated to version X".
@@ -210,6 +222,7 @@ test.describe('Slice 008 US1 — Approved corporate domains @slice-008 @us1', ()
     ).toBeVisible();
 
     await page.fill('[data-testid="domain-reason"]', REMOVE_REASON);
+    await page.fill('[data-testid="domain-source-citation"]', REMOVE_SOURCE_CITATION);
     await page.click(
       `[data-testid="domain-remove-button"][data-domain="${TEST_DOMAIN}"]`,
     );

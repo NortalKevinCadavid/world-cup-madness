@@ -182,6 +182,19 @@ test.describe("Slice 008 US3 — Tie-breaker order @slice-008 @us3", () => {
       "after one ↑ click on final_pick_correct, the DOM order MUST equal REORDERED",
     ).toEqual([...REORDERED]);
 
+    // Reason + source citation are required before save. scoring.* (the
+    // tie-breaker order key) is a security-sensitive key class, so the
+    // upsert RPC (migration 0077 step 4 / WCG02) rejects it without a
+    // source citation even though the UI labels the field "(optional)".
+    await page.fill(
+      '[data-testid="tie-breaker-reason"]',
+      "Reorder tie-breakers: final-pick correctness ahead of exact-count",
+    );
+    await page.fill(
+      '[data-testid="tie-breaker-source-citation"]',
+      "https://intranet.nortal.example/scoring/tiebreaker-reorder",
+    );
+
     // Save.
     await page.click('[data-testid="tie-breaker-save"]');
 
@@ -195,23 +208,34 @@ test.describe("Slice 008 US3 — Tie-breaker order @slice-008 @us3", () => {
     //     with an acknowledge checkbox + confirm button.
     //   - No-preview branch: the save commits directly and the success
     //     toast renders immediately.
-    const previewWarning = page.locator(
-      '[data-testid="config-preview-warning"]',
-    );
-    const previewVisible = await previewWarning
-      .isVisible({ timeout: 5_000 })
-      .catch(() => false);
-    if (previewVisible) {
+    // NOTE: locator.isVisible() samples the CURRENT state synchronously — it
+    // does NOT honor a timeout. The preview mounts only after the async
+    // /api/admin/config/preview round-trip, so the old isVisible({timeout})
+    // raced ahead, returned false, and skipped confirm — the upsert never
+    // fired and the toast never rendered. Wait on the confirm button (only
+    // present once the preview has mounted), with a short race against the
+    // toast in case the page commits directly without a preview.
+    const previewConfirm = page.locator('[data-testid="config-preview-confirm"]');
+    const toastEarly = page.locator('[data-testid="config-toast"]').first();
+    await Promise.race([
+      previewConfirm.waitFor({ state: "visible", timeout: 10_000 }),
+      toastEarly.waitFor({ state: "visible", timeout: 10_000 }),
+    ]).catch(() => {});
+    if (await previewConfirm.isVisible().catch(() => false)) {
       const ack = page.locator('[data-testid="config-preview-acknowledge"]');
-      if (await ack.isVisible({ timeout: 1_000 }).catch(() => false)) {
+      if (await ack.isVisible().catch(() => false)) {
         await ack.check();
       }
-      await page.click('[data-testid="config-preview-confirm"]');
+      await previewConfirm.click();
     }
 
-    // Success toast — quoted version id pattern matches T031's convention.
+    // Success toast — the tie-breaker section renders its own
+    // `tie-breaker-toast` (ScoringEditor), not the shared `config-toast`.
+    // Accept either so the assertion is resilient to a future consolidation.
     await expect(
-      page.locator('[data-testid="config-toast"]').first(),
+      page
+        .locator('[data-testid="tie-breaker-toast"], [data-testid="config-toast"]')
+        .first(),
       "success toast MUST render after the tie-breaker reorder upsert",
     ).toBeVisible({ timeout: 10_000 });
 

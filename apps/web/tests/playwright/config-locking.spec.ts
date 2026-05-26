@@ -102,6 +102,10 @@ const CONFIG_ACTION = `tournament_config.${CONFIG_KEY}`;
 
 const REASON_WIDEN = 'Widen lock window to 90 minutes for late submissions';
 const REASON_NARROW = 'Restore narrower 30-minute lock window after test';
+// locking.* is a security-sensitive key class — the upsert RPC (migration
+// 0077 step 4 / WCG02) rejects it unless a source citation is supplied.
+const CITATION_WIDEN = 'https://intranet.nortal.example/ops/lock-window-widen';
+const CITATION_NARROW = 'https://intranet.nortal.example/ops/lock-window-restore';
 
 test.describe('Slice 008 US2 — Match-prediction lock window @slice-008 @us2', () => {
   // The full flow walks two upserts, one client-side validation, and an
@@ -180,6 +184,7 @@ test.describe('Slice 008 US2 — Match-prediction lock window @slice-008 @us2', 
     // the local validation + parse path runs.
     await page.fill('[data-testid="locking-window-input"]', '90');
     await page.fill('[data-testid="locking-reason"]', REASON_WIDEN);
+    await page.fill('[data-testid="locking-source-citation"]', CITATION_WIDEN);
     await page.click('[data-testid="locking-preview-button"]');
 
     const previewAfterWiden = page.locator(
@@ -284,6 +289,7 @@ test.describe('Slice 008 US2 — Match-prediction lock window @slice-008 @us2', 
     // ----------------------------------------------------------------------
     await page.fill('[data-testid="locking-window-input"]', '30');
     await page.fill('[data-testid="locking-reason"]', REASON_NARROW);
+    await page.fill('[data-testid="locking-source-citation"]', CITATION_NARROW);
     await page.click('[data-testid="locking-preview-button"]');
 
     const previewAfterNarrow = page.locator(

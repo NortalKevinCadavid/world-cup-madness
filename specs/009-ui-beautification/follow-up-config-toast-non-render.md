@@ -1,5 +1,39 @@
 # Slice 009 follow-up: 4 admin config-* tests fail because `config-preview-confirm` click doesn't trigger the upsert
 
+> **RESOLVED 2026-05-26.** The four filed hypotheses (overlay / StrictMode /
+> hydration / form-action) were ALL wrong. Live diagnosis (a throwaway
+> Playwright spec capturing console + network + `elementFromPoint`) showed
+> the Confirm button IS clickable and the onClick DOES fire. Two real,
+> unrelated causes — both test-side:
+>
+> 1. **Missing `source_citation`.** Keys under `eligibility.*`, `locking.*`,
+>    `scoring.*`, `providers.active`, `admin_roles.*` are security-sensitive;
+>    the upsert RPC (migration 0077 step 4) rejects them with **WCG02**
+>    ("Source citation required for security-sensitive key …") unless a
+>    citation is supplied. The tests filled only `reason`, not the citation
+>    field, so the upsert 400'd and the `config-error` element rendered
+>    instead of the toast. The UI labels the field "(optional)" — misleading
+>    for these key classes, but the server rule is correct (Principle V).
+>
+> 2. **`locator.isVisible({ timeout })` does not wait.** `config-domains`
+>    and `config-tiebreaker` gated the Confirm click on
+>    `preview.isVisible({ timeout: 5000 })`. `isVisible()` samples the CURRENT
+>    state synchronously and ignores the timeout option, so it raced ahead of
+>    the async `/api/admin/config/preview` round-trip, returned false, and
+>    skipped the Confirm click entirely — the upsert never fired. Replaced
+>    with `confirmButton.waitFor({ state: 'visible' })`.
+>
+> Also surfaced: the ScoringEditor's per-section + tie-breaker `reason` and
+> `source_citation` inputs lacked `data-testid`s, so the tests' fills
+> silently no-op'd. Added `scoring-${alias}-reason`,
+> `scoring-${alias}-source-citation`, `tie-breaker-reason`,
+> `tie-breaker-source-citation`. And `config-tiebreaker` waited for
+> `config-toast` when the tie-breaker section renders `tie-breaker-toast`.
+>
+> Fix landed in the same commit as this doc update. All 4 config-* specs
+> pass individually and together. The hypotheses below are retained for
+> the record — a cautionary tale about guessing before instrumenting.
+
 **Filed**: 2026-05-25
 **Discovered by**: full-suite Playwright run after the cookie-forwarding + redirect-loop sweeps unblocked the admin config UIs (commits 92ad387 / 6451aaa / 28219ba / 85f825e / 1561ec1). With auth working and `/admin/*` no longer looping, four slice-008 admin-config specs now reliably reach the preview-warning state but cannot get past it — clicking the Confirm button does nothing observable.
 **Severity**: medium — blocks 4 of slice-008's 9 config-* tests. Not a production-correctness issue (no evidence the upsert flow is broken for real admin sessions; the issue may be test-environment-specific).
