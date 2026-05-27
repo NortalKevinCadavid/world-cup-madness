@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 import { formatRemainingUntilFirstKickoff } from '../../../../../lib/final-predictions/countdown';
 
@@ -53,6 +54,7 @@ export function FinalsLockBanner({
   // `null` until the client mounts, then ticks every second. Keeping the
   // initial value `null` is what avoids the SSR/CSR text mismatch — the
   // server has no notion of "now" for the countdown.
+  const t = useTranslations('Finals');
   const [now, setNow] = useState<Date | null>(null);
 
   useEffect(() => {
@@ -75,15 +77,15 @@ export function FinalsLockBanner({
         aria-live="polite"
         className="rounded-md border border-open/40 bg-open/10 px-4 py-3 text-sm text-open"
       >
-        <span className="font-semibold">Picks are locked.</span>{' '}
-        First match has kicked off.
+        <span className="font-semibold">{t('lockedTitle')}</span>{' '}
+        {t('lockedBody')}
       </div>
     );
   }
 
   const countdownLabel =
     now === null
-      ? 'Loading countdown…'
+      ? t('loadingCountdown')
       : formatRemainingUntilFirstKickoff(firstKickoffUtc, now);
 
   return (
@@ -94,7 +96,7 @@ export function FinalsLockBanner({
       aria-live="polite"
       className="rounded-md border border-accent/40 bg-accent/10 px-4 py-3 text-sm text-primary"
     >
-      <span className="font-semibold">Final predictions are open.</span>{' '}
+      <span className="font-semibold">{t('openTitle')}</span>{' '}
       <span data-testid="lock-banner-countdown">{countdownLabel}</span>
     </div>
   );

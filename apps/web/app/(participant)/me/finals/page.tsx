@@ -2,6 +2,7 @@ import 'server-only';
 
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
+import { getTranslations } from 'next-intl/server';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 
 import {
@@ -137,6 +138,8 @@ async function fetchInitialPlayerLabels(
 }
 
 export default async function FinalsPage() {
+  const t = await getTranslations('Finals');
+
   // ----- 1. Eligibility gate ------------------------------------------------
   try {
     await getCurrentParticipant();
@@ -170,13 +173,9 @@ export default async function FinalsPage() {
     >
       <header className="flex flex-col gap-1">
         <h1 className="text-2xl font-semibold text-foreground">
-          Final predictions
+          {t('title')}
         </h1>
-        <p className="text-sm text-muted-foreground">
-          Pick the four tournament-wide winners — champion, runner-up, top
-          scorer, and best player — before the first match kicks off. Each
-          pick is independently editable until the lock boundary.
-        </p>
+        <p className="text-sm text-muted-foreground">{t('intro')}</p>
       </header>
 
       <FinalsLockBanner

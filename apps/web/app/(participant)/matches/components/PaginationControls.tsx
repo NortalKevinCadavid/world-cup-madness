@@ -2,6 +2,7 @@
 
 import { useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 /**
  * Pagination controls for the participant match list — Slice 002 (T021).
@@ -32,6 +33,7 @@ export function PaginationControls({
 }: PaginationControlsProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const t = useTranslations('Matches');
 
   // Defensive: server should never return page_size <= 0, but guard
   // against a divide-by-zero just in case.
@@ -55,7 +57,7 @@ export function PaginationControls({
 
   return (
     <nav
-      aria-label="Pagination"
+      aria-label={t('paginationAria')}
       className="flex items-center justify-between gap-3 text-sm"
     >
       <button
@@ -64,15 +66,18 @@ export function PaginationControls({
         onClick={() => gotoPage(page - 1)}
         className="rounded-md border border-border bg-card px-3 py-1.5 font-medium text-muted-foreground hover:bg-muted/30 disabled:cursor-not-allowed disabled:opacity-40"
       >
-        Previous
+        {t('previous')}
       </button>
       <span
         aria-live="polite"
         className="text-muted-foreground"
       >
-        Page <span className="font-medium text-foreground">{page}</span> of{' '}
-        <span className="font-medium text-foreground">{totalPages}</span>
-        <span className="ml-2 text-muted-foreground/60">({total} matches)</span>
+        {t.rich('pageOf', {
+          page,
+          total: totalPages,
+          b: (chunks) => <span className="font-medium text-foreground">{chunks}</span>,
+        })}
+        <span className="ml-2 text-muted-foreground/60">{t('matchesCount', { count: total })}</span>
       </span>
       <button
         type="button"
@@ -80,7 +85,7 @@ export function PaginationControls({
         onClick={() => gotoPage(page + 1)}
         className="rounded-md border border-border bg-card px-3 py-1.5 font-medium text-muted-foreground hover:bg-muted/30 disabled:cursor-not-allowed disabled:opacity-40"
       >
-        Next
+        {t('next')}
       </button>
     </nav>
   );

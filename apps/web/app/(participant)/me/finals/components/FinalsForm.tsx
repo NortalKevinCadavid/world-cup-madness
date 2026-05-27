@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 import type {
   FinalPrediction,
@@ -67,40 +68,23 @@ interface RowState {
 
 interface SlotDefinition {
   kind: ItemKind;
-  label: string;
-  description: string;
+  /** i18n key under the `Finals` namespace for the slot label. */
+  labelKey: string;
+  /** i18n key under the `Finals` namespace for the slot description. */
+  descKey: string;
   kindType: 'team' | 'player';
 }
 
 /**
  * Static ordering of the four picks. Display order mirrors the contract
- * (champion → runner_up → top_scorer → best_player).
+ * (champion → runner_up → top_scorer → best_player). Labels/descriptions are
+ * resolved at render via next-intl (Finals namespace).
  */
 const SLOTS: readonly SlotDefinition[] = [
-  {
-    kind: 'champion',
-    label: 'Champion',
-    description: 'Team that lifts the trophy.',
-    kindType: 'team',
-  },
-  {
-    kind: 'runner_up',
-    label: 'Runner-up',
-    description: 'Losing finalist.',
-    kindType: 'team',
-  },
-  {
-    kind: 'top_scorer',
-    label: 'Top scorer (Golden Boot)',
-    description: 'Player with the most tournament goals.',
-    kindType: 'player',
-  },
-  {
-    kind: 'best_player',
-    label: 'Best player (Golden Ball)',
-    description: 'MVP of the tournament.',
-    kindType: 'player',
-  },
+  { kind: 'champion', labelKey: 'championLabel', descKey: 'championDesc', kindType: 'team' },
+  { kind: 'runner_up', labelKey: 'runnerUpLabel', descKey: 'runnerUpDesc', kindType: 'team' },
+  { kind: 'top_scorer', labelKey: 'topScorerLabel', descKey: 'topScorerDesc', kindType: 'player' },
+  { kind: 'best_player', labelKey: 'bestPlayerLabel', descKey: 'bestPlayerDesc', kindType: 'player' },
 ];
 
 /** Build initial RowState for each slot from the server props. */
@@ -149,6 +133,7 @@ export function FinalsForm({
   lockState,
 }: FinalsFormProps) {
   const router = useRouter();
+  const t = useTranslations('Finals');
   const [rows, setRows] = useState<Record<ItemKind, RowState>>(() =>
     buildInitialRows(initialPredictions, initialPlayerLabels),
   );
@@ -179,7 +164,7 @@ export function FinalsForm({
     const row = rows[kind];
     const body = buildSubmitBody(kind, row);
     if (!body) {
-      updateRow(kind, { error: 'Make a selection before submitting.' });
+      updateRow(kind, { error: t('selectFirst') });
       return;
     }
     updateRow(kind, { error: null });
@@ -202,7 +187,7 @@ export function FinalsForm({
           const message =
             errBody?.error?.message ??
             errBody?.error?.reason ??
-            `Submit failed (${response.status})`;
+            t('submitFailed', { status: response.status });
           updateRow(kind, { error: message });
           setPendingKind(null);
           return;
@@ -215,7 +200,7 @@ export function FinalsForm({
         router.refresh();
       } catch (err) {
         updateRow(kind, {
-          error: err instanceof Error ? err.message : 'Network error',
+          error: err instanceof Error ? err.message : t('networkError'),
         });
         setPendingKind(null);
       }
@@ -246,9 +231,9 @@ export function FinalsForm({
           >
             <header className="flex flex-col gap-0.5">
               <h2 className="text-sm font-semibold text-foreground">
-                {slot.label}
+                {t(slot.labelKey)}
               </h2>
-              <p className="text-xs text-muted-foreground">{slot.description}</p>
+              <p className="text-xs text-muted-foreground">{t(slot.descKey)}</p>
             </header>
 
             <div className="flex flex-wrap items-center gap-3">
@@ -286,7 +271,7 @@ export function FinalsForm({
                 data-testid={`submit-${slot.kind}`}
                 className="rounded border border-blue-700 bg-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {rowPending ? 'Submitting…' : 'Submit'}
+                {rowPending ? t('submitting') : t('submit')}
               </button>
             </div>
 

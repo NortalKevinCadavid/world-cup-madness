@@ -1,8 +1,12 @@
 import 'server-only';
 
 import { headers } from 'next/headers';
+import { getTranslations } from 'next-intl/server';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
+
+/** Minimal shape of the next-intl translator used across this server page. */
+type Translate = (key: string, values?: Record<string, string | number>) => string;
 
 import { getMatches } from '../../../lib/catalog/client';
 import { formatKickoff, formatScore } from '../../../lib/catalog/format';
@@ -68,21 +72,21 @@ const STAGE_ORDER: readonly MatchStage[] = [
   'third_place',
 ] as const;
 
-const STAGE_LABEL: Record<MatchStage, string> = {
-  group: 'Group stage',
-  r16: 'Round of 16',
-  qf: 'Quarter-finals',
-  sf: 'Semi-finals',
-  final: 'Final',
-  third_place: 'Third-place playoff',
+const STAGE_LABEL_KEY: Record<MatchStage, string> = {
+  group: 'stageGroup',
+  r16: 'stageR16',
+  qf: 'stageQf',
+  sf: 'stageSf',
+  final: 'stageFinal',
+  third_place: 'stageThirdPlace',
 };
 
-const STATUS_LABEL: Record<MatchStatus, string> = {
-  scheduled: 'Scheduled',
-  in_progress: 'In progress',
-  finished: 'Finished',
-  postponed: 'Postponed',
-  cancelled: 'Cancelled',
+const STATUS_LABEL_KEY: Record<MatchStatus, string> = {
+  scheduled: 'statusScheduled',
+  in_progress: 'statusInProgress',
+  finished: 'statusFinished',
+  postponed: 'statusPostponed',
+  cancelled: 'statusCancelled',
 };
 
 // Slice 009 — restyled with semantic tokens. Mapping:
@@ -280,6 +284,7 @@ function computeLockState(
 }
 
 export default async function MatchesPage({ searchParams }: PageProps) {
+  const t = (await getTranslations('Matches')) as Translate;
   const filters = decodeFilters(searchParams);
   const locale = headers().get('accept-language')?.split(',')[0]?.trim() || 'en-US';
 
@@ -304,12 +309,9 @@ export default async function MatchesPage({ searchParams }: PageProps) {
     <main className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8">
       <header className="flex flex-col gap-2">
         <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
-          Matches
+          {t('title')}
         </h1>
-        <p className="text-sm text-muted-foreground">
-          FIFA World Cup 2026 fixtures, grouped by stage. Kickoff times are
-          localized to your browser; the canonical schedule remains in UTC.
-        </p>
+        <p className="text-sm text-muted-foreground">{t('intro')}</p>
       </header>
 
       <section
@@ -321,7 +323,7 @@ export default async function MatchesPage({ searchParams }: PageProps) {
 
       {stageBuckets.length === 0 ? (
         <p className="rounded-md border border-dashed border-border bg-card/50 px-4 py-8 text-center text-sm text-muted-foreground">
-          No matches for the current filters.
+          {t('noMatches')}
         </p>
       ) : (
         <div className="flex flex-col gap-8">
@@ -335,7 +337,7 @@ export default async function MatchesPage({ searchParams }: PageProps) {
                 id={`stage-${bucket.stage}`}
                 className="font-display text-lg font-semibold text-foreground"
               >
-                {STAGE_LABEL[bucket.stage]}
+                {t(STAGE_LABEL_KEY[bucket.stage])}
               </h2>
               {sortedGroupKeys(bucket.groups).map((groupKey) => {
                 const rows = bucket.groups.get(groupKey) ?? [];
@@ -345,7 +347,7 @@ export default async function MatchesPage({ searchParams }: PageProps) {
                   <div key={groupKey} className="flex flex-col gap-2">
                     {showSubheading ? (
                       <h3 className="font-display text-sm font-semibold text-muted-foreground">
-                        Group {groupKey}
+                        {t('group', { group: groupKey })}
                       </h3>
                     ) : null}
                     <MatchTable
@@ -353,6 +355,7 @@ export default async function MatchesPage({ searchParams }: PageProps) {
                       locale={locale}
                       predictionsByMatch={predictionsByMatch}
                       now={renderNow}
+                      t={t}
                     />
                   </div>
                 );
@@ -385,9 +388,11 @@ interface MatchTableProps {
   predictionsByMatch: Map<string, Prediction>;
   /** Snapshot of "now" used for the lock-state hint + countdown label. */
   now: Date;
+  /** next-intl translator (Matches namespace), threaded from the page. */
+  t: Translate;
 }
 
-function MatchTable({ rows, locale, predictionsByMatch, now }: MatchTableProps) {
+function MatchTable({ rows, locale, predictionsByMatch, now, t }: MatchTableProps) {
   return (
     <div className="overflow-x-auto rounded-lg border border-border bg-card shadow-sm">
       <table className="min-w-full divide-y divide-border text-sm">
@@ -397,43 +402,43 @@ function MatchTable({ rows, locale, predictionsByMatch, now }: MatchTableProps) 
               scope="col"
               className="px-3 py-2 text-left font-medium text-muted-foreground"
             >
-              Home
+              {t('colHome')}
             </th>
             <th
               scope="col"
               className="px-3 py-2 text-center font-medium text-muted-foreground"
             >
-              Score
+              {t('colScore')}
             </th>
             <th
               scope="col"
               className="px-3 py-2 text-left font-medium text-muted-foreground"
             >
-              Away
+              {t('colAway')}
             </th>
             <th
               scope="col"
               className="px-3 py-2 text-left font-medium text-muted-foreground"
             >
-              Kickoff
+              {t('colKickoff')}
             </th>
             <th
               scope="col"
               className="px-3 py-2 text-left font-medium text-muted-foreground"
             >
-              Venue
+              {t('colVenue')}
             </th>
             <th
               scope="col"
               className="px-3 py-2 text-left font-medium text-muted-foreground"
             >
-              Status
+              {t('colStatus')}
             </th>
             <th
               scope="col"
               className="px-3 py-2 text-left font-medium text-muted-foreground"
             >
-              Your pick
+              {t('colYourPick')}
             </th>
           </tr>
         </thead>
@@ -485,7 +490,7 @@ function MatchTable({ rows, locale, predictionsByMatch, now }: MatchTableProps) 
                   {row.venue ?? <span className="text-muted-foreground/60">—</span>}
                 </td>
                 <td className="px-3 py-2">
-                  <StatusPill status={row.status} />
+                  <StatusPill status={row.status} label={t(STATUS_LABEL_KEY[row.status])} />
                 </td>
                 <td className="px-3 py-2">
                   <PredictionForm
@@ -528,8 +533,7 @@ function TeamCell({ team }: { team: Match['home_team'] }) {
   );
 }
 
-function StatusPill({ status }: { status: MatchStatus }) {
-  const label = STATUS_LABEL[status];
+function StatusPill({ status, label }: { status: MatchStatus; label: string }) {
   return (
     <span
       aria-label={`status: ${status}`}

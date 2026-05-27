@@ -54,6 +54,7 @@ export function LeaderboardClient({
   peerBracketEnabled = false,
 }: Props) {
   const tBracket = useTranslations("Bracket");
+  const t = useTranslations("Leaderboard");
   const myRowRef = useRef<HTMLTableRowElement | null>(null);
 
   // Detect tied positions: any rank value that appears more than once.
@@ -94,16 +95,16 @@ export function LeaderboardClient({
       {myRow ? (
         <div className="sticky top-16 z-20 flex flex-wrap items-center justify-between gap-2 rounded-md border border-accent/40 bg-accent/10 px-3 py-2 text-sm">
           <span className="text-foreground">
-            You are at rank{" "}
-            <span className="font-display font-semibold">{myRow.rank}</span>{" "}
-            with{" "}
-            <span className="font-display font-semibold tabular-nums">
-              {myRow.total_points}
-            </span>{" "}
-            pts.
+            {t.rich("yourRank", {
+              rank: myRow.rank,
+              points: myRow.total_points,
+              b: (chunks) => (
+                <span className="font-display font-semibold tabular-nums">{chunks}</span>
+              ),
+            })}
           </span>
           <Button size="sm" variant="outline" onClick={jumpToMyRow}>
-            <ArrowDownToLine className="size-4" aria-hidden /> Jump to my row
+            <ArrowDownToLine className="size-4" aria-hidden /> {t("jumpToMyRow")}
           </Button>
         </div>
       ) : null}
@@ -113,22 +114,22 @@ export function LeaderboardClient({
           <thead className="bg-muted/30 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             <tr>
               <th scope="col" className="px-4 py-2">
-                Rank
+                {t("colRank")}
               </th>
               <th scope="col" className="px-4 py-2">
-                Participant
+                {t("colParticipant")}
               </th>
               <th scope="col" className="px-4 py-2 text-right">
-                Total
+                {t("colTotal")}
               </th>
               <th scope="col" className="px-4 py-2 text-right">
-                Exact
+                {t("colExact")}
               </th>
               <th scope="col" className="px-4 py-2 text-right">
-                Outcome
+                {t("colOutcome")}
               </th>
               <th scope="col" className="px-4 py-2 text-right">
-                Finals
+                {t("colFinals")}
               </th>
             </tr>
           </thead>
@@ -162,10 +163,10 @@ export function LeaderboardClient({
                       {row.rank <= 3 ? (
                         <Badge variant="gold" className="px-1.5 py-0">
                           {row.rank === 1
-                            ? "1st"
+                            ? t("first")
                             : row.rank === 2
-                              ? "2nd"
-                              : "3rd"}
+                              ? t("second")
+                              : t("third")}
                         </Badge>
                       ) : null}
                     </div>
@@ -175,7 +176,7 @@ export function LeaderboardClient({
                     className="px-4 py-2 text-foreground"
                   >
                     <span className="font-medium">
-                      {isMe ? <>{row.display_name} <span className="text-xs text-muted-foreground">(you)</span></> : row.display_name}
+                      {isMe ? <>{row.display_name} <span className="text-xs text-muted-foreground">({t("you")})</span></> : row.display_name}
                     </span>
                     {peerBracketEnabled && !isMe ? (
                       <Link
@@ -205,9 +206,9 @@ export function LeaderboardClient({
                                 "transition-colors duration-fast hover:bg-muted",
                                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card",
                               )}
-                              aria-label="Tied rank — view tie-breaker"
+                              aria-label={t("tieAria")}
                             >
-                              <Info className="size-3" aria-hidden /> Tie
+                              <Info className="size-3" aria-hidden /> {t("tie")}
                             </button>
                           </PopoverTrigger>
                           <PopoverContent align="end" className="w-80">
@@ -257,19 +258,19 @@ export function LeaderboardClient({
  * the user can verify visually.
  */
 function TieBreakerChain({ entry }: { entry: LeaderboardEntry }) {
+  const t = useTranslations("Leaderboard");
   const criteria: { label: string; value: number; note?: string }[] = [
-    { label: "Total points", value: entry.total_points },
-    { label: "Exact-result count", value: entry.exact_count },
-    { label: "Outcome-only count", value: entry.outcome_count },
-    { label: "Final-prediction points", value: entry.final_points },
+    { label: t("tierTotal"), value: entry.total_points },
+    { label: t("tierExact"), value: entry.exact_count },
+    { label: t("tierOutcome"), value: entry.outcome_count },
+    { label: t("tierFinal"), value: entry.final_points },
   ];
   return (
     <div className="space-y-3">
       <div>
-        <h3 className="font-display text-sm font-semibold">Tie-breaker chain</h3>
+        <h3 className="font-display text-sm font-semibold">{t("tieChainTitle")}</h3>
         <p className="text-xs text-muted-foreground">
-          Two or more participants share rank {entry.rank}. Ties are broken
-          in this order (top to bottom). Equal at every level = still tied.
+          {t("tieChainIntro", { rank: entry.rank })}
         </p>
       </div>
       <ol className="space-y-1.5 text-sm">

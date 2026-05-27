@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   Command,
   CommandEmpty,
@@ -67,6 +68,7 @@ export function TeamPicker({
   disabled = false,
   testIdPrefix,
 }: TeamPickerProps) {
+  const t = useTranslations('Finals');
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
@@ -105,7 +107,7 @@ export function TeamPicker({
 
   const buttonLabel = selected
     ? `${selected.short_code} — ${selected.name}`
-    : 'Select a team';
+    : t('selectTeam');
 
   return (
     <div
@@ -133,21 +135,21 @@ export function TeamPicker({
       {open ? (
         <div className="absolute z-10 mt-1 w-full rounded-md border border-border bg-card shadow-lg">
           <Command
-            label="Filter teams"
+            label={t('filterTeams')}
             className="flex flex-col"
             // cmdk's default `command-score` filter handles the team-name
             // + short-code keyword match we set on each item below, so
             // we let it run rather than swapping a custom `filter` in.
           >
             <CommandInput
-              placeholder="Search by name or code…"
+              placeholder={t('searchTeamPlaceholder')}
               autoFocus
               data-testid={`${testIdPrefix}-input`}
               className="w-full rounded-t-md border-b border-border px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-blue-500"
             />
             <CommandList className="max-h-60 overflow-y-auto">
               <CommandEmpty className="px-3 py-2 text-sm text-muted-foreground">
-                No teams match.
+                {t('noTeams')}
               </CommandEmpty>
               {teams.map((team) => (
                 <CommandItem

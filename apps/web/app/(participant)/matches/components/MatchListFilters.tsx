@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 import type {
   MatchFilters,
@@ -26,21 +27,21 @@ import type {
  *    handler defaults to `kickoff_asc`, which the spec assumes.
  */
 
-const STAGE_OPTIONS: { value: MatchStage; label: string }[] = [
-  { value: 'group', label: 'Group stage' },
-  { value: 'r16', label: 'Round of 16' },
-  { value: 'qf', label: 'Quarter-finals' },
-  { value: 'sf', label: 'Semi-finals' },
-  { value: 'final', label: 'Final' },
-  { value: 'third_place', label: 'Third-place playoff' },
+const STAGE_OPTIONS: { value: MatchStage; labelKey: string }[] = [
+  { value: 'group', labelKey: 'stageGroup' },
+  { value: 'r16', labelKey: 'stageR16' },
+  { value: 'qf', labelKey: 'stageQf' },
+  { value: 'sf', labelKey: 'stageSf' },
+  { value: 'final', labelKey: 'stageFinal' },
+  { value: 'third_place', labelKey: 'stageThirdPlace' },
 ];
 
-const STATUS_OPTIONS: { value: MatchStatus; label: string }[] = [
-  { value: 'scheduled', label: 'Scheduled' },
-  { value: 'in_progress', label: 'In progress' },
-  { value: 'finished', label: 'Finished' },
-  { value: 'postponed', label: 'Postponed' },
-  { value: 'cancelled', label: 'Cancelled' },
+const STATUS_OPTIONS: { value: MatchStatus; labelKey: string }[] = [
+  { value: 'scheduled', labelKey: 'statusScheduled' },
+  { value: 'in_progress', labelKey: 'statusInProgress' },
+  { value: 'finished', labelKey: 'statusFinished' },
+  { value: 'postponed', labelKey: 'statusPostponed' },
+  { value: 'cancelled', labelKey: 'statusCancelled' },
 ];
 
 const GROUP_OPTIONS: string[] = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'];
@@ -58,6 +59,7 @@ function firstOrEmpty(value: string | string[] | undefined): string {
 export function MatchListFilters({ currentFilters }: MatchListFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const t = useTranslations('Matches');
 
   const current = useMemo(
     () => ({
@@ -91,13 +93,13 @@ export function MatchListFilters({ currentFilters }: MatchListFiltersProps) {
   return (
     <form
       role="search"
-      aria-label="Match filters"
+      aria-label={t('filtersAria')}
       className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3"
       onSubmit={(e) => e.preventDefault()}
     >
       <div className="flex flex-col gap-1">
         <label htmlFor="filter-stage" className="text-xs font-medium text-muted-foreground">
-          Stage
+          {t('filterStage')}
         </label>
         <select
           id="filter-stage"
@@ -106,10 +108,10 @@ export function MatchListFilters({ currentFilters }: MatchListFiltersProps) {
           value={current.stage}
           onChange={(e) => pushParam('stage', e.target.value)}
         >
-          <option value="">All stages</option>
+          <option value="">{t('allStages')}</option>
           {STAGE_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>
-              {opt.label}
+              {t(opt.labelKey)}
             </option>
           ))}
         </select>
@@ -117,7 +119,7 @@ export function MatchListFilters({ currentFilters }: MatchListFiltersProps) {
 
       <div className="flex flex-col gap-1">
         <label htmlFor="filter-group" className="text-xs font-medium text-muted-foreground">
-          Group
+          {t('filterGroup')}
         </label>
         <select
           id="filter-group"
@@ -126,10 +128,10 @@ export function MatchListFilters({ currentFilters }: MatchListFiltersProps) {
           value={current.group}
           onChange={(e) => pushParam('group', e.target.value)}
         >
-          <option value="">All groups</option>
+          <option value="">{t('allGroups')}</option>
           {GROUP_OPTIONS.map((g) => (
             <option key={g} value={g}>
-              Group {g}
+              {t('group', { group: g })}
             </option>
           ))}
         </select>
@@ -137,7 +139,7 @@ export function MatchListFilters({ currentFilters }: MatchListFiltersProps) {
 
       <div className="flex flex-col gap-1">
         <label htmlFor="filter-status" className="text-xs font-medium text-muted-foreground">
-          Status
+          {t('filterStatus')}
         </label>
         <select
           id="filter-status"
@@ -146,10 +148,10 @@ export function MatchListFilters({ currentFilters }: MatchListFiltersProps) {
           value={current.status}
           onChange={(e) => pushParam('status', e.target.value)}
         >
-          <option value="">All statuses</option>
+          <option value="">{t('allStatuses')}</option>
           {STATUS_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>
-              {opt.label}
+              {t(opt.labelKey)}
             </option>
           ))}
         </select>
@@ -157,7 +159,7 @@ export function MatchListFilters({ currentFilters }: MatchListFiltersProps) {
 
       <div className="flex flex-col gap-1">
         <label htmlFor="filter-team-id" className="text-xs font-medium text-muted-foreground">
-          Team ID
+          {t('filterTeamId')}
         </label>
         <input
           id="filter-team-id"
@@ -176,7 +178,7 @@ export function MatchListFilters({ currentFilters }: MatchListFiltersProps) {
 
       <div className="flex flex-col gap-1">
         <label htmlFor="filter-from" className="text-xs font-medium text-muted-foreground">
-          From (UTC)
+          {t('fromUtc')}
         </label>
         <input
           id="filter-from"
@@ -193,7 +195,7 @@ export function MatchListFilters({ currentFilters }: MatchListFiltersProps) {
 
       <div className="flex flex-col gap-1">
         <label htmlFor="filter-to" className="text-xs font-medium text-muted-foreground">
-          To (UTC)
+          {t('toUtc')}
         </label>
         <input
           id="filter-to"

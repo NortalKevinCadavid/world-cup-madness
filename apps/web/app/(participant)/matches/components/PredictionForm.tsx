@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 import type { Prediction } from '../../../../lib/predictions/types';
 
@@ -65,6 +66,7 @@ export function PredictionForm({
   countdownLabel,
 }: PredictionFormProps) {
   const router = useRouter();
+  const t = useTranslations('Matches');
   const [home, setHome] = useState<string>(
     existingPrediction ? existingPrediction.predicted_home.toString() : '',
   );
@@ -78,16 +80,16 @@ export function PredictionForm({
     if (existingPrediction) {
       return (
         <div className="text-sm text-slate-600">
-          Your pick:{' '}
+          {t('yourPickLabel')}{' '}
           <span className="font-semibold">
             {existingPrediction.predicted_home}-{existingPrediction.predicted_away}
           </span>{' '}
-          <span className="text-locked">(locked)</span>
+          <span className="text-locked">{t('locked')}</span>
         </div>
       );
     }
     return (
-      <div className="text-sm italic text-slate-500">No pick — locked</div>
+      <div className="text-sm italic text-slate-500">{t('noPickLocked')}</div>
     );
   }
 
@@ -98,7 +100,7 @@ export function PredictionForm({
     const homeNum = Number.parseInt(home, 10);
     const awayNum = Number.parseInt(away, 10);
     if (Number.isNaN(homeNum) || Number.isNaN(awayNum)) {
-      setError('Enter both scores as integers');
+      setError(t('enterScores'));
       return;
     }
 
@@ -120,7 +122,7 @@ export function PredictionForm({
             | { error?: { message?: string } }
             | null;
           setError(
-            body?.error?.message ?? `Submit failed (${response.status})`,
+            body?.error?.message ?? t('submitFailed', { status: response.status }),
           );
           return;
         }
@@ -130,7 +132,7 @@ export function PredictionForm({
         // (if the match just locked) the updated lock_state.
         router.refresh();
       } catch (e) {
-        setError(e instanceof Error ? e.message : 'Network error');
+        setError(e instanceof Error ? e.message : t('networkError'));
       }
     });
   }
@@ -138,7 +140,7 @@ export function PredictionForm({
   return (
     <form onSubmit={onSubmit} className="flex flex-wrap items-center gap-2">
       <label className="flex items-center gap-1 text-sm">
-        <span className="sr-only">Home score</span>
+        <span className="sr-only">{t('homeScore')}</span>
         <input
           type="number"
           inputMode="numeric"
@@ -147,13 +149,13 @@ export function PredictionForm({
           value={home}
           onChange={(e) => setHome(e.target.value)}
           disabled={isPending}
-          aria-label="Home score"
+          aria-label={t('homeScore')}
           className="w-12 rounded border border-border px-1 py-0.5 text-center focus:outline-none focus:ring-2 focus:ring-ring"
         />
       </label>
       <span aria-hidden>-</span>
       <label className="flex items-center gap-1 text-sm">
-        <span className="sr-only">Away score</span>
+        <span className="sr-only">{t('awayScore')}</span>
         <input
           type="number"
           inputMode="numeric"
@@ -162,7 +164,7 @@ export function PredictionForm({
           value={away}
           onChange={(e) => setAway(e.target.value)}
           disabled={isPending}
-          aria-label="Away score"
+          aria-label={t('awayScore')}
           className="w-12 rounded border border-border px-1 py-0.5 text-center focus:outline-none focus:ring-2 focus:ring-ring"
         />
       </label>
@@ -171,7 +173,7 @@ export function PredictionForm({
         disabled={isPending}
         className="rounded border border-blue-700 bg-primary px-2 py-0.5 text-sm font-medium text-white hover:bg-primary disabled:opacity-50"
       >
-        {existingPrediction ? 'Update' : 'Submit'}
+        {existingPrediction ? t('update') : t('submit')}
       </button>
       {countdownLabel ? (
         <span className="text-xs text-slate-500" aria-live="polite">

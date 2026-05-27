@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   Command,
   CommandEmpty,
@@ -69,6 +70,7 @@ export function PlayerPicker({
   teamFilter = null,
   testIdPrefix,
 }: PlayerPickerProps) {
+  const t = useTranslations('Finals');
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Player[]>([]);
@@ -160,7 +162,7 @@ export function PlayerPicker({
     setOpen(false);
   }
 
-  const buttonLabel = value ? value.full_name : 'Select a player';
+  const buttonLabel = value ? value.full_name : t('selectPlayer');
 
   return (
     <div
@@ -186,12 +188,12 @@ export function PlayerPicker({
       {open ? (
         <div className="absolute z-10 mt-1 w-full rounded-md border border-border bg-card shadow-lg">
           <Command
-            label="Search players"
+            label={t('searchPlayers')}
             shouldFilter={false}
             className="flex flex-col"
           >
             <CommandInput
-              placeholder="Search by name…"
+              placeholder={t('searchPlayerPlaceholder')}
               autoFocus
               value={query}
               onValueChange={setQuery}
@@ -201,7 +203,7 @@ export function PlayerPicker({
             <CommandList className="max-h-60 overflow-y-auto">
               {loading ? (
                 <CommandLoading className="px-3 py-2 text-sm text-muted-foreground">
-                  Searching…
+                  {t('searching')}
                 </CommandLoading>
               ) : null}
               {error ? (
@@ -216,8 +218,8 @@ export function PlayerPicker({
               {!loading && !error && results.length === 0 ? (
                 <CommandEmpty className="px-3 py-2 text-sm text-muted-foreground">
                   {query.trim().length === 0
-                    ? 'Type to search…'
-                    : 'No players match.'}
+                    ? t('typeToSearch')
+                    : t('noPlayers')}
                 </CommandEmpty>
               ) : null}
               {results.map((player) => (

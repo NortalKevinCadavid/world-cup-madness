@@ -2,6 +2,7 @@ import 'server-only';
 
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
+import { getTranslations } from 'next-intl/server';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 
 import { EligibilityError } from '../../../lib/auth/requireEligible';
@@ -89,6 +90,8 @@ function createSessionBoundClient() {
 }
 
 export default async function LeaderboardPage() {
+  const t = await getTranslations('Leaderboard');
+
   // ----- 1. Eligibility gate ------------------------------------------------
   let me: Awaited<ReturnType<typeof getCurrentParticipant>>;
   try {
@@ -131,18 +134,14 @@ export default async function LeaderboardPage() {
     >
       <header className="flex flex-col gap-2">
         <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
-          Leaderboard
+          {t('title')}
         </h1>
-        <p className="text-sm text-muted-foreground">
-          Standings refresh automatically as matches finish. Ties break by
-          exact-result count, then outcome-only count, then final-predictions
-          points.
-        </p>
+        <p className="text-sm text-muted-foreground">{t('intro')}</p>
         <p
           data-testid="calculation-version-indicator"
           className="text-xs text-muted-foreground"
         >
-          Calculation v{calculation_version}
+          {t('calculationVersion', { version: calculation_version })}
         </p>
       </header>
 
@@ -152,8 +151,7 @@ export default async function LeaderboardPage() {
           role="status"
           className="rounded-lg border border-dashed border-border bg-card/50 p-6 text-center text-sm text-muted-foreground"
         >
-          The leaderboard will populate once matches finish. Until then, all
-          participants are tied at zero.
+          {t('emptyState')}
         </div>
       ) : null}
 
