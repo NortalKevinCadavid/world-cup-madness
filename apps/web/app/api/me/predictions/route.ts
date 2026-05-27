@@ -150,9 +150,11 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         case 'participant_not_provisioned':
           return errorResponse(403, DOMAIN_NOT_APPROVED_BODY);
         case 'internal':
+          console.error('[me/predictions] eligibility internal error:', err.message);
           return errorResponse(500, INTERNAL_BODY);
       }
     }
+    console.error('[me/predictions] unexpected error during requireEligible:', err);
     return errorResponse(500, INTERNAL_BODY);
   }
 
@@ -183,6 +185,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
   const { data, error } = await query;
   if (error) {
+    console.error('[me/predictions] predictions query error:', error.message, error);
     return errorResponse(500, INTERNAL_BODY);
   }
 
