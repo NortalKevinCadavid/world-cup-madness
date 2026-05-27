@@ -17,6 +17,8 @@
  */
 
 import { useMemo, useRef } from "react";
+import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { ArrowDownToLine, Info } from "lucide-react";
 
 import { Button } from "@/app/components/ui/button";
@@ -42,9 +44,16 @@ export type LeaderboardEntry = {
 type Props = {
   rows: LeaderboardEntry[];
   currentParticipantId: string | null;
+  /** Post-lock only: enables per-row "View bracket" peer links (FR-019). */
+  peerBracketEnabled?: boolean;
 };
 
-export function LeaderboardClient({ rows, currentParticipantId }: Props) {
+export function LeaderboardClient({
+  rows,
+  currentParticipantId,
+  peerBracketEnabled = false,
+}: Props) {
+  const tBracket = useTranslations("Bracket");
   const myRowRef = useRef<HTMLTableRowElement | null>(null);
 
   // Detect tied positions: any rank value that appears more than once.
@@ -168,6 +177,15 @@ export function LeaderboardClient({ rows, currentParticipantId }: Props) {
                     <span className="font-medium">
                       {isMe ? <>{row.display_name} <span className="text-xs text-muted-foreground">(you)</span></> : row.display_name}
                     </span>
+                    {peerBracketEnabled && !isMe ? (
+                      <Link
+                        href={`/bracket/peer/${row.participant_id}`}
+                        data-testid="peer-bracket-link"
+                        className="ml-2 text-xs font-medium text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      >
+                        {tBracket("viewBracket")}
+                      </Link>
+                    ) : null}
                   </td>
                   <td
                     data-field="total_points"

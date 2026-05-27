@@ -20,7 +20,7 @@ import { Button } from "@/app/components/ui/button";
 import { Badge } from "@/app/components/ui/badge";
 import { cn } from "@/lib/utils";
 
-type Section = "dashboard" | "matches" | "leaderboard" | "me" | "admin";
+type Section = "dashboard" | "matches" | "leaderboard" | "me" | "bracket" | "admin";
 
 type Props = {
   links: { href: string; label: string; section: Section }[];

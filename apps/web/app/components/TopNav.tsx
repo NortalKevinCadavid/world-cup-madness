@@ -12,7 +12,7 @@ import { LanguageSwitcher } from "@/app/components/LanguageSwitcher";
 import { MobileNavSheet } from "@/app/components/MobileNavSheet";
 import { UserMenu } from "@/app/components/UserMenu";
 
-type Section = "dashboard" | "matches" | "leaderboard" | "me" | "admin";
+type Section = "dashboard" | "matches" | "leaderboard" | "me" | "bracket" | "admin";
 
 interface TopNavProps {
   participant: Participant;
@@ -35,6 +35,7 @@ export async function TopNav({
     { href: "/dashboard", label: t("dashboard"), section: "dashboard" },
     { href: "/matches", label: t("matches"), section: "matches" },
     { href: "/leaderboard", label: t("leaderboard"), section: "leaderboard" },
+    { href: "/bracket", label: t("bracket"), section: "bracket" },
     { href: "/me/finals", label: t("myPicks"), section: "me" },
   ];
 

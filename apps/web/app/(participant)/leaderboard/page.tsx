@@ -104,6 +104,16 @@ export default async function LeaderboardPage() {
   const supabase = createSessionBoundClient();
   const { leaderboard, calculation_version } = await getLeaderboard(supabase);
 
+  // Peer brackets are visible only after lock (FR-019). Compute lock state from
+  // server/DB-sourced config (Principle VI) to gate the per-row entry point.
+  const { data: cfg } = await supabase
+    .from('tournament_config')
+    .select('value')
+    .eq('key', 'first_kickoff_utc')
+    .maybeSingle();
+  const lockIso = cfg?.value ? String(cfg.value).replace(/^"|"$/g, '') : null;
+  const peerBracketEnabled = lockIso !== null && Date.now() >= Date.parse(lockIso);
+
   // The empty/zero state is its own surface per spec § Edge Cases
   // ("leaderboard requested before any matches have finished" → all tied at
   // 0). We STILL render every row in the table because Playwright (T022 Test
@@ -147,7 +157,11 @@ export default async function LeaderboardPage() {
         </div>
       ) : null}
 
-      <LeaderboardClient rows={leaderboard} currentParticipantId={me.id} />
+      <LeaderboardClient
+        rows={leaderboard}
+        currentParticipantId={me.id}
+        peerBracketEnabled={peerBracketEnabled}
+      />
 
       {/*
         Client island: subscribes to `tournament_config` postgres_changes
