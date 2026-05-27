@@ -15,7 +15,7 @@
  *   aria-hidden="true" instead by passing aria-hidden via the rest props.
  */
 
-import { forwardRef } from "react";
+import { forwardRef, type Ref } from "react";
 
 export type FlagSize = "sm" | "md" | "lg";
 
@@ -31,6 +31,20 @@ const DIMENSIONS: Record<FlagSize, { width: number; height: number; fontSize: st
   sm: { width: 24, height: 16, fontSize: "0.625rem" },
   md: { width: 36, height: 24, fontSize: "0.75rem" },
   lg: { width: 48, height: 32, fontSize: "0.875rem" },
+};
+
+// ISO-3 / FIFA short code → flagcdn slug (ISO 3166-1 alpha-2, lowercase; plus
+// flagcdn's gb-eng / gb-sct / gb-wls for the UK home nations). When a code maps
+// here we render the real flag image from flagcdn.com; unknown codes fall back
+// to the 3-letter chip below. Extend as new nations enter the catalog.
+const FLAGCDN_SLUG: Record<string, string> = {
+  ARG: "ar", AUS: "au", AUT: "at", BEL: "be", BRA: "br", CAN: "ca",
+  CHI: "cl", CMR: "cm", COL: "co", CRO: "hr", DEN: "dk", ECU: "ec",
+  EGY: "eg", ENG: "gb-eng", ESP: "es", FRA: "fr", GER: "de", GHA: "gh",
+  IRN: "ir", ITA: "it", JPN: "jp", KOR: "kr", MAR: "ma", MEX: "mx",
+  NED: "nl", NGA: "ng", NOR: "no", PAR: "py", PER: "pe", POL: "pl",
+  POR: "pt", SCO: "gb-sct", SEN: "sn", SRB: "rs", SUI: "ch", SWE: "se",
+  TUR: "tr", URU: "uy", USA: "us", WAL: "gb-wls",
 };
 
 // Minimal name table — extend with the 48 FIFA WC 2026 nations as they are confirmed.
@@ -82,7 +96,34 @@ export const Flag = forwardRef<HTMLSpanElement, FlagProps>(function Flag(
   const ariaHidden = rest["aria-hidden"];
   const ariaLabel = rest["aria-label"] ?? countryName;
   const isDecorative = ariaHidden === true || ariaHidden === "true";
+  const slug = FLAGCDN_SLUG[normalized];
 
+  // Real flag image when the code is known. flagcdn serves by ISO-2 slug; we
+  // request a 2× width for crispness and let CSS size it to the chip box.
+  if (slug) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        ref={ref as unknown as Ref<HTMLImageElement>}
+        src={`https://flagcdn.com/w80/${slug}.png`}
+        srcSet={`https://flagcdn.com/w160/${slug}.png 2x`}
+        alt={isDecorative ? "" : ariaLabel}
+        aria-hidden={isDecorative ? "true" : undefined}
+        loading="lazy"
+        width={dims.width}
+        height={dims.height}
+        className={[
+          "inline-block select-none rounded-sm border border-border object-cover",
+          className ?? "",
+        ]
+          .filter(Boolean)
+          .join(" ")}
+        style={{ width: dims.width, height: dims.height }}
+      />
+    );
+  }
+
+  // Fallback: 3-letter code chip for codes without a known flag slug.
   return (
     <span
       ref={ref}
