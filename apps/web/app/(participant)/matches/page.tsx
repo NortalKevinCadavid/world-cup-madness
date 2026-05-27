@@ -16,6 +16,7 @@ import type {
   MatchStatus,
 } from '../../../lib/types/match';
 
+import { Flag } from '../../components/Flag';
 import { MatchListFilters } from './components/MatchListFilters';
 import { PaginationControls } from './components/PaginationControls';
 import { PredictionForm } from './components/PredictionForm';
@@ -517,10 +518,9 @@ function TeamCell({ team }: { team: Match['home_team'] }) {
           className="h-3.5 w-5 rounded-sm border border-border object-cover"
         />
       ) : (
-        <span
-          aria-hidden
-          className="inline-block h-3.5 w-5 rounded-sm border border-dashed border-border bg-muted/30"
-        />
+        // No flag asset yet → fall back to the design-system code chip
+        // (same renderer the bracket + MatchCard use) instead of an empty box.
+        <Flag code={team.short_code} size="sm" aria-hidden />
       )}
       <span className="font-medium text-foreground">{team.short_code}</span>
       <span className="text-muted-foreground">{team.name}</span>
