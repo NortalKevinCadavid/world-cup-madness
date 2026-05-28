@@ -14,9 +14,16 @@ export interface SubmitBracketButtonProps {
   status: BracketStatus;
   pending?: boolean;
   onSubmit: () => void;
+  /** testid for the button; override so multiple instances stay unique. */
+  testId?: string;
 }
 
-export function SubmitBracketButton({ status, pending, onSubmit }: SubmitBracketButtonProps) {
+export function SubmitBracketButton({
+  status,
+  pending,
+  onSubmit,
+  testId = "bracket-submit",
+}: SubmitBracketButtonProps) {
   const t = useTranslations("Bracket");
 
   const isLocked =
@@ -33,7 +40,7 @@ export function SubmitBracketButton({ status, pending, onSubmit }: SubmitBracket
     <div className="flex flex-col items-start gap-1">
       <Button
         type="button"
-        data-testid="bracket-submit"
+        data-testid={testId}
         disabled={disabled}
         aria-disabled={disabled}
         aria-describedby={disabledReason ? "bracket-submit-reason" : undefined}

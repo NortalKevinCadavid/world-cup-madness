@@ -46,12 +46,14 @@ export function BracketReviewBoard({
             key={round}
             data-testid="bracket-round-column"
             data-round={round}
-            className="flex min-w-[14rem] flex-col gap-2"
+            className="flex min-w-[14rem] flex-col"
           >
-            <h2 className="text-sm font-semibold text-muted-foreground">{t(ROUND_LABEL_KEY[round])}</h2>
-            {col.map((m) => (
-              <MatchupCard key={m.id} matchup={m} disabled onPickWinner={noop} />
-            ))}
+            <h2 className="mb-2 text-sm font-semibold text-muted-foreground">{t(ROUND_LABEL_KEY[round])}</h2>
+            <div className="flex flex-1 flex-col justify-around gap-2">
+              {col.map((m) => (
+                <MatchupCard key={m.id} matchup={m} disabled onPickWinner={noop} />
+              ))}
+            </div>
           </section>
         ))}
       </div>

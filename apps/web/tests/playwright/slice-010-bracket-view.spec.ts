@@ -79,10 +79,11 @@ test.describe("US1 — View bracket teams @slice-010 @us1", () => {
       // A known seeded team renders by name.
       await expect(page.getByText("France", { exact: true }).first()).toBeVisible();
 
-      // Iran (seeded with NULL flag) shows the fallback with the unavailable alt text.
+      // Iran (seeded with NULL flag_url) still renders a flag — resolved from
+      // its country code via flagcdn — with a descriptive accessible name.
       await expect(
-        page.getByLabel("Flag unavailable for Iran").first(),
-        "missing-flag team shows fallback with alt text",
+        page.getByRole("img", { name: "Flag of Iran" }).first(),
+        "team without a stored flag_url still shows a flag (from its code)",
       ).toBeVisible();
 
       // Later rounds show pending placeholders (no resolved competitors yet for an empty bracket — alpha has only 3 R32 picks in the fixture).

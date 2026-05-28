@@ -175,19 +175,23 @@ export function BracketClient({ initial }: { initial: BracketResponse }) {
             key={round}
             data-testid="bracket-round-column"
             data-round={round}
-            className="flex min-w-[14rem] flex-col gap-2"
+            className="flex min-w-[14rem] flex-col"
           >
-            <h2 className="text-sm font-semibold text-muted-foreground">
+            <h2 className="mb-2 text-sm font-semibold text-muted-foreground">
               {t(ROUND_LABEL_KEY[round])}
             </h2>
-            {matchups.map((m) => (
-              <MatchupCard
-                key={m.id}
-                matchup={m}
-                disabled={locked || pending}
-                onPickWinner={handlePick}
-              />
-            ))}
+            {/* Distribute matchups evenly over the (stretched) column height so
+                each later-round matchup centers between its two feeders. */}
+            <div className="flex flex-1 flex-col justify-around gap-2">
+              {matchups.map((m) => (
+                <MatchupCard
+                  key={m.id}
+                  matchup={m}
+                  disabled={locked || pending}
+                  onPickWinner={handlePick}
+                />
+              ))}
+            </div>
           </section>
         ))}
       </div>
@@ -203,7 +207,7 @@ export function BracketClient({ initial }: { initial: BracketResponse }) {
         {locked ? (
           <BracketStatusBadge status={status.submission_status} />
         ) : (
-          <SubmitBracketButton status={status} pending={pending} onSubmit={handleSubmit} />
+          <SubmitBracketButton status={status} pending={pending} onSubmit={handleSubmit} testId="bracket-submit-mobile" />
         )}
       </div>
     </div>

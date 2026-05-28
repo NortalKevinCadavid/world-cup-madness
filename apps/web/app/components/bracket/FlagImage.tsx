@@ -1,9 +1,9 @@
-// Slice 010 / T010 — team flag renderer with graceful fallback (FR-002, FR-023).
+// Slice 010 / T010 — team flag renderer (FR-002, FR-023).
 //
-// Renders the real flag image from `flag_url` when present, with descriptive
-// alt text. When the URL is missing, falls back to the slice-009 <Flag>
-// code-chip (which itself degrades to a 3-letter code). Alt text distinguishes
-// the two cases for screen readers.
+// Renders the stored `flag_url` image when present; otherwise delegates to the
+// slice-009 <Flag>, which resolves a real flag image from the team's country
+// code (flagcdn) and only degrades to a 3-letter code chip for unknown codes.
+// Either way the accessible name is "Flag of <team>".
 
 import Image from "next/image";
 import { Flag } from "@/app/components/Flag";
@@ -34,12 +34,13 @@ export function FlagImage({ team, size = "md" }: FlagImageProps) {
       />
     );
   }
-  // Fallback: slice-009 code-chip + alt text signaling the flag is unavailable.
+  // No stored flag_url: <Flag> resolves a real flag from the country code
+  // (flagcdn), falling back to a code chip only for unknown codes.
   return (
     <Flag
       code={team.short_code}
       size={size}
-      aria-label={`Flag unavailable for ${team.name}`}
+      aria-label={`Flag of ${team.name}`}
     />
   );
 }

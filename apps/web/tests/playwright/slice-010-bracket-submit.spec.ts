@@ -94,8 +94,10 @@ test.afterEach(async () => {
 test("AS1 — submit disabled with N-of-31 progress while incomplete @slice-010 @us3", async ({ page }) => {
   await signInWithIdentity(page, { claims: { ...CHARLIE } });
   await page.goto("/bracket");
-  await expect(page.getByTestId("bracket-progress")).toContainText("of 31");
-  const submitBtn = page.getByTestId("bracket-submit");
+  await expect(page.getByTestId("bracket-progress").first()).toContainText("of 31");
+  // Two submit controls share this testid (header + mobile sticky footer);
+  // assert the header one (first in DOM, visible on the desktop viewport).
+  const submitBtn = page.getByTestId("bracket-submit").first();
   await expect(submitBtn).toBeVisible();
   await expect(submitBtn).toBeDisabled();
 });
