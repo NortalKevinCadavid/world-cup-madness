@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers';
 import { NextResponse, type NextRequest } from 'next/server';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
+import type { EmailOtpType } from '@supabase/supabase-js';
 
 // Slice 001 D-T021-006: /auth/callback is a ROUTE HANDLER (not a page) because
 // Server Components in Next.js App Router are read-only for cookies — only
@@ -21,21 +22,24 @@ export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
+  // OAuth/PKCE path: `?code=`. Magic-link path: `?token_hash=&type=` (verifyOtp).
   const code = url.searchParams.get('code');
+  const tokenHash = url.searchParams.get('token_hash');
+  const otpType = url.searchParams.get('type');
   const error = url.searchParams.get('error');
   const next = url.searchParams.get('next') ?? '/dashboard';
 
   if (error) {
     console.error(
-      '[auth/callback] OAuth provider error:',
+      '[auth/callback] auth provider error:',
       error,
       url.searchParams.get('error_description') ?? '',
     );
     return NextResponse.redirect(new URL('/auth/denied', request.url));
   }
 
-  if (!code) {
-    console.warn('[auth/callback] no code in query — no session to establish');
+  if (!code && !(tokenHash && otpType)) {
+    console.warn('[auth/callback] no code or token_hash in query — no session to establish');
     return NextResponse.redirect(new URL('/auth/denied', request.url));
   }
 
@@ -70,12 +74,16 @@ export async function GET(request: NextRequest) {
     },
   });
 
-  const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
-  if (exchangeError) {
-    console.error(
-      '[auth/callback] exchangeCodeForSession failed:',
-      exchangeError.message,
-    );
+  // Magic-link (token_hash) → verifyOtp; OAuth (code) → exchangeCodeForSession.
+  // Either way the eligibility/provisioning trigger on auth.users has already
+  // gated the domain; a non-nortal address never reaches a valid session here.
+  const authError =
+    tokenHash && otpType
+      ? (await supabase.auth.verifyOtp({ token_hash: tokenHash, type: otpType as EmailOtpType })).error
+      : (await supabase.auth.exchangeCodeForSession(code as string)).error;
+
+  if (authError) {
+    console.error('[auth/callback] session establishment failed:', authError.message);
     return NextResponse.redirect(new URL('/auth/denied', request.url));
   }
 

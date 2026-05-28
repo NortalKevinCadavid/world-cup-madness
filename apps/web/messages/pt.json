@@ -171,6 +171,14 @@
     "intro": "Bolão interno da Nortal. Faça login com sua identidade corporativa Nortal aprovada para começar a palpitar os placares dos jogos, fechar seus palpites das finais do torneio e subir na classificação.",
     "signIn": "Entrar",
     "signingIn": "Redirecionando…",
+    "emailLabel": "E-mail corporativo",
+    "emailPlaceholder": "voce@nortal.com",
+    "sendLink": "Enviar link mágico",
+    "sendingLink": "Enviando…",
+    "checkEmailTitle": "Verifique seu e-mail",
+    "checkEmailBody": "Enviamos um link de acesso para {email}. Expira em 1 hora.",
+    "invalidDomain": "Use seu e-mail @nortal.com.",
+    "orDivider": "ou",
     "accessNote": "O acesso é restrito a identidades corporativas Nortal aprovadas."
   },
   "Footer": {

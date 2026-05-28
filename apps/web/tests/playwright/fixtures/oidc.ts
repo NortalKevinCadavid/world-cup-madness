@@ -190,10 +190,11 @@ export async function signInWithIdentity(
   const startPath = options.startPath ?? "/";
   const expectedPostSignInPath = options.expectedPostSignInPath ?? "/dashboard";
 
-  // 1. Land on the app's sign-in entry point. The slice 009 redesign uses
-  //    a <Button> for the sign-in trigger, not a <Link>; we accept either
-  //    to remain robust across UI revisions.
-  await page.goto(startPath);
+  // 1. Land on the app's sign-in entry point. The Keycloak SSO button is a
+  //    dev/test sign-in stub hidden behind `?sso=1` (the magic link is the
+  //    user-facing login); append the flag so the trigger renders for tests.
+  const startUrl = startPath.includes("?") ? `${startPath}&sso=1` : `${startPath}?sso=1`;
+  await page.goto(startUrl);
   const signInTrigger = page
     .getByRole("button", { name: /sign in/i })
     .or(page.getByRole("link", { name: /sign in/i }))

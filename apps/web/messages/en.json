@@ -171,6 +171,14 @@
     "intro": "Internal Nortal prediction pool. Sign in with your approved Nortal corporate identity to start picking match scores, locking your tournament finals, and chasing the leaderboard.",
     "signIn": "Sign in",
     "signingIn": "Redirecting…",
+    "emailLabel": "Work email",
+    "emailPlaceholder": "you@nortal.com",
+    "sendLink": "Send magic link",
+    "sendingLink": "Sending…",
+    "checkEmailTitle": "Check your email",
+    "checkEmailBody": "We sent a sign-in link to {email}. It expires in 1 hour.",
+    "invalidDomain": "Use your @nortal.com email address.",
+    "orDivider": "or",
     "accessNote": "Access is restricted to approved Nortal corporate identities."
   },
   "Footer": {

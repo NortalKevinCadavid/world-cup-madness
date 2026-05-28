@@ -232,8 +232,11 @@ web3 = 30
 # secret = ""
 
 [auth.email]
-# Allow/disallow new user signups via email to your project. Disabled — OIDC-only per FR-001.
-enable_signup = false
+# Magic-link sign-in for Nortal users. enable_signup = true so a first-time
+# @nortal.com user signing in via magic link triggers handle_auth_user_created
+# (domain gate + participant provisioning). Non-nortal addresses are rejected by
+# that auth-users trigger, so opening email signup does NOT widen access.
+enable_signup = true
 # If enabled, a user will be required to confirm any email change on both the old, and new email
 # addresses. If disabled, only the new email is required to confirm.
 double_confirm_changes = true
@@ -257,6 +260,14 @@ otp_expiry = 3600
 # pass = "env(SENDGRID_API_KEY)"
 # admin_email = "admin@email.com"
 # sender_name = "Admin"
+
+# Magic-link email template — routes to our /auth/callback with token_hash so
+# the server completes sign-in via verifyOtp (works cross-device; no PKCE
+# verifier required in the clicking browser). content_path is relative to the
+# project root (where the supabase CLI runs).
+[auth.email.template.magic_link]
+subject = "Your World Cup Madness sign-in link"
+content_path = "./supabase/templates/magic_link.html"
 
 # Uncomment to customize email template
 # [auth.email.template.invite]

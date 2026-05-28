@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+  <body style="font-family: Arial, Helvetica, sans-serif; color: #1a1a1a; line-height: 1.5;">
+    <h2 style="margin-bottom: 0.25rem;">Sign in to World Cup Madness</h2>
+    <p style="color: #555; margin-top: 0;">The Nortal World Cup 2026 prediction pool.</p>
+    <p>Click the button below to sign in. This link is single-use and expires in 1 hour.</p>
+    <p>
+      <a
+        href="{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=magiclink&next=/dashboard"
+        style="display: inline-block; padding: 12px 20px; background: #d93912; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600;"
+      >
+        Sign in
+      </a>
+    </p>
+    <p style="color: #888; font-size: 12px;">
+      If the button doesn't work, copy and paste this URL into your browser:<br />
+      {{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=magiclink&next=/dashboard
+    </p>
+    <p style="color: #888; font-size: 12px;">
+      If you didn't request this, you can safely ignore this email.
+    </p>
+  </body>
+</html>

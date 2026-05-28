@@ -54,7 +54,7 @@
 //   - `requireEligible()` server helper (T027)
 // --------------------------------------------------------------------------
 
-import { test, expect, type APIRequestContext } from "@playwright/test";
+import { test, expect, type APIRequestContext, type Page } from "@playwright/test";
 
 import {
   signInWithIdentity,
@@ -113,6 +113,11 @@ interface ParticipantMeResponse {
  * Helper — fetches `/api/me` via the page's authenticated session and
  * returns the parsed body. Throws (failing the test) on any non-200.
  */
+async function cookieHeaderFor(page: Page): Promise<string> {
+  const cookies = await page.context().cookies();
+  return cookies.map((c) => `${c.name}=${c.value}`).join("; ");
+}
+
 async function fetchMe(
   request: APIRequestContext,
   cookieHeader: string,
@@ -154,8 +159,7 @@ test.describe("US1 — eligible employee signs in", () => {
       .from("audit_log")
       .delete()
       .eq("actor", FRESHIE.sub)
-      .then(() => {})
-      .catch(() => {});
+      .then(() => undefined, () => undefined);
     await client.from("participants").delete().eq("auth_user_id", FRESHIE.sub);
     await client.from("identity_emails").delete().eq("user_id", FRESHIE.sub);
     await client.from("identity_event_log").delete().eq("user_id", FRESHIE.sub);
@@ -195,7 +199,7 @@ test.describe("US1 — eligible employee signs in", () => {
       expect(landedOn).toMatch(/\/dashboard(\?|$|#|\/)/);
 
       // Then — /api/me returns the freshly-created participant.
-      const body = await fetchMe(page.request);
+      const body = await fetchMe(page.request, await cookieHeaderFor(page));
       const p = body.participant;
 
       expect(p.email).toBe(FRESHIE.email);
@@ -234,7 +238,7 @@ test.describe("US1 — eligible employee signs in", () => {
         },
       });
 
-      const firstRead = await fetchMe(page.request);
+      const firstRead = await fetchMe(page.request, await cookieHeaderFor(page));
       const idBefore = firstRead.participant.id;
       const lastLoginBefore = Date.parse(firstRead.participant.last_login_at);
 
@@ -267,7 +271,7 @@ test.describe("US1 — eligible employee signs in", () => {
         },
       });
 
-      const secondRead = await fetchMe(page.request);
+      const secondRead = await fetchMe(page.request, await cookieHeaderFor(page));
       const idAfter = secondRead.participant.id;
       const lastLoginAfter = Date.parse(secondRead.participant.last_login_at);
 
